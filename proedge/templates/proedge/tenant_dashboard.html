@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ role }} Dashboard</h1>
+
+  <h2>Your Listed Properties</h2>
+
+  {% if properties %}
+    <ul>
+      {% for property in properties %}
+        <li>
+          <a href="{% url 'property_detail' property.pk %}">{{ property.title }}</a> - R{{ property.price|floatformat:2 }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You have not listed any properties yet.</p>
+  {% endif %}
+{% endblock %}

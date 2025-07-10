@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<form method="get" style="margin-bottom: 20px;">
+    <input type="text" name="q" placeholder="Search by title or location" value="{{ query }}">
+    <button type="submit">Search</button>
+</form>
+{% if no_results %}
+    <p style="color: red;"><strong>🔍 No properties found matching your search.</strong></p>
+{% endif %}
+
+<h2>Pending Properties</h2>
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Owner</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    {% for prop in pending_properties %}
+    {% if prop.status == 'pending' %}
+    <tr>
+        <td>
+            <a href="{% url 'adminpanel:property_detail' prop.id %}">{{ prop.title }}</a>
+        </td>
+        <td>{{ prop.listing_type }}</td>
+        <td>R {{ prop.price }}</td>
+        <td>{{ prop.status }}</td>
+        <td>
+            <a href="{% url 'adminpanel:approve_property' prop.id %}">Approve</a> |
+            <a href="{% url 'adminpanel:reject_property' prop.id %}">Reject</a> |
+            <a href="{% url 'adminpanel:delete_property' prop.id %}" onclick="return confirm('Are you sure you want to delete this property?');">Delete</a>
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+
+<hr>
+
+
+<h2>Approved Properties</h2>
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Owner</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    {% for prop in approved_properties %}
+    {% if prop.status == 'approved' %}
+    <tr>
+        <td>
+            <a href="{% url 'adminpanel:property_detail' prop.id %}">{{ prop.title }}</a>
+        </td>
+        <td>{{ prop.listing_type }}</td>
+        <td>R {{ prop.price }}</td>
+        <td>{{ prop.status }}</td>
+        <td>
+            <a href="{% url 'adminpanel:delete_property' prop.id %}" onclick="return confirm('Delete this property?');">Delete</a>
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+
+<hr>
+
+<h2>Rejected Properties</h2>
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Owner</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    {% for prop in rejected_properties %}
+    {% if prop.status == 'rejected' %}
+    <tr>
+        <td>
+            <a href="{% url 'adminpanel:property_detail' prop.id %}">{{ prop.title }}</a>
+        </td>
+        <td>{{ prop.listing_type }}</td>
+        <td>R {{ prop.price }}</td>
+        <td>{{ prop.status }}</td>
+        <td>
+            <a href="{% url 'adminpanel:delete_property' prop.id %}" onclick="return confirm('Delete this property?');">Delete</a>
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Django
+*/migrations/
+
+# Environments
+venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Media
+media/
+
+# Local secrets
+*.env
+
+# Ignore nested repos
+ProEdge_Website/
+Property-website/
+property-group-website/
+ 

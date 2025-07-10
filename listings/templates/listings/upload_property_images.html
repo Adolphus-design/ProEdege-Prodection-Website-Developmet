@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<h2>Upload Images for {{ property.title }}</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label>Main Image (Grid View Image)</label>
+        <input type="file" name="main_image" accept="image/*" required>
+    </div>
+
+    <div class="form-group" id="gallery-images">
+        <label>Gallery Images</label>
+        <input type="file" name="images" accept="image/*">
+    </div>
+
+    <button type="button" id="add-more-images-btn">Add More Images</button>
+    <br><br>
+
+    <button type="submit">Finish Listing</button>
+</form>
+
+<script>
+  document.getElementById('add-more-images-btn').addEventListener('click', function() {
+    const container = document.getElementById('gallery-images');
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.name = 'images';
+    input.accept = 'image/*';
+    container.appendChild(document.createElement('br'));
+    container.appendChild(input);
+  });
+</script>
+
+{% endblock %}

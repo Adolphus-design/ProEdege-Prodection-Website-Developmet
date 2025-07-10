@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Manage Images for: {{ property.title }}</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <table>
+        {% for form in formset %}
+        <tr>
+            <td>
+                {% if form.instance.image %}
+                    <img src="{{ form.instance.image.url }}" width="150" alt="Property Image"><br>
+                {% endif %}
+                {{ form.image }}
+            </td>
+            <td>
+                {% if form.can_delete %}
+                    {{ form.DELETE }} Delete
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button type="submit">Save Images</button>
+</form>
+
+<a href="{% url 'adminpanel:property_list' %}">Back to Property List</a>
+{% endblock %}

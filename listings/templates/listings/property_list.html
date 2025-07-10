@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>FEATURED PROPERTIES</h2>
+
+  <form method="get" action="{% url 'property_list' %}" class="search-bar">
+    <input
+      type="text"
+      name="q"
+      placeholder="Search properties (e.g. 3 bedroom in Burgersfort)"
+      value="{{ query|default_if_none:'' }}"
+      autocomplete="off"
+    >
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="property-grid">
+    {% if properties %}
+      {% for property in properties %}
+
+        {% if property.status == "sold" %}
+    <div style="background-color: red; color: white; padding: 5px; font-weight: bold; position: absolute;">
+      SOLD
+    </div>
+  {% endif %}
+        <div class="property-card">
+          <a href="{% url 'property_detail' property.pk %}">
+            {% with property.images.first as first_image %}
+              {% if first_image and first_image.main_image %}
+                <img src="{{ first_image.main_image.url }}" alt="{{ property.title }}" class="property-image">
+              {% elif first_image %}
+                <img src="{{ first_image.image.url }}" alt="{{ property.title }}" class="property-image">
+              {% else %}
+                <img src="{% static 'images/no-image.png' %}" alt="No image" class="property-image">
+              {% endif %}
+            {% endwith %}
+          </a>
+          
+          <div class="property-info">
+            <h3>{{ property.title }}</h3>
+            <p>R{{ property.price|floatformat:2 }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No properties available.</p>
+    {% endif %}
+  </div>
+{% endblock %}

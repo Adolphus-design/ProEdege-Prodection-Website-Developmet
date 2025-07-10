@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <h2>Edit Property: {{ property.title }}</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    
+    <h3>Upload New Images (optional)</h3>
+    {{ image_form.as_p }}
+
+    <button type="submit">Update Property</button>
+    
+  </form>
+  
+  <hr>
+  <h3>Current Images</h3>
+  <div>
+    {% for image in property.images.all %}
+      <img src="{{ image.image.url }}" width="100" style="margin: 5px;">
+    {% empty %}
+      <p>No images uploaded yet.</p>
+    {% endfor %}
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script>
+    // Initialize LightGallery for the images
+    document.addEventListener('DOMContentLoaded', function() {
+      lightGallery(document.querySelector('.lightgallery'), {
+        plugins: [lgThumbnail, lgZoom],
+        speed: 500,
+        thumbnail: true,
+        zoom: true
+      });
+    });
+  </script>
+{% endblock %}

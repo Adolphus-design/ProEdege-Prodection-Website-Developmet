@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>ProEdge Admin Dashboard</h1>
+
+<section>
+  <h2>Recent Properties</h2>
+  <ul>
+    {% for prop in properties %}
+      <li>
+        <strong>{{ prop.title }}</strong> — {{ prop.location }} — R{{ prop.price }} —
+        <em>Status: {{ prop.status }}</em>
+      </li>
+    {% empty %}
+      <li>No properties found.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section>
+  <h2>Registered Users</h2>
+  <ul>
+    {% for user in users %}
+      <li>{{ user.username }} — {{ user.email }} — {{ user.is_staff|yesno:"Staff,User" }}</li>
+    {% empty %}
+      <li>No users registered.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}ProEdge{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'proedge/css/style.css' %}">
+    <!-- LightGallery CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/css/lightgallery-bundle.min.css" />
+    <!-- LightGallery JS -->
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.umd.min.js"></script>
+
+    <link rel="stylesheet" href="{% static 'proedge/css/font-awesome.min.css' %}">
+</head>
+<body>
+    <header>
+        <h1><a href="/">ProEdge Real Property Group</a></h1>
+        <nav>
+            <a href="{% url 'register' %}">Register</a> |
+            <a href="{% url 'login' %}">Login</a>
+            
+            {% if user.is_authenticated and user.is_staff %}
+               
+            {% endif %}
+
+        </nav>
+        <hr>
+    </header>
+
+    <main>
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color: green;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <hr>
+        <p>&copy; {{ now|date:"Y" }} ProEdge Property Listings | Version 1.0 | developed by Gray-Tech Solutions</p>
+    </footer>
+</body>
+</html>

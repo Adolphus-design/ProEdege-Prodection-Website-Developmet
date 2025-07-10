@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Edit User: {{ user.username }}</h2>
+<form method="post">
+    {% csrf_token %}
+    <label><input type="checkbox" name="is_staff" {% if user.is_staff %}checked{% endif %}> Staff</label><br>
+    <label><input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %}> Active</label><br>
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

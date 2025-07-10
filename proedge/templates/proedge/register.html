@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Register | ProEdge{% endblock %}
+
+{% block content %}
+    <h2>Create Your Account</h2>
+    <form method="post" class="registration-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+        <button type="submit">Register</button>
+    </form>
+    
+{% endblock %}

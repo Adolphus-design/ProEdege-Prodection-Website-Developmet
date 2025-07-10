@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+
+{% load static %}
+
+
+{% block title %}Admin Dashboard | ProEdge{% endblock %}
+
+{% block content %}
+<h1>Admin Dashboard</h1>
+
+
+
+
+
+<ul>
+    <li>Total Users: {{ user_count }}</li>
+    <li>Total Properties: {{ property_count }}</li>
+    <li>Pending Properties: {{ pending_properties }}</li>
+</ul>
+<a href="{% url 'adminpanel:user_list' %}">Manage Users</a><br>
+<a href="{% url 'adminpanel:property_list' %}">Manage Properties</a>
+{% endblock %}

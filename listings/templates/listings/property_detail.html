@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="property-detail-container">
+
+  <!-- Header Section -->
+  <div class="property-header">
+    <h1>{{ property.title }}</h1>
+    <p class="location">{{ property.location }}</p>
+    <p class="price">R{{ property.price|floatformat:2 }}</p>
+  </div>
+
+  <!-- Main Image -->
+  {% if images %}
+    <div class="main-image">
+      <img src="{{ images.0.image.url }}" alt="Main Image">
+    </div>
+  {% endif %}
+
+  <!-- Thumbnail Gallery -->
+  {% if images %}
+    <div id="lightgallery" class="thumbnail-gallery">
+      {% for image in images %}
+        <a href="{{ image.image.url }}">
+          <img src="{{ image.image.url }}" alt="Gallery Image">
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Property Description & Meta -->
+  <div class="property-info">
+    <h2>Property Description</h2>
+    <p>{{ property.description }}</p>
+
+    <ul class="meta">
+      <li><strong>Type:</strong> {{ property.property_type }}</li>
+      <li><strong>Rooms:</strong> {{ property.number_of_rooms }}</li>
+      <li><strong>Status:</strong> {{ property.status|title }}</li>
+    </ul>
+
+    {% if user.is_authenticated %}
+      <p class="seller-info"><strong>Listed by:</strong> {{ property.seller.username }}</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- LightGallery -->
+<script>
+  lightGallery(document.getElementById('lightgallery'), {
+    plugins: [lgZoom, lgThumbnail],
+    speed: 500,
+    thumbnail: true
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Submit Property | ProEdge{% endblock %}
+
+{% block content %}
+<h2>Submit Property Listing</h2>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <!-- ✅ Basic Info -->
+  <div class="property-info-section">
+    <h3>Basic Details</h3>
+    <div class="form-group">{{ form.title.label_tag }} {{ form.title }}</div>
+    <div class="form-group">{{ form.description.label_tag }} {{ form.description }}</div>
+    <div class="form-group">{{ form.location.label_tag }} {{ form.location }}</div>
+    <div class="form-group">{{ form.property_type.label_tag }} {{ form.property_type }}</div>
+    <div class="form-group">{{ form.listing_type.label_tag }} {{ form.listing_type }}</div>
+    <div class="form-group">{{ form.price.label_tag }} {{ form.price }}</div>
+    <div class="form-group">{{ form.number_of_rooms.label_tag }} {{ form.number_of_rooms }}</div>
+  </div>
+
+  <!-- ✅ Expandable Advanced Info -->
+  <button type="button" id="toggle-advanced-btn" style="margin-top: 15px;">Add Additional Property Info</button>
+
+  <div id="advanced-fields" style="display: none; margin-top: 15px;">
+    <h4>Additional Property Info</h4>
+    <div class="form-group">{{ form.number_of_bedrooms.label_tag }} {{ form.number_of_bedrooms }}</div>
+    <div class="form-group">{{ form.number_of_kitchens.label_tag }} {{ form.number_of_kitchens }}</div>
+    <div class="form-group">{{ form.number_of_bathrooms.label_tag }} {{ form.number_of_bathrooms }}</div>
+    <div class="form-group">{{ form.number_of_garages.label_tag }} {{ form.number_of_garages }}</div>
+    <div class="form-group">{{ form.floor_area_m2.label_tag }} {{ form.floor_area_m2 }}</div>
+    <div class="form-group">{{ form.erf_size_m2.label_tag }} {{ form.erf_size_m2 }}</div>
+    <div class="form-group">{{ form.price_per_m2.label_tag }} {{ form.price_per_m2 }}</div>
+    <div class="form-group">{{ form.price_per_erf_m2.label_tag }} {{ form.price_per_erf_m2 }}</div>
+    <div class="form-group">{{ form.has_parking.label_tag }} {{ form.has_parking }}</div>
+    <div class="form-group">{{ form.number_of_parking_slots.label_tag }} {{ form.number_of_parking_slots }}</div>
+  </div>
+
+  <!-- ✅ Button to Reveal Image Upload -->
+  <button type="button" id="show-image-upload-btn" style="margin-top: 20px;">Upload Property Images</button>
+
+  <div id="image-upload-section" style="display: none; margin-top: 20px;">
+    <h4>Property Images</h4>
+
+    <!-- Main Image -->
+    <div class="form-group">
+      <label for="main_image">Main Image (Grid View)</label>
+      <input type="file" name="main_image" accept="image/*" required>
+    </div>
+
+    <!-- Gallery Images -->
+    <div class="form-group" id="gallery-images-container">
+      <label>Gallery Images</label>
+      <input type="file" name="images" accept="image/*">
+    </div>
+    <button type="button" id="add-more-images-btn">Add More Image Slots</button>
+  </div>
+
+  <!-- ✅ Submit -->
+  <div style="margin-top: 30px;">
+    <button type="submit">Submit Property</button>
+  </div>
+</form>
+
+<!-- ✅ JavaScript -->
+<script>
+  // Toggle additional fields
+  document.getElementById('toggle-advanced-btn').addEventListener('click', function () {
+    const section = document.getElementById('advanced-fields');
+    section.style.display = (section.style.display === 'none') ? 'block' : 'none';
+    this.textContent = section.style.display === 'none' ? 'Add Additional Property Info' : 'Hide Additional Info';
+  });
+
+  // Show image upload
+  document.getElementById('show-image-upload-btn').addEventListener('click', function () {
+    document.getElementById('image-upload-section').style.display = 'block';
+    this.style.display = 'none';
+  });
+
+  // Add more gallery image fields
+  document.getElementById('add-more-images-btn').addEventListener('click', function () {
+    const container = document.getElementById('gallery-images-container');
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.name = 'images';
+    input.accept = 'image/*';
+    container.appendChild(document.createElement('br'));
+    container.appendChild(input);
+  });
+</script>
+{% endblock %}

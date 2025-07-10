@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Property: {{ property.title }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <table>
+        {{ form.as_table }}
+    </table>
+    <br>
+    <button type="submit">💾 Save Changes</button>
+    <a href="{% url 'adminpanel:property_detail' property.id %}">🔙 Cancel</a>
+</form>
+{% endblock %}
