@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+<<<<<<< HEAD
   <h1>{{ role }} Dashboard</h1>
+=======
+  <h1>Buyer Dashboard</h1>
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
 <h2>Welcome {{ request.user.get_full_name }}</h2>
 
  
@@ -88,7 +92,11 @@
     </tbody>
   </table>
 {% empty %}
+<<<<<<< HEAD
   <p>You have no listings.</p>
+=======
+  <h2>No Properties Listed</h2>
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
 {% endfor %}
 
 

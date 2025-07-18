@@ -10,6 +10,11 @@ from django.http import HttpResponse
 from listings.models import Property
 from django.db.models import Q
 from collections import defaultdict
+<<<<<<< HEAD
+=======
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import AuthenticationForm
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
 
 
 # This view handles user registration
@@ -339,3 +344,30 @@ def auctioneer_dashboard(request):
     return render(request, 'proedge/auctioneer_dashboard.html', context)
 
 # Add similar ones for tenant, landlord, agent
+<<<<<<< HEAD
+=======
+
+
+# Login and Registration View
+def login_register_view(request):
+    login_form = AuthenticationForm()
+    register_form = CustomUserCreationForm()
+
+    if request.method == 'POST':
+        if 'login_submit' in request.POST:
+            login_form = AuthenticationForm(request, data=request.POST)
+            if login_form.is_valid():
+                login(request, login_form.get_user())
+                return redirect('dashboard_redirect')
+        elif 'register_submit' in request.POST:
+            register_form = CustomUserCreationForm(request.POST)
+            if register_form.is_valid():
+                user = register_form.save()
+                login(request, user)
+                return redirect('dashboard_redirect')
+
+    return render(request, 'proedge/login_register.html', {
+        'login_form': login_form,
+        'register_form': register_form
+    })
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)

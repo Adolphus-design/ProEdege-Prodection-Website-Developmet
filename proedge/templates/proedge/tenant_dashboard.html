@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+<<<<<<< HEAD
   <h1>{{ role }} Dashboard</h1>
+=======
+  <h1>Tenant Dashboard</h1>
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
 
   <h2>Your Listed Properties</h2>
 
@@ -14,6 +18,10 @@
       {% endfor %}
     </ul>
   {% else %}
+<<<<<<< HEAD
     <p>You have not listed any properties yet.</p>
+=======
+    <h2>No Properties Listed</h2>
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
   {% endif %}
 {% endblock %}

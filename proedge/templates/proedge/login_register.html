@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="auth-container">
+  <!-- Login Form -->
+  <div class="auth-card">
+    <h2>Log in</h2>
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Your email address</label>
+        <input type="email" name="username" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" required>
+      </div>
+      <div class="form-footer">
+        <label><input type="checkbox" name="remember"> Remember me</label>
+        <button type="submit" class="btn-green">Log in</button>
+      </div>
+    </form>
+    <p><a href="#">Forgot your password?</a></p>
+    <p>Don’t have an account? <a href="{% url 'register' %}">Sign up for one now</a></p>
+  </div>
+
+  <!-- Right Section -->
+  <div class="auth-side">
+    <img src="{% static 'images/secure-safe.svg' %}" alt="ProEdge Logo">
+    <h3>Best Property Listing Platform</h3>
+    <p>NUmber one best property listing Website</p>
+    <a href="#" class="info-link">Read more about our recovery process</a>
+  </div>
+</div>
+
+
+
+{% endblock %}

@@ -3,12 +3,55 @@
 {% block title %}Register | ProEdge{% endblock %}
 
 {% block content %}
+<<<<<<< HEAD
     <h2>Create Your Account</h2>
+=======
+   
+
+     <h2>Create Your Account</h2>
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
     <form method="post" class="registration-form">
         {% csrf_token %}
         {{ form.as_p }}
         <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
         <button type="submit">Register</button>
     </form>
+<<<<<<< HEAD
+=======
+
+<!--
+    <div class="register-container">
+  <div class="form-card">
+    <h2>Sign Up for a <span class="highlight">free</span> account</h2>
+    <form method="POST" novalidate>
+        {{ form.as_p }}
+        {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group">
+          {{ form.username.label_tag }}
+          {{ form.username }}
+        </div>
+        <div class="form-group">
+          {{ form.contact_number.label_tag }}
+          {{ form.contact_number }}
+        </div>
+        <div class="form-group">
+          {{ form.whatsapp_number.label_tag }}
+          {{ form.whatsapp_number }}
+        </div>
+        <div class="form-group">
+          {{ form.password1.label_tag }}
+          {{ form.password1 }}
+        </div>
+        <div class="form-group">
+          {{ form.password2.label_tag }}
+          {{ form.password2 }}
+        </div>
+      </div>
+      <button type="submit">Register</button>
+    </form>
+  </div>
+</div>-->
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
     
 {% endblock %}

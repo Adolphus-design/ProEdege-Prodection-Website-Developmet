@@ -46,6 +46,10 @@ class Property(models.Model):
     tenant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='rented_by_properties')
     agent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='listed_properties')
     bank = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='banked_properties')
+<<<<<<< HEAD
+=======
+    agency = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='agency_properties')
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
     auctioneer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='auctioned_properties')
     created_at = models.DateTimeField(auto_now_add=True)
     

@@ -231,3 +231,7 @@ def upload_property_images(request, pk):
 
     return render(request, 'listings/upload_property_images.html', {'property': property})
 
+<<<<<<< HEAD
+=======
+#for comit
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)

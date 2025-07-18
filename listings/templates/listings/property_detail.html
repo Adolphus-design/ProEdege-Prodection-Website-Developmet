@@ -4,6 +4,7 @@
 {% block content %}
 <div class="property-detail-container">
 
+<<<<<<< HEAD
   <!-- Header Section -->
   <div class="property-header">
     <h1>{{ property.title }}</h1>
@@ -24,10 +25,177 @@
       {% for image in images %}
         <a href="{{ image.image.url }}">
           <img src="{{ image.image.url }}" alt="Gallery Image">
+=======
+  <!-- Main Image with Mini Overlay -->
+  {% if images %}
+    <div style="position: relative;">
+      <img src="{{ images.0.image.url }}" alt="Main Image"
+           style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 0;">
+
+      <!-- 🟥 Small Transparent Red Card -->
+      <div style="
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: rgba(87, 83, 83, 0.75);
+        color: white;
+        padding: 12px;
+        width: 320px;
+        height: 150px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      ">
+
+        <!-- Title + Location -->
+        <div style="display: flex; justify-content: space-between; font-size: 16px;">
+          <strong>{{ property.title|truncatechars:20 }}</strong>
+          <span>{{ property.location|truncatechars:15 }}</span>
+        </div>
+
+        <!-- Address Button Placeholder -->
+        <button style="
+          background-color: red;
+          color: black;
+          font-size: 11px;
+          border: none;
+          padding: 4px 8px;
+          width: fit-content;
+          border-radius: 4px;
+          cursor: default;
+        ">Placeholder Address</button>
+
+        <!-- Price + Offer -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 20px; font-weight: bold;">R{{ property.price|floatformat:2 }}</span>
+          <button style="
+            background-color: white;
+            color: red;
+            border: none;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+          ">Make Offer</button>
+        </div>
+
+        <!-- Feature Icons -->
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px;">
+          <!--Don't display if null-->
+          {% if property.number_of_bedrooms %}
+            <span>🛏 {{ property.number_of_bedrooms }} Beds</span>
+          {% endif %}
+          {% if property.number_of_bathrooms %}
+            <span>🛁 {{ property.number_of_bathrooms }} Baths</span>
+          {% endif %}
+          {% if property.number_of_garages %}
+            <span>🚗 {{ property.number_of_garages }} Garages</span>
+          {% endif %}
+          {% if property.floor_area_m2 %}
+            <span>📏 {{ property.floor_area_m2 }} m²</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!--Agents marketing the property Contact details of property-->
+  <div class="contact-details" style="margin-top: 20px; padding: 20px; background-color: #b36f6f; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2>Agents Marketing the Property</h2>
+    <p><strong>Name:</strong> {{ property.seller.first_name }} {{ property.seller.last_name }}</p>
+    <p><strong>Email:</strong> {{ property.seller.email }}</p>
+    <p><strong>Phone:</strong> {{ property.seller.contact_number }}</p>
+    <p><strong>WhatsApp:</strong> {{ property.seller.whatsapp_number }}</p>
+  </div>
+
+
+  <!-- Description Section -->
+  <!-- Property Key Features Section -->
+<div class="property-features">
+  <h2>Property Key Features</h2>
+  <hr>
+
+  {% if property.number_of_bedrooms or property.number_of_bathrooms %}
+    <h4>Rooms</h4>
+    <ul>
+      {% if property.number_of_bedrooms %}
+        <li>{{ property.number_of_bedrooms }} Bedroom{{ property.number_of_bedrooms|pluralize }}</li>
+      {% endif %}
+      {% if property.number_of_bathrooms %}
+        <li>{{ property.number_of_bathrooms }} Bathroom{{ property.number_of_bathrooms|pluralize }}</li>
+      {% endif %}
+    </ul>
+  {% endif %}
+
+  {% if property.number_of_kitchens %}
+    <h4>Kitchen</h4>
+    <ul>
+      <li>{{ property.number_of_kitchens }} Kitchen{{ property.number_of_kitchens|pluralize }}</li>
+    </ul>
+  {% endif %}
+
+  <h4>More Features</h4>
+  <ul>
+    {% if property.property_type %}
+      <li>Property Type – {{ property.property_type|title }}</li>
+    {% endif %}
+    {% if property.listing_type %}
+      <li>Seller Type – {{ property.listing_type|title }}</li>
+    {% endif %}
+    {% if property.floor_area_m2 %}
+      <li>Floor Area – {{ property.floor_area_m2 }}m²</li>
+    {% endif %}
+    {% if property.erf_size_m2 %}
+      <li>Erf Size – {{ property.erf_size_m2 }}m²</li>
+    {% endif %}
+    {% if property.price_per_m2 %}
+      <li>Price per square meter – R{{ property.price_per_m2 }} per m²</li>
+    {% endif %}
+    {% if property.price_per_erf_m2 %}
+      <li>Price per square erf meter – R{{ property.price_per_erf_m2 }} per m²</li>
+    {% endif %}
+  </ul>
+</div>
+
+
+{% if property.latitude and property.longitude %}
+  <div style="margin-top: 30px;">
+    <h2>Map Location</h2>
+    <div id="map" style="height: 350px; width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var map = L.map('map').setView([{{ property.latitude }}, {{ property.longitude }}], 15);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      L.marker([{{ property.latitude }}, {{ property.longitude }}]).addTo(map)
+        .bindPopup("{{ property.title|escapejs }}")
+        .openPopup();
+    });
+  </script>
+{% endif %}
+  
+
+  <!-- Gallery Thumbnails -->
+  {% if images %}
+    <div id="lightgallery" style="margin-top: 25px;">
+      {% for image in images %}
+        <a href="{{ image.image.url }}">
+          <img src="{{ image.image.url }}" alt="Gallery Image" style="width: 130px; height: 90px; object-fit: cover; border-radius: 4px; margin: 5px;">
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
         </a>
       {% endfor %}
     </div>
   {% endif %}
+<<<<<<< HEAD
 
   <!-- Property Description & Meta -->
   <div class="property-info">
@@ -45,6 +213,8 @@
     {% endif %}
   </div>
 
+=======
+>>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
 </div>
 
 <!-- LightGallery -->
