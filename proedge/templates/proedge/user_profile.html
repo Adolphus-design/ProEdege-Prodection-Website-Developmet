@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Your Profile</h2>
+
+    
+    {% if profile.profile_picture %}
+        <img src="{{ profile.profile_picture.url }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+    {% else %}
+        <p>No profile picture uploaded.</p>
+    {% endif %}
+    <h3 class="mt-4">Profile Details</h3>               
+    <ul class="list-group">
+        <li class="list-group-item"><strong>Full Name:</strong> {{ request.user.get_full_name }}</li>
+        <li class="list-group-item"><strong>Email:</strong> {{ request.user.email }}</li>
+        <li class="list-group-item"><strong>Phone:</strong> {{ profile.contact_number|default:"Not provided" }}</li>
+        <li class="list-group-item"><strong>Address:</strong> {{ profile.address|default:"Not provided" }}</li>
+    </ul>
+
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary mt-3">Edit Profile</a>
+    <a href="{% url 'dashboard_redirect' %}" class="btn btn-primary">🏠 Back to Dashboard</a>
+
+</div>
+{% endblock %}

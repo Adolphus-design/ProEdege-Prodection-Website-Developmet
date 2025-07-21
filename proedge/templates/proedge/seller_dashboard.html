@@ -8,6 +8,16 @@
 
 
 <h2>Welcome {{ request.user.get_full_name }}</h2>
+<a href="{% url 'user_profile' %}" class="btn btn-outline-secondary btn-sm mt-2">
+    👤 View Profile
+</a>
+
+{% if incomplete_profile %}
+<div class="bg-yellow-100 text-yellow-800 px-4 py-3 rounded mb-4">
+    Please <a href="{% url 'edit_profile' %}" class="underline">complete your profile</a> to unlock full features.
+</div>
+{% endif %}
+
 
 <div style="text-align: right; margin-bottom: 1rem;">
     <a href="{% url 'submit_property' %}" class="btn-list-property">+ List New Property</a>

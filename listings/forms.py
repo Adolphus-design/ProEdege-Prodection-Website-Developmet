@@ -20,7 +20,7 @@ class PropertyForm(forms.ModelForm):
     class Meta:
         model = Property
         fields = [
-            'title', 'description', 'location', 'property_type', 'price',
+            'title', 'description', 'province', 'location', 'listing_type', 'property_type', 'price',
             'number_of_bedrooms', 'number_of_kitchens', 'number_of_bathrooms',
             'number_of_garages', 'floor_area_m2', 'erf_size_m2',
             'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots'
@@ -30,7 +30,7 @@ class SubmitPropertyForm(forms.ModelForm):
     class Meta:
         model = Property
         fields = [
-            'title', 'description', 'location', 'property_type', 'price',
+            'title', 'description','province', 'location','listing_type', 'property_type', 'price',
             'number_of_bedrooms', 'number_of_kitchens', 'number_of_bathrooms',
             'number_of_garages', 'floor_area_m2', 'erf_size_m2',
             'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots'

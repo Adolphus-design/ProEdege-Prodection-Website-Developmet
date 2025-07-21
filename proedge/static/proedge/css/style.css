@@ -41,8 +41,7 @@
 }
 
 
-<<<<<<< HEAD
-/*Section for LOGIN page Styling
+/*Section for LOGIN page Styling*/
 /* Container centered */
 .login-container {
   max-width: 400px;
@@ -189,12 +188,6 @@ body {
   list-style-type: none;
   padding-left: 0;
 }
-=======
-
-
-
-
->>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
 
 
 /*Styling for SUBMIT LISTING in seller dashboard*/
@@ -279,8 +272,7 @@ button[type="submit"]:hover,
 button[type="button"]:hover {
   background-color: #0056b3;
 }
-<<<<<<< HEAD
-=======
+
 
 
 /*NEW LOGIN_REGISTER PAGE STYLING*/

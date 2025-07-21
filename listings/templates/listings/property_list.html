@@ -1,50 +1,65 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block content %}
-  <h2>FEATURED PROPERTIES</h2>
 
-  <form method="get" action="{% url 'property_list' %}" class="search-bar">
-    <input
-      type="text"
-      name="q"
-      placeholder="Search properties (e.g. 3 bedroom in Burgersfort)"
-      value="{{ query|default_if_none:'' }}"
-      autocomplete="off"
-    >
-    <button type="submit">Search</button>
-  </form>
+<h2>Available Properties</h2>
 
-  <div class="property-grid">
-    {% if properties %}
-      {% for property in properties %}
+<!-- templates/property_list.html -->
+<h2 class="text-xl font-bold mb-4">Browse by Province</h2>
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
+  {% for province in provinces %}
+    <a href="{% url 'province_properties' province.id %}"
+       class="block bg-white rounded-lg border p-4 hover:shadow-md transition">
+      <p class="text-center text-sm font-semibold text-gray-800">{{ province.name }}</p>
+    </a>
+  {% endfor %}
+</div>
 
-        {% if property.status == "sold" %}
-    <div style="background-color: red; color: white; padding: 5px; font-weight: bold; position: absolute;">
-      SOLD
-    </div>
-  {% endif %}
-        <div class="property-card">
-          <a href="{% url 'property_detail' property.pk %}">
-            {% with property.images.first as first_image %}
-              {% if first_image and first_image.main_image %}
-                <img src="{{ first_image.main_image.url }}" alt="{{ property.title }}" class="property-image">
-              {% elif first_image %}
-                <img src="{{ first_image.image.url }}" alt="{{ property.title }}" class="property-image">
-              {% else %}
-                <img src="{% static 'images/no-image.png' %}" alt="No image" class="property-image">
-              {% endif %}
-            {% endwith %}
-          </a>
-          
-          <div class="property-info">
-            <h3>{{ property.title }}</h3>
-            <p>R{{ property.price|floatformat:2 }}</p>
-          </div>
+
+<div class="property-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px 0;">
+  {% for property in properties %}
+    <div class="property-card" style="border: 1px solid #ddd; border-radius: 10px; overflow: hidden; position: relative; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
+      
+      {% if property.is_sold %}
+        <div style="position: absolute; top: 10px; left: 10px; background-color: red; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">
+          SOLD
         </div>
-      {% endfor %}
-    {% else %}
-      <p>No properties available.</p>
-    {% endif %}
-  </div>
+      {% endif %}
+
+      <a href="{% url 'property_detail' property.id %}">
+        {% if property.main_image %}
+          <img src="{{ property.main_image.url }}" alt="{{ property.title }}" style="width: 100%; height: 200px; object-fit: cover;">
+        {% else %}
+          {% with property.images.first as first_image %}
+            {% if first_image %}
+              <img src="{{ first_image.image.url }}" alt="{{ property.title }}" style="width: 100%; height: 200px; object-fit: cover;">
+            {% else %}
+              <img src="{% static 'images/default.jpg' %}" alt="No image" style="width: 100%; height: 200px; object-fit: cover;">
+            {% endif %}
+          {% endwith %}
+        {% endif %}
+      </a>
+
+      <div style="padding: 15px;">
+        <h3 style="margin-bottom: 5px;">{{ property.title }}</h3>
+        <p style="color: gray; margin-bottom: 10px;">{{ property.city }} {{ property.province }}</p>
+        <p style="font-weight: bold; font-size: 1.2rem; margin-bottom: 10px;">R {{ property.price|floatformat:0 }}</p>
+
+        <div style="display: flex; gap: 10px; font-size: 0.9rem; color: #555;">
+          {% if property.bedrooms %}<span>🛏 {{ property.bedrooms }}</span>{% endif %}
+          {% if property.bathrooms %}<span>🛁 {{ property.bathrooms }}</span>{% endif %}
+          {% if property.garages %}<span>🚗 {{ property.garages }}</span>{% endif %}
+        </div>
+
+        <a href="{% url 'property_detail' property.id %}" style="display: inline-block; margin-top: 15px; padding: 8px 12px; background: #007bff; color: white; border-radius: 5px; text-decoration: none;">
+          View Details
+        </a>
+      </div>
+
+    </div>
+  {% empty %}
+    <p>No properties available at the moment.</p>
+  {% endfor %}
+</div>
+
 {% endblock %}

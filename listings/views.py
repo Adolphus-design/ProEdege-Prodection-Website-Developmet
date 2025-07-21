@@ -9,6 +9,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from .forms import PropertyForm, PropertyImageForm
 from django.contrib import messages
+from .models import  Property
 
 # This view handles the listing of properties
 # It retrieves all approved properties and paginates them for display
@@ -231,7 +232,34 @@ def upload_property_images(request, pk):
 
     return render(request, 'listings/upload_property_images.html', {'property': property})
 
-<<<<<<< HEAD
-=======
-#for comit
->>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
+@login_required
+def contact_seller(request, property_id):
+    property_obj = get_object_or_404(Property, id=property_id)
+    seller_email = property_obj.seller.email
+
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        subject = f"New Inquiry about: {property_obj.title}"
+        from_email = request.user.email
+        buyer_name = request.user.get_full_name() or request.user.username
+
+        email_body = f"""
+        Hello {property_obj.seller.username},
+
+        You have received a new message about your listing:
+        "{property_obj.title}"
+
+        From: {buyer_name}
+        Email: {from_email}
+
+        Message:
+        {message}
+        """
+
+        #send_mail(subject, email_body, from_email, [seller_email])
+        messages.success(request, "Your message has been sent to the seller.")
+
+    return redirect('property_detail', property_id=property_id)
+
+
+#view for displaying provinces and aeras

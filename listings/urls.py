@@ -11,7 +11,8 @@ urlpatterns = [
     path('properties/<int:pk>/edit/', edit_property, name='edit_property'),
     path('properties/<int:pk>/mark-sold/', mark_property_sold, name='mark_property_sold'),
     path('properties/<int:pk>/mark-available/', views.mark_property_available, name='mark_property_available'),
-    
+    path('contact-seller/<int:property_id>/', views.contact_seller, name='contact_seller'),
     path('properties/<int:pk>/upload-images/', views.upload_property_images, name='upload_property_images'),
-
+    #path('landing/', views.landing_page, name='landing_page'),
+    #path('province/<int:province_id>/', views.province_properties, name='province_properties'),
 ]

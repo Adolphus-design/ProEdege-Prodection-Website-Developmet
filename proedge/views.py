@@ -10,11 +10,10 @@ from django.http import HttpResponse
 from listings.models import Property
 from django.db.models import Q
 from collections import defaultdict
-<<<<<<< HEAD
-=======
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
->>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
+from .forms import EditProfileForm
+from .models import UserProfile
 
 
 # This view handles user registration
@@ -79,6 +78,8 @@ def seller_dashboard(request):
     query = request.GET.get('q')
     selected_status = request.GET.get('status')
     sort_by = request.GET.get('sort')
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    incomplete_profile = not profile.contact_number or not profile.profile_picture
 
     # Unfiltered queryset for dashboard stats
     all_properties = Property.objects.filter(seller=request.user)
@@ -122,6 +123,8 @@ def seller_dashboard(request):
         'selected_status': selected_status,
         'query': query,
         'user_name': request.user.get_full_name() or request.user.username,
+        'properties': Property.objects.filter(seller=request.user),
+        'incomplete_profile': incomplete_profile,
     }
 
     return render(request, 'proedge/seller_dashboard.html', context)
@@ -344,8 +347,6 @@ def auctioneer_dashboard(request):
     return render(request, 'proedge/auctioneer_dashboard.html', context)
 
 # Add similar ones for tenant, landlord, agent
-<<<<<<< HEAD
-=======
 
 
 # Login and Registration View
@@ -370,4 +371,28 @@ def login_register_view(request):
         'login_form': login_form,
         'register_form': register_form
     })
->>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
+    
+@login_required
+def edit_profile(request):
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('user_profile')
+    else:
+        form = EditProfileForm(instance=profile)
+
+    return render(request, 'proedge/edit_profile.html', {'form': form})
+
+#user profile view
+@login_required
+def user_profile_view(request):
+    try:
+        profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        return redirect('edit_profile')  # If no profile exists yet
+
+    return render(request, 'proedge/user_profile.html', {'profile': profile})
