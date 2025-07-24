@@ -1,0 +1,30 @@
+<!-- auction_detail.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Auction for {{ property.title }}</h2>
+
+<div>
+    <strong>Location:</strong> {{ property.location }}<br>
+    <strong>Starting Price:</strong> R{{ auction.starting_price }}<br>
+    <strong>Start Time:</strong> {{ auction.start_time }}<br>
+    <strong>End Time:</strong> {{ auction.end_time }}<br>
+    <strong>Status:</strong> {{ auction.status }}<br>
+</div>
+
+<hr>
+
+<h3>Property Details</h3>
+<p>{{ property.description }}</p>
+<ul>
+    <li><strong>Bedrooms:</strong> {{ property.bedrooms }}</li>
+    <li><strong>Bathrooms:</strong> {{ property.bathrooms }}</li>
+    <li><strong>Garages:</strong> {{ property.garages }}</li>
+    <li><strong>Erf Size:</strong> {{ property.erf_size }} m²</li>
+</ul>
+
+<hr>
+
+<a href="{% url 'auctioneer_dashboard' %}">Back to Dashboard</a>
+{% endblock %}

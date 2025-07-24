@@ -1,6 +1,9 @@
 from django.urls import path
 from .views import property_list, edit_property, mark_property_sold
 from . import views
+from .views import submit_interest
+
+app_name = 'listings'
 
 urlpatterns = [
     #path('properties/', property_list, name='property_list'),
@@ -15,4 +18,5 @@ urlpatterns = [
     path('properties/<int:pk>/upload-images/', views.upload_property_images, name='upload_property_images'),
     #path('landing/', views.landing_page, name='landing_page'),
     #path('province/<int:province_id>/', views.province_properties, name='province_properties'),
+    path('property/<int:property_id>/interest/', views.submit_interest, name='submit_interest'),
 ]

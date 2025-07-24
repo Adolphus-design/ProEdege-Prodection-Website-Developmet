@@ -1,5 +1,6 @@
+from email.message import Message
 from urllib import request
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from .forms import CustomUserCreationForm
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
@@ -14,6 +15,16 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import EditProfileForm
 from .models import UserProfile
+from listings.models import Property, Interest
+from collections import defaultdict
+from .forms import AuctionForm
+
+from django.contrib.auth.decorators import user_passes_test
+from listings.models import Property, Auction, Bid, Agency, AgentProfile
+from listings.forms import BidForm, AgencyForm
+
+from .forms import AgentJoinRequestForm
+from .models import AgentJoinRequest
 
 
 # This view handles user registration
@@ -39,11 +50,16 @@ class CustomLogoutView(LogoutView):
     
     
     #This view dasboard rediect depending on user role
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+
 @login_required
 def dashboard_redirect_view(request):
     user = request.user
+
     if user.is_authenticated:
-        role = getattr(user, 'role', None)  # Assuming 'role' is a field in your User model
+        role = getattr(user, 'role', None)
+
         if role == 'seller':
             return redirect('seller_dashboard')
         elif role == 'buyer':
@@ -54,27 +70,85 @@ def dashboard_redirect_view(request):
             return redirect('landlord_dashboard')
         elif role == 'tenant':
             return redirect('tenant_dashboard')
-        # Add more roles as needed
+        elif role == 'bank':
+            return redirect('bank_dashboard')
+        elif role == 'auctioneer':
+            return redirect('auctioneer_dashboard')
+        elif role == 'agency':
+            # 👇 Check if agency profile exists before dashboard redirect
+            if not hasattr(user, 'agency_profile'):
+                return redirect('complete_agency_profile')
+            return redirect('agency_dashboard')
         else:
-            return redirect('property_list')  # or any safe default
+            return redirect('property_list')
+
     return redirect('login')
+
 
 #This is the view for the buyer and seller dashboards
 # You can create similar views for tenant, landlord, and agent dashboards
+
 @login_required
 def agent_dashboard(request):
-    # Fetch properties related to the logged-in agent
-    properties = Property.objects.filter(seller=request.user)
+    user = request.user
+
+    # Get properties listed by this agent
+    properties = Property.objects.filter(seller=user).order_by('-created_at')
+
+    # Filtering logic
+    query = request.GET.get('q')
+    selected_status = request.GET.get('status')
+    sort = request.GET.get('sort')
+
+    if query:
+        properties = properties.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(location__icontains=query)
+        )
+
+    if selected_status:
+        properties = properties.filter(status=selected_status)
+
+    if sort == 'price_asc':
+        properties = properties.order_by('price')
+    elif sort == 'price_desc':
+        properties = properties.order_by('-price')
+    elif sort == 'newest':
+        properties = properties.order_by('-created_at')
+    elif sort == 'oldest':
+        properties = properties.order_by('created_at')
+
+    # Group properties by status
+    grouped_properties = defaultdict(list)
+    for prop in properties:
+        grouped_properties[prop.status].append(prop)
+
+    # Interest/offers for this agent’s properties
+    interests = Interest.objects.filter(property__seller=user).select_related('user', 'property')
 
     context = {
-        'properties': properties,
         'role': 'Agent',
+        'properties': properties,
+        'grouped_properties': dict(grouped_properties),
+        'interests': interests,
+
+        # Summary stats
+        'total_listings': properties.count(),
+        'approved_count': properties.filter(status='approved').count(),
+        'pending_count': properties.filter(status='pending').count(),
+        'rejected_count': properties.filter(status='rejected').count(),
+        'sold_count': properties.filter(status='sold').count(),
+
+        'query': query,
+        'selected_status': selected_status,
     }
 
     return render(request, 'proedge/agent_dashboard.html', context)
 
 @login_required
 def seller_dashboard(request):
+    user = request.user
     query = request.GET.get('q')
     selected_status = request.GET.get('status')
     sort_by = request.GET.get('sort')
@@ -110,7 +184,10 @@ def seller_dashboard(request):
     grouped_properties = defaultdict(list)
     for prop in properties:
         grouped_properties[prop.status].append(prop)
-
+    # Interest/offers for this seller’s properties
+    # This assumes you have an Interest model that relates to Property and User    
+    interests = Interest.objects.filter(property__seller=user).select_related('user', 'property')
+    
     context = {
         'grouped_properties': dict(grouped_properties),  # convert defaultdict to normal dict for template
         'role': 'Seller',
@@ -125,6 +202,7 @@ def seller_dashboard(request):
         'user_name': request.user.get_full_name() or request.user.username,
         'properties': Property.objects.filter(seller=request.user),
         'incomplete_profile': incomplete_profile,
+        'interests': interests,
     }
 
     return render(request, 'proedge/seller_dashboard.html', context)
@@ -135,10 +213,7 @@ def buyer_dashboard(request):
     selected_status = request.GET.get('status')
     sort_by = request.GET.get('sort')
 
-    # Unfiltered queryset for dashboard stats
-    all_properties = Property.objects.filter(seller=request.user)
-
-    # Filtered queryset for display
+    all_properties = Property.objects.filter(buyer=request.user)
     properties = all_properties
 
     if selected_status in ['approved', 'rejected', 'pending', 'sold', 'available']:
@@ -160,14 +235,43 @@ def buyer_dashboard(request):
     elif sort_by == 'oldest':
         properties = properties.order_by('created_at')
 
-    # ✅ Group properties by status for dynamic section display
+    # ✅ Handle Bid Submission
+    if request.method == 'POST' and 'property_id' in request.POST:
+        prop_id = request.POST.get('property_id')
+        try:
+            property_instance = Property.objects.get(id=prop_id)
+        except Property.DoesNotExist:
+            messages.error(request, "Property not found.")
+            return redirect('buyer_dashboard')
+
+        if property_instance.listing_type == 'auction':
+            bid_form = BidForm(request.POST)
+            if bid_form.is_valid():
+                bid = bid_form.save(commit=False)
+                bid.user = request.user
+                bid.property = property_instance
+                bid.save()
+                messages.success(request, f"Your bid of R{bid.amount} was placed successfully.")
+            else:
+                messages.error(request, "There was an error placing your bid. Please try again.")
+        else:
+            messages.warning(request, "Bidding is only allowed on auction listings.")
+
+        return redirect('buyer_dashboard')  # Prevent resubmission
+
+    # ✅ Group by status
     grouped_properties = defaultdict(list)
     for prop in properties:
         grouped_properties[prop.status].append(prop)
 
+    # ✅ Generate a BidForm for each auction property
+    bid_forms = {
+        prop.id: BidForm() for prop in properties if prop.listing_type == 'auction'
+    }
+
     context = {
-        'grouped_properties': dict(grouped_properties),  # convert defaultdict to normal dict for template
-        'role': 'Seller',
+        'grouped_properties': dict(grouped_properties),
+        'role': 'buyer',
         'total_listings': all_properties.count(),
         'approved_count': all_properties.filter(status='approved').count(),
         'rejected_count': all_properties.filter(status='rejected').count(),
@@ -177,6 +281,7 @@ def buyer_dashboard(request):
         'selected_status': selected_status,
         'query': query,
         'user_name': request.user.get_full_name() or request.user.username,
+        'bid_forms': bid_forms,
     }
 
     return render(request, 'proedge/buyer_dashboard.html', context)
@@ -240,7 +345,7 @@ def tenant_dashboard(request):
     sort_by = request.GET.get('sort')
 
     # Unfiltered queryset for dashboard stats
-    all_properties = Property.objects.filter(seller=request.user)
+    all_properties = Property.objects.filter(tenant=request.user)
 
     # Filtered queryset for display
     properties = all_properties
@@ -271,7 +376,7 @@ def tenant_dashboard(request):
 
     context = {
         'grouped_properties': dict(grouped_properties),  # convert defaultdict to normal dict for template
-        'role': 'Seller',
+        'role': 'Tenant',
         'total_listings': all_properties.count(),
         'approved_count': all_properties.filter(status='approved').count(),
         'rejected_count': all_properties.filter(status='rejected').count(),
@@ -337,15 +442,30 @@ def bank_dashboard(request):
 
     return render(request, 'proedge/bank_dashboard.html', context)
 
+# This view handles the auctioneer dashboard
+# It shows auctions managed by the auctioneer and allows them to manage bids
 @login_required
 def auctioneer_dashboard(request):
-    properties = Property.objects.filter(seller=request.user)
-    context = {
-        'properties': properties,
-        'role': 'Auctioneer',
-    }
-    return render(request, 'proedge/auctioneer_dashboard.html', context)
+    properties = Property.objects.filter(auctioneer=request.user)
+    #auctions = Auction.objects.filter(auctioneer=request.user).select_related('property')
+    auctions = Auction.objects.filter(auctioneer=request.user)
+    auction_data = []
+    for auction in auctions:
+        bids = Bid.objects.filter(auction=auction).order_by('-amount')
+        highest_bid = bids.first()
+        auction_data.append({
+            'auction': auction,
+            'property': auction.property,
+            'bids': bids,
+            'highest_bid': highest_bid
+        })
 
+    return render(request, 'proedge/auctioneer_dashboard.html', {
+        'role': 'Auctioneer',
+        'properties': properties,
+        'auction_data': auction_data,
+        'auctions': auctions,
+    })
 # Add similar ones for tenant, landlord, agent
 
 
@@ -396,3 +516,217 @@ def user_profile_view(request):
         return redirect('edit_profile')  # If no profile exists yet
 
     return render(request, 'proedge/user_profile.html', {'profile': profile})
+
+# Interest messages view for agents, sellers, landlords, banks, auctioneers
+@login_required
+def interest_messages_view(request):
+    user = request.user
+    messages = Interest.objects.filter(property__agent=request.user).order_by('-created_at')
+    # Filter messages based on user role
+    if hasattr(user, 'agent'):
+        interests = Interest.objects.filter(property__agent=user)
+    elif hasattr(user, 'seller'):
+        interests = Interest.objects.filter(property__seller=user)
+    elif hasattr(user, 'landlord'):
+        interests = Interest.objects.filter(property__landlord=user)
+    elif hasattr(user, 'bank'):
+        interests = Interest.objects.filter(property__bank=user)
+    elif hasattr(user, 'auctioneer'):
+        interests = Interest.objects.filter(property__auctioneer=user)
+    else:
+        interests = Interest.objects.filter(user=user)  # for buyers/tenants
+
+    context = {
+        'interests': interests.order_by('-created_at'),
+        'messages': messages,
+    }
+    return render(request, 'proedge/messages.html', context)
+
+
+@login_required
+def create_auction(request):
+    if request.method == 'POST':
+        form = AuctionForm(request.POST, user=request.user)
+        if form.is_valid():
+            auction = form.save(commit=False)
+
+            # Get the property from cleaned_data
+            selected_property = form.cleaned_data.get('property')
+            if selected_property is None:
+                form.add_error('property', 'Please select a valid property.')
+            else:
+                auction.property = selected_property
+                auction.auctioneer = request.user
+                auction.save()
+                messages.success(request, 'Auction created successfully.')
+                return redirect('auctioneer_dashboard')
+    else:
+        form = AuctionForm(user=request.user)
+
+    return render(request, 'proedge/create_auction.html', {'form': form})
+
+# This view handles the auction detail page
+@login_required
+def auction_detail(request, auction_id):
+    auction = get_object_or_404(Auction, id=auction_id)
+    property = auction.property  # This is correct
+    bids = auction.bids.all()  # via related_name='bids'
+    
+    if request.method == 'POST':
+        form = BidForm(request.POST)
+        if form.is_valid():
+            bid = form.save(commit=False)
+            bid.auction = auction
+            bid.bidder = request.user
+            bid.save()
+            messages.success(request, "Your bid was placed successfully.")
+            return redirect('auction_detail', auction_id=auction.id)
+    else:
+        form = BidForm()
+
+    return render(request, 'proedge/auction_detail.html', {
+        'auction': auction,
+        'form': form,
+        'bids': bids,
+    })
+    #return render(request, 'proedge/auction_detail.html', {'auction': auction})
+# This view allows auctioneers to edit an existing auction
+# It uses the AuctionForm to handle the form submission
+@login_required
+def edit_auction(request, auction_id):
+    auction = get_object_or_404(Auction, id=auction_id)
+
+    if request.method == 'POST':
+        form = AuctionForm(request.POST, instance=auction)
+        if form.is_valid():
+            form.save()
+            return redirect('proedge:auction_detail', auction_id=auction.id)  # or your dashboard
+    else:
+        form = AuctionForm(instance=auction)  # <== pre-fill form
+
+    return render(request, 'proedge/edit_auction.html', {'form': form, 'auction': auction})
+
+# This view handles the agency dashboard
+# It shows the agency's agents and properties, along with summary stats
+
+@login_required
+def agency_dashboard(request):
+    # Get the current agency
+    try:
+        agency = Agency.objects.get(owner=request.user)
+    except Agency.DoesNotExist:
+        return redirect('create_agency_profile')
+    
+    # Get all agent profiles linked to this agency
+    agents = AgentProfile.objects.filter(agency=agency)
+
+    # Extract actual User objects (agent users) from the agent profiles
+    agent_users = [agent_profile.user for agent_profile in agents]
+
+    # Get properties assigned to those users (agents)
+    properties = Property.objects.filter(agent__in=agent_users) if agent_users else []
+
+    # Get pending join requests
+    join_requests = AgentJoinRequest.objects.filter(is_approved=False)
+
+    return render(request, 'proedge/agency_dashboard.html', {
+        'agency': agency,
+        'agents': agents,
+        'properties': properties,
+        'join_requests': join_requests,
+    })
+   
+   
+# This view allows users to create a new agency
+@login_required
+def complete_agency_profile(request):
+    if hasattr(request.user, 'agency_profile'):
+        return redirect('agency_dashboard')  # Already completed
+
+    if request.method == 'POST':
+        form = AgencyForm(request.POST, request.FILES)
+        if form.is_valid():
+            agency = form.save(commit=False)
+            agency.owner = request.user
+            agency.save()
+            return redirect('agency_dashboard')
+    else:
+        form = AgencyForm()
+
+    return render(request, 'proedge/complete_profile.html', {'form': form})
+
+    
+    
+@login_required
+def request_join_agency(request):
+    if request.method == 'POST':
+        form = AgentJoinRequestForm(request.POST)
+        if form.is_valid():
+            join_request = form.save(commit=False)
+            join_request.agent = request.user
+            join_request.save()
+            return redirect('agent_dashboard')  # or a success page
+    else:
+        form = AgentJoinRequestForm()
+    return render(request, 'proedge/request_join_agency.html', {'form': form})
+
+
+from django.contrib.auth import get_user_model
+from django.views.decorators.http import require_POST
+
+    
+
+
+# Reject join request view
+@login_required
+def reject_join_request(request, request_id):
+    join_request = get_object_or_404(AgentJoinRequest, id=request_id, is_approved=False)
+
+    # Option 1: Delete the request completely
+    join_request.delete()
+
+    # Optionally show a feedback message
+    messages.success(request, "Agent join request rejected.")
+
+    return redirect('agency_dashboard')
+
+@login_required
+def approve_join_request(request, request_id):
+    join_request = get_object_or_404(AgentJoinRequest, id=request_id, is_approved=False)
+
+    # Mark the request as approved
+    join_request.is_approved = True
+    join_request.save()
+
+    # Set the agent's profile to link to the agency
+    agent_profile = AgentProfile.objects.get(user=join_request.agent)
+    agent_profile.agency = join_request.agency
+    agent_profile.save()
+
+    messages.success(request, f"{join_request.agent.username} has been approved and added to your agency.")
+    return redirect('agency_dashboard')
+
+
+# This view allows agency owners to edit their agency profile
+@login_required
+def edit_agency_profile(request):
+    agency = get_object_or_404(Agency, owner=request.user)
+
+    if request.method == 'POST':
+        form = AgencyForm(request.POST, request.FILES, instance=agency)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Agency profile updated successfully.')
+            return redirect('agency_dashboard')
+    else:
+        form = AgencyForm(instance=agency)
+
+    return render(request, 'proedge/edit_agency_profile.html', {'form': form})
+
+# This view allows agency owners to view their agency profile
+@login_required
+def view_agency_profile(request):
+    agency = get_object_or_404(Agency, owner=request.user)
+    return render(request, 'proedge/view_agency_profile.html', {
+        'agency': agency
+    })

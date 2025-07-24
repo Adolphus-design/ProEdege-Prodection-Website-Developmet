@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ agency.name }} Dashboard</h1>
+<p>Welcome, {{ request.user.username }}</p>
+
+
+<a href="{% url 'view_agency_profile' %}" class="btn btn-sm btn-outline-primary mb-3">Profile</a>
+
+<a href="{% url 'add_agency_property' %}" class="bg-green-600 text-white px-3 py-2 rounded">+ Add New Property</a>
+<h3 class="mt-5">Pending Agent Join Requests</h3>
+
+
+{% if join_requests %}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Agent</th>
+        <th>Message</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for request in join_requests %}
+        <tr>
+          <td>{{ request.agent.username }}</td>
+          <td>{{ request.message }}</td>
+          <td>
+            <form method="post" action="{% url 'handle_join_request' request.id %}">
+              {% csrf_token %}
+              <a href="{% url 'approve_join_request' request.id %}" class="btn btn-success">Accept</a>
+              <a href="{% url 'reject_join_request' request.id %}" class="btn btn-danger">Reject</a>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No pending requests.</p>
+{% endif %}
+
+<h3>Approved Agents ({{ agents.count }})</h3>
+{% if agents %}
+    <ul class="list-group mb-4">
+        {% for agent in agents %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ agent.user.get_full_name|default:agent.user.username }}
+                <span class="text-muted">{{ agent.user.email }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No agents have joined your agency yet.</p>
+{% endif %}
+
+<h2>Listed Properties ({{ properties.count }})</h2>
+<ul>
+    {% for property in properties %}
+        <li>{{ property.title }} - {{ property.status }}</li>
+    {% empty %}
+        <li>No properties listed.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

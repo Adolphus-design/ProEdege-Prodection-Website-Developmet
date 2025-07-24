@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="p-6 max-w-4xl mx-auto">
+    <h1 class="text-2xl font-semibold mb-4">Interest Messages</h1>
+
+    {% if interests %}
+        <div class="space-y-4">
+            {% for interest in interests %}
+                <div class="bg-white border rounded-lg p-4 shadow">
+                    <p><strong>{{ interest.user.username }}</strong> is interested in <strong>{{ interest.property.title }}</strong></p>
+                    <p class="text-gray-600 mt-1">{{ interest.message }}</p>
+                    <p class="text-xs text-gray-400 mt-2">Sent at {{ interest.created_at|date:"Y-m-d H:i" }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500">You don't have any interest messages yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

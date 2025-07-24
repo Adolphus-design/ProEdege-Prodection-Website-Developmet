@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Agency Profile</h2>
+
+    <div class="card p-4">
+        {% if agency.logo %}
+            <img src="{{ agency.logo.url }}" alt="Agency Logo" class="img-thumbnail mb-3" style="max-height: 120px;">
+        {% else %}
+            <p><em>No logo uploaded.</em></p>
+        {% endif %}
+
+        <p><strong>Name:</strong> {{ agency.name }}</p>
+        <p><strong>Address:</strong> {{ agency.address }}</p>
+        <p><strong>Description:</strong> {{ agency.description }}</p>
+        <p><strong>Email:</strong> {{ agency.contact_email }}</p>
+        <p><strong>Phone Number:</strong> {{ agency.phone_number }}</p>
+
+        <a href="{% url 'edit_agency_profile' %}" class="btn btn-outline-primary mt-3">Edit Profile</a>
+        <a href="{% url 'agency_dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-2xl font-semibold mb-4">Your Agency Property Listings</h2>
+
+    {% if properties %}
+        <table class="w-full table-auto border border-gray-300 shadow-md">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-2 border">Main Image</th>
+                    <th class="p-2 border">Title</th>
+                    <th class="p-2 border">Location</th>
+                    <th class="p-2 border">Price</th>
+                    <th class="p-2 border">Status</th>
+                    <th class="p-2 border">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for property in properties %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2 border">
+                            {% if property.main_image %}
+                                <img src="{{ property.main_image.url }}" alt="Main Image" class="h-16 w-24 object-cover">
+                            {% else %}
+                                <span class="text-gray-400 italic">No image</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-2 border">{{ property.title }}</td>
+                        <td class="p-2 border">{{ property.city }}, {{ property.province }}</td>
+                        <td class="p-2 border">R {{ property.price|floatformat:2 }}</td>
+                        <td class="p-2 border">{{ property.status }}</td>
+                        <td class="p-2 border text-center">
+                            <a href="{% url 'agencylistings:property_detail' property.pk %}">View</a>
+                            <a href="{% url 'agencylistings:edit_property' property.pk %}">Edit</a>
+
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-gray-600 mt-4">No properties found.</p>
+    {% endif %}
+</div>
+{% endblock %}

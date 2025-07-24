@@ -1,7 +1,9 @@
 # listings/forms.py
-
+from .models import Interest
 from django import forms
 from .models import Property
+from .models import Bid
+from .models import Agency
 
 # This form is used for submitting property images
 # It allows multiple file uploads and uses a ClearableFileInput widget for better user experience.
@@ -39,4 +41,40 @@ class SubmitPropertyForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
             'latitude': forms.NumberInput(attrs={'step': 'any'}),
             'longitude': forms.NumberInput(attrs={'step': 'any'}),
+        }
+
+class InterestForm(forms.ModelForm):
+    class Meta:
+        model = Interest
+        fields = ['interest_type', 'message', 'offer_price']
+
+        widgets = {
+            'interest_type': forms.Select(attrs={'class': 'form-control'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'offer_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        }
+
+# This form is used for submitting a bid on an auction
+# It includes a field for the bid amount and uses a NumberInput widget for better user experience
+class BidForm(forms.ModelForm):
+    class Meta:
+        model = Bid
+        fields = ['amount']
+        widgets = {
+            'amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your bid amount',
+                'step': '0.01',
+            }),
+        }
+        
+
+# This form is used for creating a new agency
+# It includes fields for the agency name, description, and owner.
+class AgencyForm(forms.ModelForm):
+    class Meta:
+        model = Agency
+        fields = ['name', 'address', 'description', 'contact_email', 'phone_number', 'logo']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
         }

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Express Interest for "{{ property.title }}"</h2>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<a href="{% url 'property_detail' property.pk %}">Back to property details</a>
+{% endblock %}

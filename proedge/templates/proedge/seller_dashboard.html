@@ -3,9 +3,28 @@
 
 {% block content %}
 
+<a href="{% url 'interest_messages' %}" class="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700 transition">
+    Messages ({{ interests.count }})
+</a>
 
   <h1>{{ role }} Dashboard</h1>
-
+{% if interests %}
+  <ul>
+    {% for interest in interests %}
+      <li style="margin-bottom: 1em;">
+        <strong>{{ interest.user.get_full_name|default:interest.user.username }}</strong>
+        is interested in 
+        <a href="{% url 'property_detail' interest.property.pk %}">{{ interest.property.title }}</a><br>
+        <strong>Type:</strong> {{ interest.interest_type }}<br>
+        <strong>Offer:</strong> R{{ interest.offer_price|floatformat:2 }}<br>
+        <strong>Message:</strong> {{ interest.message }}<br>
+        <strong>Contact:</strong> {{ interest.user.userprofile.contact_number|default:"N/A" }}<br>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No offers or interest submitted yet.</p>
+{% endif %}
 
 <h2>Welcome {{ request.user.get_full_name }}</h2>
 <a href="{% url 'user_profile' %}" class="btn btn-outline-secondary btn-sm mt-2">

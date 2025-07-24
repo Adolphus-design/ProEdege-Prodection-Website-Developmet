@@ -1,16 +1,14 @@
 {% extends "base.html" %}
+{% load static %}
+{% load custom_tags %}
+
+{% block title %}Buyer Dashboard{% endblock %}
 
 {% block content %}
-<<<<<<< HEAD
-  <h1>{{ role }} Dashboard</h1>
-=======
-  <h1>Buyer Dashboard</h1>
->>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
-<h2>Welcome {{ request.user.get_full_name }}</h2>
+<h1>{{ role }} Dashboard</h1>
+<h2>Welcome, {{ user.username }} (Buyer Dashboard)</h2>
 
- 
-
- <h2>Dashboard Summary</h2>
+<h2>Dashboard Summary</h2>
 <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
   <div style="background-color: #4caf50; color: white; padding: 15px; border-radius: 8px; flex: 1;">
     <strong>Total Listings:</strong> {{ total_listings }}
@@ -27,17 +25,42 @@
   <div style="background-color: #795548; color: white; padding: 15px; border-radius: 8px; flex: 1;">
     <strong>Sold:</strong> {{ sold_count }}
   </div>
-  
 </div>
 
-  
+<hr>
 
+<h3>Active Auctions</h3>
+<ul>
+  {% for auction in active_auctions %}
+    <li>
+      <strong>{{ auction.property.title }}</strong> | Ends: {{ auction.end_time }} |
+      Minimum Bid: R{{ auction.minimum_bid }}
+    </li>
+  {% empty %}
+    <li>No active auctions right now.</li>
+  {% endfor %}
+</ul>
+
+<hr>
+
+<h3>Your Bid History</h3>
+<ul>
+  {% for bid in bid_history %}
+    <li>
+      Auction: {{ bid.auction.property.title }} |
+      R{{ bid.amount }} on {{ bid.timestamp }}
+    </li>
+  {% empty %}
+    <li>No bids placed yet.</li>
+  {% endfor %}
+</ul>
+
+<hr>
 
 <h2 align="center">My Properties</h2>
 
- <form method="get" class="dashboard-filter-bar">
+<form method="get" class="dashboard-filter-bar">
   <input type="text" name="q" placeholder="Search..." value="{{ query|default:'' }}">
-
   <select name="status">
     <option value="">All Statuses</option>
     <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
@@ -58,10 +81,9 @@
   <button type="submit">Apply</button>
 </form>
 
-
 {% for status, properties in grouped_properties.items %}
   <h3>{{ status|title }}</h3>
-  <table border="1" cellpadding="8" cellspacing="0" style="margin-bottom: 20px;">
+  <table border="1" cellpadding="8" cellspacing="0" style="margin-bottom: 20px; width: 100%;">
     <thead>
       <tr>
         <th>Title</th>
@@ -85,28 +107,35 @@
               | <a href="{% url 'mark_property_sold' property.pk %}">Mark Sold</a>
             {% elif property.status == 'sold' %}
               | <a href="{% url 'mark_property_available' property.pk %}">Mark Available</a>
-  {% endif %}
+            {% endif %}
           </td>
         </tr>
+
+        {% if property.listing_type == 'auction' %}
+        <tr>
+          <td colspan="5">
+            <form method="post" style="margin-top: 10px;">
+              {% csrf_token %}
+              {{ bid_forms|get_item:property.id.amount.label_tag }}
+              {{ bid_forms|get_item:property.id.amount }}
+              <input type="hidden" name="property_id" value="{{ property.id }}">
+              <button type="submit">Place Bid</button>
+            </form>
+          </td>
+        </tr>
+        {% endif %}
       {% endfor %}
     </tbody>
   </table>
 {% empty %}
-<<<<<<< HEAD
-  <p>You have no listings.</p>
-=======
-  <h2>No Properties Listed</h2>
->>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
+  <p>You haven't listed any properties yet. Start by adding a new property!</p>
 {% endfor %}
-
-
-
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector(".dashboard-filter-bar");
 
-    // Auto-submit on search field clear
+    // Auto-submit on search clear
     const searchInput = form.querySelector("input[name='q']");
     searchInput.addEventListener("input", function () {
       if (this.value === "") {
@@ -114,7 +143,7 @@
       }
     });
 
-    // Auto-submit when filter or sort dropdown changes
+    // Auto-submit on filter/sort change
     form.querySelectorAll("select").forEach(function (select) {
       select.addEventListener("change", function () {
         form.submit();

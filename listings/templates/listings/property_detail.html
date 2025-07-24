@@ -68,6 +68,10 @@
       {% else %}
         <p class="text-xs text-red-500">Login to view contact info</p>
       {% endif %}
+
+      
+      <a href="{% url 'submit_interest' property.id %}" class="btn btn-success">I'm Interested / Make Offer</a>
+
     </div>
   </div>
 

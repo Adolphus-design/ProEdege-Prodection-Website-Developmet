@@ -1,5 +1,9 @@
 from django.db import models
 from django.conf import settings
+from datetime import timedelta
+from django.utils import timezone
+
+from django.contrib.auth.models import User
 
 
 class Property(models.Model):
@@ -30,7 +34,7 @@ class Property(models.Model):
     location = models.CharField(max_length=255)
     province = models.CharField(max_length=100)  # Now a free-text field
     area = models.CharField(max_length=100, null=True, blank=True)
-
+    
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES)
     listing_type = models.CharField(max_length=20, choices=LISTING_TYPE_CHOICES, default='')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
@@ -60,7 +64,7 @@ class Property(models.Model):
     agent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='listed_properties')
     bank = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='banked_properties')
     auctioneer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='auctioned_properties')
-
+    agency = models.ForeignKey('Agency', on_delete=models.CASCADE, null=True, blank=True, related_name='properties')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -77,3 +81,95 @@ class PropertyImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.property.title}"
+    
+# This model is used to store user interests in properties
+# It allows users to express interest in buying, renting, or making an offer on a property
+class Interest(models.Model):
+    INTEREST_TYPE_CHOICES = [
+        ('buy', 'Buying'),
+        ('rent', 'Renting'),
+        ('offer', 'Make Offer'),
+        ('inquiry', 'General Inquiry'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    property = models.ForeignKey('Property', on_delete=models.CASCADE, related_name='interests')
+    interest_type = models.CharField(max_length=20, choices=INTEREST_TYPE_CHOICES, default='inquiry')
+    message = models.TextField(blank=True, null=True)
+    offer_price = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('accepted', 'Accepted'),
+            ('declined', 'Declined')
+        ],
+        default='pending'
+    )
+
+    def __str__(self):
+        return f"{self.user} - {self.property.title} - {self.interest_type}"
+    
+    
+class Auction(models.Model):
+    property = models.OneToOneField('Property', on_delete=models.CASCADE, related_name='auction')
+    auctioneer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    minimum_bid = models.DecimalField(max_digits=12, decimal_places=2)
+    bid_increment = models.DecimalField(max_digits=12, decimal_places=2, default=1000.00)
+    
+    is_active = models.BooleanField(default=False)
+    is_closed = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Auction for {self.property.title}"
+
+    def has_started(self):
+        return timezone.now() >= self.start_time
+
+    def has_ended(self):
+        return timezone.now() >= self.end_time
+
+    def duration(self):
+        return self.end_time - self.start_time
+    
+class Bid(models.Model):
+    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name='bids')
+    bidder = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-amount', '-timestamp']
+
+    def __str__(self):
+        return f"{self.bidder} - {self.amount} on {self.auction.property.title}"
+    
+# This model is used to store agency information
+# An agency can have multiple agents, and each agent can be associated with an agency
+class Agency(models.Model):
+    name = models.CharField(max_length=255)
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='agency_profile')
+    address = models.TextField(blank=True)
+    description = models.TextField(blank=True)
+    contact_email = models.EmailField(blank=True)
+    phone_number = models.CharField(max_length=20, blank=True)
+    logo = models.ImageField(upload_to='agency_logos/', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+# This model is used to store agent profiles
+# Each agent can be associated with an agency, and they can have their own profile
+class AgentProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    agency = models.ForeignKey(Agency, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    def __str__(self):
+        return self.user.username

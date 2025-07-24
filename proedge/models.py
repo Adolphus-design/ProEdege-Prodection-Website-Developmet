@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from datetime import timedelta
+from django.utils import timezone
+from listings.models import Agency, AgentProfile
 # Create your models here.
 
 def user_profile_picture_path(instance, filename):
@@ -22,13 +25,27 @@ class CustomUser(AbstractUser):
         ('buyer', 'Buyer'),
         ('seller', 'Seller'),
         ('tenant', 'Tenant'),
+        ('agency', 'Agency'),
         ('landlord', 'Landlord'),
         ('agent', 'Agent'),
         ('bank', 'Bank'),
         ('auctioneer', 'Auctioneer'),
+        
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     
     def __str__(self):
         return f"{self.username} ({self.role})"
+
+
+# Agent Join Request
+class AgentJoinRequest(models.Model):
+    agent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
+    message = models.TextField(blank=True)
+    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.agent.username} → {self.agency.name}"

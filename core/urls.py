@@ -28,6 +28,7 @@ urlpatterns = [
     path('adminpanel/', include('adminpanel.urls', namespace='adminpanel')),
     path('', include(('listings.urls', 'listings'), namespace='listings')),
     path('', include(('proedge.urls', 'proedge'), namespace='proedge')),
+    path('agency/', include('agencylistings.urls', namespace='agencylistings'))
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

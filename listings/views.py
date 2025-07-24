@@ -9,7 +9,9 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from .forms import PropertyForm, PropertyImageForm
 from django.contrib import messages
-from .models import  Property
+from .models import  Property, Interest
+from django.http import HttpResponseForbidden
+from .forms import InterestForm
 
 # This view handles the listing of properties
 # It retrieves all approved properties and paginates them for display
@@ -263,3 +265,28 @@ def contact_seller(request, property_id):
 
 
 #view for displaying provinces and aeras
+
+# This view allows users to submit their interest in a property
+# It checks if the user is logged in and renders a form for submitting interest details
+@login_required
+def submit_interest(request, property_id):
+    property_obj = get_object_or_404(Property, id=property_id)
+
+    if request.method == 'POST':
+        form = InterestForm(request.POST)
+        if form.is_valid():
+            interest = form.save(commit=False)
+            interest.user = request.user
+            interest.property = property_obj
+            interest.save()
+            messages.success(request, "Your interest/offer has been submitted.")
+            return redirect('property_detail', pk=property_obj.pk)
+    else:
+        form = InterestForm()
+
+    return render(request, 'listings/submit_interest.html', {
+        'form': form,
+        'property': property_obj
+    })
+    
+    

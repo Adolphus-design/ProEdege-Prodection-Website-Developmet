@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from .models import UserProfile
+from listings.models import Bid, Auction
+from .models import AgentJoinRequest
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -29,3 +31,29 @@ class UserProfileForm(forms.ModelForm):
             if picture.size > 2 * 1024 * 1024:  # 2MB limit
                 raise ValidationError("Profile picture size must be under 2MB.")
         return picture
+
+class AuctionForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)  # extract user if passed
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = Auction
+        fields = ['property', 'start_time', 'end_time', 'minimum_bid', 'bid_increment', 'is_active']
+        widgets = {
+            'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        }
+        
+
+
+
+class AgentJoinRequestForm(forms.ModelForm):
+    class Meta:
+        model = AgentJoinRequest
+        fields = ['agency', 'message']
+        widgets = {
+            'message': forms.Textarea(attrs={'rows': 3}),
+        }
+
+        
