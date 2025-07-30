@@ -1,39 +1,128 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
-  <h2>Edit Property: {{ property.title }}</h2>
+<div class="container my-5">
 
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    
-    <h3>Upload New Images (optional)</h3>
-    {{ image_form.as_p }}
-
-    <button type="submit">Update Property</button>
-    
-  </form>
-  
-  <hr>
-  <h3>Current Images</h3>
-  <div>
-    {% for image in property.images.all %}
-      <img src="{{ image.image.url }}" width="100" style="margin: 5px;">
-    {% empty %}
-      <p>No images uploaded yet.</p>
-    {% endfor %}
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-dark">Welcome, {{ agency.name }}</h2>
+    <a href="{% url 'edit_agency_profile' %}" class="btn btn-outline-dark">Edit Profile</a>
   </div>
-{% endblock %}
-{% block scripts %}
-  <script>
-    // Initialize LightGallery for the images
-    document.addEventListener('DOMContentLoaded', function() {
-      lightGallery(document.querySelector('.lightgallery'), {
-        plugins: [lgThumbnail, lgZoom],
-        speed: 500,
-        thumbnail: true,
-        zoom: true
-      });
-    });
-  </script>
+
+  <!-- Agency Summary -->
+  <div class="row mb-5 text-white">
+    <div class="col-md-3">
+      <div class="card bg-danger shadow-sm">
+        <div class="card-body">
+          <h6>Total Agents</h6>
+          <h4>{{ agents|length }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-dark shadow-sm">
+        <div class="card-body">
+          <h6>Total Properties</h6>
+          <h4>{{ properties|length }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-secondary shadow-sm">
+        <div class="card-body">
+          <h6>Join Requests</h6>
+          <h4>{{ join_requests|length }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent List -->
+  <div class="mb-5">
+    <h4 class="mb-3">Your Agents</h4>
+    {% if agents %}
+      <div class="row">
+        {% for agent in agents %}
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              <div class="card-body">
+                <h6 class="card-title">{{ agent.user.get_full_name|default:agent.user.username }}</h6>
+                <p class="mb-1"><strong>Email:</strong> {{ agent.user.email }}</p>
+                <p class="mb-0"><strong>Phone:</strong> {{ agent.user.userprofile.contact_number|default:"N/A" }}</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No agents joined your agency yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- Property Listings -->
+  <div class="mb-5">
+    <h4 class="mb-3">Agency Properties</h4>
+    {% if properties %}
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Title</th>
+              <th>Location</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for property in properties %}
+              <tr>
+                <td>{{ property.title }}</td>
+                <td>{{ property.location }}</td>
+                <td>R{{ property.price|floatformat:0 }}</td>
+                <td>{{ property.status|title }}</td>
+                <td>
+                  <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-secondary">View</a>
+                  <a href="{% url 'edit_agency_property' property.pk %}" class="btn btn-sm btn-outline-danger">Edit</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted">No properties listed yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- Agent Join Requests -->
+  <div class="mb-5">
+    <h4 class="mb-3">Pending Join Requests</h4>
+    {% if join_requests %}
+      <div class="list-group">
+        {% for request in join_requests %}
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              {{ request.agent.get_full_name|default:request.agent.username }} wants to join your agency.
+            </div>
+            <div class="d-flex gap-2">
+              <form method="post" action="{% url 'approve_join_request' request.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-success">✔ Approve</button>
+              </form>
+              <form method="post" action="{% url 'reject_join_request' request.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger">✖ Reject</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No pending join requests.</p>
+    {% endif %}
+  </div>
+
+</div>
 {% endblock %}

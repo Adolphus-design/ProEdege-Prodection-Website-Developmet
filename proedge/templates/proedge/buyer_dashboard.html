@@ -5,16 +5,19 @@
 {% block title %}Buyer Dashboard{% endblock %}
 
 {% block content %}
-<h1>{{ role }} Dashboard</h1>
-<h2>Welcome, {{ user.username }} (Buyer Dashboard)</h2>
+<!-- Profile Note -->
+  <div class="mb-4">
+    <h5>Welcome, {{ request.user.get_full_name }}</h5>
+    <a href="{% url 'user_profile' %}" class="btn btn-outline-dark btn-sm">👤 View Profile</a>
+  </div>
 
 <h2>Dashboard Summary</h2>
 <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
   <div style="background-color: #4caf50; color: white; padding: 15px; border-radius: 8px; flex: 1;">
-    <strong>Total Listings:</strong> {{ total_listings }}
+    <strong>Saved Properties:</strong> {{ total_listings }}
   </div>
   <div style="background-color: #2196f3; color: white; padding: 15px; border-radius: 8px; flex: 1;">
-    <strong>Approved:</strong> {{ approved_count }}
+    <strong>Favorite:</strong> {{ approved_count }}
   </div>
   <div style="background-color: #ff9800; color: white; padding: 15px; border-radius: 8px; flex: 1;">
     <strong>Pending:</strong> {{ pending_count }}
@@ -28,6 +31,33 @@
 </div>
 
 <hr>
+
+<!--Search...Filter-->
+<h2 align="center">My Properties</h2>
+
+<form method="get" class="dashboard-filter-bar">
+  <input type="text" name="q" placeholder="Search..." value="{{ query|default:'' }}">
+  <select name="status">
+    <option value="">All Statuses</option>
+    <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
+    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+    <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option>
+    <option value="sold" {% if selected_status == 'sold' %}selected{% endif %}>Sold</option>
+    <option value="available" {% if selected_status == 'available' %}selected{% endif %}>Available</option>
+  </select>
+
+  <select name="sort">
+    <option value="">Sort By</option>
+    <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+    <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+    <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest First</option>
+    <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+  </select>
+
+  <button type="submit">Apply</button>
+</form>
+
+
 
 <h3>Active Auctions</h3>
 <ul>
@@ -57,79 +87,7 @@
 
 <hr>
 
-<h2 align="center">My Properties</h2>
 
-<form method="get" class="dashboard-filter-bar">
-  <input type="text" name="q" placeholder="Search..." value="{{ query|default:'' }}">
-  <select name="status">
-    <option value="">All Statuses</option>
-    <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
-    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
-    <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option>
-    <option value="sold" {% if selected_status == 'sold' %}selected{% endif %}>Sold</option>
-    <option value="available" {% if selected_status == 'available' %}selected{% endif %}>Available</option>
-  </select>
-
-  <select name="sort">
-    <option value="">Sort By</option>
-    <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
-    <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
-    <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest First</option>
-    <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest First</option>
-  </select>
-
-  <button type="submit">Apply</button>
-</form>
-
-{% for status, properties in grouped_properties.items %}
-  <h3>{{ status|title }}</h3>
-  <table border="1" cellpadding="8" cellspacing="0" style="margin-bottom: 20px; width: 100%;">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Location</th>
-        <th>Price</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for property in properties %}
-        <tr>
-          <td>{{ property.title }}</td>
-          <td>{{ property.location }}</td>
-          <td>R{{ property.price|floatformat:2 }}</td>
-          <td>{{ property.status|title }}</td>
-          <td>
-            <a href="{% url 'property_detail' property.pk %}">View</a> |
-            <a href="{% url 'edit_property' property.pk %}">Edit</a>
-            {% if property.status == 'approved' or property.status == 'available' %}
-              | <a href="{% url 'mark_property_sold' property.pk %}">Mark Sold</a>
-            {% elif property.status == 'sold' %}
-              | <a href="{% url 'mark_property_available' property.pk %}">Mark Available</a>
-            {% endif %}
-          </td>
-        </tr>
-
-        {% if property.listing_type == 'auction' %}
-        <tr>
-          <td colspan="5">
-            <form method="post" style="margin-top: 10px;">
-              {% csrf_token %}
-              {{ bid_forms|get_item:property.id.amount.label_tag }}
-              {{ bid_forms|get_item:property.id.amount }}
-              <input type="hidden" name="property_id" value="{{ property.id }}">
-              <button type="submit">Place Bid</button>
-            </form>
-          </td>
-        </tr>
-        {% endif %}
-      {% endfor %}
-    </tbody>
-  </table>
-{% empty %}
-  <p>You haven't listed any properties yet. Start by adding a new property!</p>
-{% endfor %}
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {

@@ -2,138 +2,158 @@
 {% load static %}
 
 {% block content %}
-<div class="property-detail-container">
+<div class="container my-5">
 
-  <!-- Header Section 
-  <div class="property-header">
-    <h1>{{ property.title }}</h1>
-    <p class="location">{{ property.location }}</p>
-    <p class="price">R{{ property.price|floatformat:2 }}</p>
-  </div>-->
-
-  <!-- Main Image -->
+  <!-- Main Image + Overlay -->
   {% if images %}
-  <div class="main-image" style="position: relative;">
-    <img src="{{ images.0.image.url }}" alt="Main Image" style="width: 100%; display: block;">
-    <div class="property-card-overlay" style="
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: rgba(255,255,255,0.95);
-      padding: 20px 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-      z-index: 2;
-      min-width: 250px;
-    ">
-      <h2 style="margin: 0 0 10px 0;">{{ property.title }}</h2>
-      <p style="margin: 0 0 10px 0; font-weight: bold; color: #2e7d32;">R{{ property.price|floatformat:2 }}</p>
-      <ul style="list-style: none; padding: 0; margin: 0;">
-        <li><strong>Bedrooms:</strong> {{ property.number_of_rooms }}</li>
-        <li><strong>Kitchen:</strong> {{ property.number_of_kitchens }}</li>
-        <li><strong>Bathrooms:</strong> {{ property.number_of_bathrooms }}</li>
-        <li><strong>Garage:</strong> {{ property.number_of_garages }}</li>
-      </ul>
-    </div>
-    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="#lightgallery" class="btn btn-primary">Image Gallery</a>
-        <a href="#property-overview" class="btn btn-secondary">Property Overview</a>
-        <a href="#map-view" class="btn btn-info">Map View</a>
-        <a href="#make-offer" class="btn btn-success">Make Offer</a>
-        <a href="#make-contact" class="btn btn-warning">Make Contact</a>
-      </div>
-  </div>
-{% endif %}
-<hr>
-<!--<div class="max-w-xs bg-white rounded-xl shadow-md border border-gray-200 p-4 mt-6">
-  <div class="flex items-center space-x-4">
-    {% if property.seller.userprofile.profile_picture %}
-      <img src="{{ property.seller.userprofile.profile_picture.url }}"
-           class="w-12 h-12 rounded-full object-cover border border-gray-300 shadow-sm"
-           alt="Seller Picture">
-    {% else %}
-      <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-semibold">
-        {{ property.seller.get_full_name|default:property.seller.username|first|upper }}
-      </div>
-    {% endif %}
-    -->
+    <div class="position-relative mb-4">
+      <img src="{{ images.0.image.url }}" class="img-fluid rounded w-100" style="height: 400px; object-fit: cover;" alt="Main Image">
 
-    <div>
-      <p class="text-sm font-semibold text-gray-800">
-        {{ property.seller.get_full_name|default:property.seller.username }}
-      </p>
-      {% if user.is_authenticated %}
-        <p class="text-xs text-gray-600">{{ property.seller.userprofile.contact_number }}</p>
-        <p class="text-xs text-gray-600">{{ property.seller.email }}</p>
+      <!-- Overlay Card -->
+      <div class="position-absolute top-0 start-0 bg-dark bg-opacity-75 text-white p-3 rounded m-3" style="max-width: 340px;">
+        <h4 class="mb-2">{{ property.title }}</h4>
+        <p class="mb-2"><i class="fas fa-map-marker-alt me-1"></i> {{ property.location }}, {{ property.province }}</p>
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h4 class="mb-0 text-danger fw-bold">R{{ property.price|floatformat:0 }}</h4>
+          <a href="{% url 'submit_interest' property.id %}" class="btn btn-danger btn-sm">Make Offer</a>
+        </div>
+
+        <div class="d-flex gap-3 mt-3 small">
+          {% if property.number_of_bedrooms %}<span><i class="fas fa-bed"></i> {{ property.number_of_bedrooms }}</span>{% endif %}
+          {% if property.number_of_bathrooms %}<span><i class="fas fa-shower"></i> {{ property.number_of_bathrooms }}</span>{% endif %}
+          {% if property.number_of_kitchens %}<span><i class="fas fa-utensils"></i> {{ property.number_of_kitchens }}</span>{% endif %}
+          {% if property.number_of_garages %}<span><i class="fas fa-warehouse"></i> {{ property.number_of_garages }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Quick Nav Buttons -->
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="#overview" class="btn btn-outline-dark btn-sm"><i class="fas fa-home me-1"></i> Overview</a>
+    <a href="#seller" class="btn btn-outline-dark btn-sm"><i class="fas fa-user me-1"></i> Seller Info</a>
+    <a href="#features" class="btn btn-outline-dark btn-sm"><i class="fas fa-list me-1"></i> Key Features</a>
+    <a href="#lightgallery" class="btn btn-outline-dark btn-sm"><i class="fas fa-images me-1"></i> Gallery</a>
+    <a href="#map" class="btn btn-outline-dark btn-sm"><i class="fas fa-map-marked-alt me-1"></i> Map</a>
+  </div>
+
+  <!-- Overview & Seller Side-by-Side -->
+  <div class="row mb-5">
+    <div class="col-md-8" id="overview">
+      <h5 class="mb-3 border-bottom pb-2">Property Overview</h5>
+      <p>{{ property.description }}</p>
+    </div>
+    <div class="col-md-4" id="seller">
+  <h5 class="mb-3 border-bottom pb-2">Seller / Agent Info</h5>
+  {% if user.is_authenticated %}
+    <div class="bg-light p-3 rounded shadow-sm d-flex align-items-center gap-3">
+      {% if property.seller.userprofile.profile_picture %}
+        <img src="{{ property.seller.userprofile.profile_picture.url }}" alt="Profile Picture"
+             class="rounded-circle border" style="width: 60px; height: 60px; object-fit: cover;">
       {% else %}
-        <p class="text-xs text-red-500">Login to view contact info</p>
+        <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center text-white fw-bold"
+             style="width: 60px; height: 60px;">
+          {{ property.seller.username|first|upper }}
+        </div>
       {% endif %}
 
-      
-      <a href="{% url 'submit_interest' property.id %}" class="btn btn-success">I'm Interested / Make Offer</a>
-
-    </div>
-  </div>
-
-  {% if user.is_authenticated %}
-    <form method="POST" class="mt-4">
-      {% csrf_token %}
-      <textarea name="message"
-                placeholder="Write a message..."
-                rows="2"
-                class="w-full text-xs p-2 border border-gray-300 rounded-md resize-none focus:ring-1 focus:ring-red-500"
-                required></textarea>
-      <button type="submit"
-              class="w-full mt-2 bg-red-600 hover:bg-red-700 text-white text-xs py-1.5 rounded-md">
-        Send Message
-      </button>
-    </form>
-  {% endif %}
-</div>
-
-  <!-- Thumbnail Gallery -->
-  {% if images %}
-    <div id="lightgallery" class="thumbnail-gallery">
-      {% for image in images %}
-        <a href="{{ image.image.url }}">
-          <img src="{{ image.image.url }}" alt="Gallery Image">
+      <div>
+        <p class="mb-1 fw-semibold">{{ property.seller.get_full_name|default:property.seller.username }}</p>
+        <a href="{% url 'contact_seller' property.id %}" class="btn btn-danger btn-sm">
+          <i class="fas fa-envelope"></i> Contact Seller/Agent
         </a>
-      {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <p class="text-danger">Please <a href="{% url 'login' %}">login</a> to contact the seller/agent.</p>
+  {% endif %}
+</div>
+
+  <!-- Key Features -->
+  <div id="features" class="mb-5">
+    <h5 class="mb-3 border-bottom pb-2">Key Features</h5>
+    <div class="row">
+      <div class="col-md-3"><strong>Property Type:</strong> {{ property.property_type }}</div>
+      <div class="col-md-3"><strong>Floor Area:</strong> {{ property.floor_area_m2 }} m²</div>
+      <div class="col-md-3"><strong>Erf Size:</strong> {{ property.erf_size_m2 }} m²</div>
+      <div class="col-md-3"><strong>Listing Type:</strong> {{ property.listing_type }}</div>
+    </div>
+  </div>
+
+  
+<div id="lightgallery" class="row g-3">
+  {% for image in images %}
+    <div class="col-6 col-md-3">
+      <a href="{{ image.image.url }}" class="gallery-item">
+        <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Gallery Image">
+      </a>
+    </div>
+  {% endfor %}
+</div>
+
+
+
+
+  <!-- Map View -->
+  {% if property.latitude and property.longitude %}
+    <div id="map" class="mb-5">
+      <h5 class="mb-3 border-bottom pb-2">Map View</h5>
+      <div id="map-container" class="rounded" style="height: 400px;"></div>
+      <script>
+        function initMap() {
+          const location = { lat: {{ property.latitude }}, lng: {{ property.longitude }} };
+          const map = new google.maps.Map(document.getElementById("map-container"), {
+            zoom: 15,
+            center: location,
+          });
+          new google.maps.Marker({ position: location, map: map });
+        }
+      </script>
+      <script async src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
     </div>
   {% endif %}
 
-  <!-- Property Description & Meta -->
-  <div class="property-info">
-    <h2>Property Description</h2>
-    <p>{{ property.description }}</p>
-
-    <ul class="meta">
-      <li><strong>Type:</strong> {{ property.property_type }}</li>
-      <li><strong>Rooms:</strong> {{ property.number_of_rooms }}</li>
-      <li><strong>Status:</strong> {{ property.status|title }}</li>
-    </ul>
-
-    {% if user.is_authenticated %}
-      <p class="seller-info"><strong>Listed by:</strong> {{ property.seller.username }}</p>
-    {% endif %}
+  <!-- Other Actions -->
+  <div class="mb-5">
+    <h5 class="mb-3 border-bottom pb-2">Other Actions</h5>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'submit_interest' property.id %}" class="btn btn-danger"><i class="fas fa-handshake"></i> Make Offer</a>
+      <button class="btn btn-outline-secondary" disabled><i class="fas fa-bookmark"></i> Save</button>
+      <button class="btn btn-outline-secondary" disabled><i class="fas fa-share"></i> Share</button>
+      <button class="btn btn-outline-secondary" disabled><i class="fas fa-bolt"></i> Boost</button>
+    </div>
   </div>
 
 </div>
 
-<!-- Map View -->
-{% if property.latitude and property.longitude %}
-  <div id="map-view" style="height: 400px; margin-top: 20px;">
-    <h2>Map View</h2>
-    <div id="map" style="height: 100%;"></div>
-  </div>
-{% endif %}
+<!-- LightGallery Script -->
+<link href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/css/lightgallery.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script>
 
-<!-- LightGallery -->
+
 <script>
-  lightGallery(document.getElementById('lightgallery'), {
-    plugins: [lgZoom, lgThumbnail],
-    speed: 500,
-    thumbnail: true
+  document.addEventListener("DOMContentLoaded", function () {
+    lightGallery(document.getElementById("lightgallery"), {
+      selector: '.gallery-item',
+      plugins: [
+        lgZoom,
+        lgThumbnail,
+        lgFullscreen,
+        lgShare,
+        lgPager,
+        lgAutoplay,
+        lgSwipe
+      ],
+      mode: 'lg-slide',
+      speed: 600,
+      thumbnail: true,
+      download: false
+    });
   });
 </script>
+
+
+
 {% endblock %}

@@ -3,21 +3,20 @@
 {% block title %}Register | ProEdge{% endblock %}
 
 {% block content %}
-<<<<<<< HEAD
+
     <h2>Create Your Account</h2>
-=======
+
    
 
      <h2>Create Your Account</h2>
->>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
+
     <form method="post" class="registration-form">
         {% csrf_token %}
         {{ form.as_p }}
         <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
         <button type="submit">Register</button>
     </form>
-<<<<<<< HEAD
-=======
+
 
 <!--
     <div class="register-container">
@@ -52,6 +51,6 @@
     </form>
   </div>
 </div>-->
->>>>>>> f9ec739 (Before improving user deashboards and list, detail views to look modern)
+
     
 {% endblock %}

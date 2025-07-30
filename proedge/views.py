@@ -18,11 +18,11 @@ from .models import UserProfile
 from listings.models import Property, Interest
 from collections import defaultdict
 from .forms import AuctionForm
-
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test
 from listings.models import Property, Auction, Bid, Agency, AgentProfile
 from listings.forms import BidForm, AgencyForm
-
+from agencylistings.models import AgencyProperty
 from .forms import AgentJoinRequestForm
 from .models import AgentJoinRequest
 
@@ -155,6 +155,7 @@ def seller_dashboard(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
     incomplete_profile = not profile.contact_number or not profile.profile_picture
 
+    
     # Unfiltered queryset for dashboard stats
     all_properties = Property.objects.filter(seller=request.user)
 
@@ -203,6 +204,7 @@ def seller_dashboard(request):
         'properties': Property.objects.filter(seller=request.user),
         'incomplete_profile': incomplete_profile,
         'interests': interests,
+        
     }
 
     return render(request, 'proedge/seller_dashboard.html', context)
@@ -324,7 +326,7 @@ def landlord_dashboard(request):
 
     context = {
         'grouped_properties': dict(grouped_properties),  # convert defaultdict to normal dict for template
-        'role': 'Seller',
+        'role': 'Landlord',
         'total_listings': all_properties.count(),
         'approved_count': all_properties.filter(status='approved').count(),
         'rejected_count': all_properties.filter(status='rejected').count(),
@@ -611,28 +613,23 @@ def edit_auction(request, auction_id):
 
 @login_required
 def agency_dashboard(request):
-    # Get the current agency
     try:
         agency = Agency.objects.get(owner=request.user)
     except Agency.DoesNotExist:
         return redirect('create_agency_profile')
     
-    # Get all agent profiles linked to this agency
     agents = AgentProfile.objects.filter(agency=agency)
+    agent_users = [agent.user for agent in agents]
 
-    # Extract actual User objects (agent users) from the agent profiles
-    agent_users = [agent_profile.user for agent_profile in agents]
+    # 👇 Fetch from agency listings, not default Property model
+    agency_properties = AgencyProperty.objects.filter(agency=agency)
 
-    # Get properties assigned to those users (agents)
-    properties = Property.objects.filter(agent__in=agent_users) if agent_users else []
-
-    # Get pending join requests
     join_requests = AgentJoinRequest.objects.filter(is_approved=False)
 
     return render(request, 'proedge/agency_dashboard.html', {
         'agency': agency,
         'agents': agents,
-        'properties': properties,
+        'properties': agency_properties,  # renamed from "properties"
         'join_requests': join_requests,
     })
    
@@ -730,3 +727,26 @@ def view_agency_profile(request):
     return render(request, 'proedge/view_agency_profile.html', {
         'agency': agency
     })
+@login_required
+def handle_join_request(request, request_id):
+    join_request = get_object_or_404(AgentJoinRequest, id=request_id, is_approved=False)
+
+    action = request.POST.get('action')
+    if action == 'approve':
+        join_request.is_approved = True
+        join_request.save()
+        agent_profile = AgentProfile.objects.get(user=join_request.agent)
+        agent_profile.agency = join_request.agency
+        agent_profile.save()
+        messages.success(request, "Agent approved.")
+    elif action == 'reject':
+        join_request.delete()
+        messages.success(request, "Agent rejected.")
+
+    return redirect('agency_dashboard')
+
+
+# This view handles user logout
+def custom_logout(request):
+    logout(request)
+    return redirect('login')  # or wherever you want to go after logout

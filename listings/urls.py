@@ -3,10 +3,10 @@ from .views import property_list, edit_property, mark_property_sold
 from . import views
 from .views import submit_interest
 
-app_name = 'listings'
+
 
 urlpatterns = [
-    #path('properties/', property_list, name='property_list'),
+    path('properties/', property_list, name='property_list'),
     #path('properties/<int:pk>/', property_detail, name='property_detail'),
     path('', views.property_list, name='property_list'),
     path('<int:pk>/', views.property_detail, name='property_detail'),
@@ -19,4 +19,6 @@ urlpatterns = [
     #path('landing/', views.landing_page, name='landing_page'),
     #path('province/<int:province_id>/', views.province_properties, name='province_properties'),
     path('property/<int:property_id>/interest/', views.submit_interest, name='submit_interest'),
+    path('property/image/delete/<int:image_id>/', views.delete_property_image, name='delete_property_image'),
+
 ]

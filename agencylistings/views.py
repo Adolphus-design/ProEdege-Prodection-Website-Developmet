@@ -1,8 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .forms import PropertyForm
+
 from listings.forms import PropertyForm
-from listings.models import Agency, Property
+from listings.models import Agency, Property, AgentProfile
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from .forms import AgencyPropertyForm
+
 
 
 # Create your views here.
@@ -35,19 +38,30 @@ def edit_agency_property(request, pk):
 # Add Property
 @login_required
 def add_agency_property(request):
-    try:
-        agency = Agency.objects.get(owner=request.user)
-    except Agency.DoesNotExist:
-        return redirect('agency_dashboard')  # Fallback if agency not found
-
     if request.method == 'POST':
-        form = PropertyForm(request.POST)
+        form = AgencyPropertyForm(request.POST, request.FILES)
+        if form.is_valid():
+            agency_property = form.save(commit=False)
+            agency_property.agency = request.user.agency_profile  # Or however you link
+            agency_property.save()
+            return redirect('agency_dashboard')  # or appropriate view
+    else:
+        form = AgencyPropertyForm()
+    return render(request, 'agencylistings/add_agency_property.html', {'form': form})
+
+
+
+# View: Submit Property
+@login_required
+def submit_agency_property(request):
+    if request.method == 'POST':
+        form = AgencyPropertyForm(request.POST, agency=request.user.agency_profile.agency)
         if form.is_valid():
             property = form.save(commit=False)
-            property.agency = agency
+            property.agency = request.user.agency_profile.agency
             property.save()
-            return redirect('agency_property_list')
+            return redirect('agencylistings:agency_property_list')
     else:
-        form = PropertyForm()
+        form = AgencyPropertyForm(agency=request.user.agency_profile.agency)
 
-    return render(request, 'agencylisting/add_agency_property.html', {'form': form})
+    return render(request, 'agencylistings/add_agency_property.html', {'form': form})

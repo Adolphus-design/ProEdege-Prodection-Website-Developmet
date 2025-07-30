@@ -12,6 +12,8 @@ from django.contrib import messages
 from .models import  Property, Interest
 from django.http import HttpResponseForbidden
 from .forms import InterestForm
+from django.views.decorators.http import require_POST
+
 
 # This view handles the listing of properties
 # It retrieves all approved properties and paginates them for display
@@ -45,7 +47,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render, get_object_or_404
 from .models import Property
 
-@login_required
+
 def property_detail(request, pk):
     try:
         prop = Property.objects.get(pk=pk)
@@ -261,7 +263,7 @@ def contact_seller(request, property_id):
         #send_mail(subject, email_body, from_email, [seller_email])
         messages.success(request, "Your message has been sent to the seller.")
 
-    return redirect('property_detail', property_id=property_id)
+    return redirect('property_detail', pk=property_id)
 
 
 #view for displaying provinces and aeras
@@ -290,3 +292,12 @@ def submit_interest(request, property_id):
     })
     
     
+# This view allows sellers or agents to delete a property image
+# It checks if the user is logged in and is the owner of the property before allowing deletion
+@login_required
+@require_POST
+def delete_property_image(request, image_id):
+    image = get_object_or_404(PropertyImage, id=image_id, property__seller=request.user)
+    image.delete()
+    messages.success(request, "Image deleted successfully.")
+    return redirect('edit_property', pk=image.property.pk)

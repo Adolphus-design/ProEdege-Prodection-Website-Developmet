@@ -1,20 +1,146 @@
 {% extends "base.html" %}
-{% include "components/message_notification.html" %}
 {% block content %}
-  <h1>{{ role }} Dashboard</h1>
 
-  <h2>Your Listed Properties</h2>
+<div class="container my-5">
 
-  {% if properties %}
-    <ul>
-      {% for property in properties %}
-        <li>
-          <a href="{% url 'property_detail' property.pk %}">{{ property.title }}</a> - R{{ property.price|floatformat:2 }}
-          {{ property.location }}
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>You have not listed any properties yet.</p>
+   
+  <!-- Interest Button -->
+  <div class="mb-4 d-flex justify-content-between align-items-center">
+    <a href="{% url 'interest_messages' %}" class="btn btn-danger">
+      💬 Messages ({{ interests.count }})
+    </a>
+    <h2 class="mb-0">{{ role }} Dashboard</h2>
+  </div>
+ 
+
+  <!-- Profile Note -->
+  <div class="mb-4">
+    <h5>Welcome, {{ request.user.get_full_name }}</h5>
+    <a href="{% url 'user_profile' %}" class="btn btn-outline-dark btn-sm">👤 View Profile</a>
+  </div>
+
+  {% if incomplete_profile %}
+    <div class="alert alert-warning">
+      Please <a href="{% url 'edit_profile' %}" class="alert-link">complete your profile</a> to unlock full features.
+    </div>
   {% endif %}
+
+  <!-- New Property Button -->
+  <div class="text-end mb-3">
+    <a href="{% url 'submit_property' %}" class="btn btn-primary">+ List New Property</a>
+  </div>
+
+  <!-- Dashboard Summary -->
+  <div class="row g-3 mb-5">
+    <div class="col-md-2 col-sm-4">
+      <div class="bg-success text-white rounded p-3 text-center">
+        <strong>Total</strong><br>{{ total_listings }}
+      </div>
+    </div>
+    <div class="col-md-2 col-sm-4">
+      <div class="bg-primary text-white rounded p-3 text-center">
+        <strong>Approved</strong><br>{{ approved_count }}
+      </div>
+    </div>
+    <div class="col-md-2 col-sm-4">
+      <div class="bg-warning text-dark rounded p-3 text-center">
+        <strong>Pending</strong><br>{{ pending_count }}
+      </div>
+    </div>
+    <div class="col-md-2 col-sm-4">
+      <div class="bg-danger text-white rounded p-3 text-center">
+        <strong>Rejected</strong><br>{{ rejected_count }}
+      </div>
+    </div>
+    <div class="col-md-2 col-sm-4">
+      <div class="bg-dark text-white rounded p-3 text-center">
+        <strong>Sold</strong><br>{{ sold_count }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter/Search -->
+  <form method="get" class="row g-2 align-items-center mb-4">
+    <div class="col-md-4">
+      <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ query|default:'' }}">
+    </div>
+    <div class="col-md-3">
+      <select name="status" class="form-select">
+        <option value="">All Statuses</option>
+        <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
+        <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option>
+        <option value="sold" {% if selected_status == 'sold' %}selected{% endif %}>Sold</option>
+        <option value="available" {% if selected_status == 'available' %}selected{% endif %}>Available</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="sort" class="form-select">
+        <option value="">Sort By</option>
+        <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+        <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+        <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest First</option>
+        <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-secondary w-100">Apply</button>
+    </div>
+  </form>
+
+  <!-- Listings -->
+  {% for status, properties in grouped_properties.items %}
+    <h4 class="mt-4">{{ status|title }} Listings</h4>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle mt-2">
+        <thead class="table-light">
+          <tr>
+            <th>Title</th>
+            <th>Location</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for property in properties %}
+            <tr>
+              <td>{{ property.title }}</td>
+              <td>{{ property.location }}</td>
+              <td>R{{ property.price|floatformat:2 }}</td>
+              <td><span class="badge bg-secondary">{{ property.status|title }}</span></td>
+              <td>
+                <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-info">View</a>
+                <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                {% if property.status == 'approved' or property.status == 'available' %}
+                  <a href="{% url 'mark_property_sold' property.pk %}" class="btn btn-sm btn-outline-danger">Mark Sold</a>
+                {% elif property.status == 'sold' %}
+                  <a href="{% url 'mark_property_available' property.pk %}" class="btn btn-sm btn-outline-success">Mark Available</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endfor %}
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("form");
+    const searchInput = form.querySelector("input[name='q']");
+    searchInput.addEventListener("input", function () {
+      if (this.value === "") form.submit();
+    });
+
+    form.querySelectorAll("select").forEach(function (select) {
+      select.addEventListener("change", function () {
+        form.submit();
+      });
+    });
+  });
+</script>
+
 {% endblock %}
