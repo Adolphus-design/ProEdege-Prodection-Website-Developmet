@@ -25,6 +25,8 @@ from listings.forms import BidForm, AgencyForm
 from agencylistings.models import AgencyProperty
 from .forms import AgentJoinRequestForm
 from .models import AgentJoinRequest
+from bankdashboard.forms import BankListingForm
+from bankdashboard.models import BankListing
 
 
 # This view handles user registration
@@ -430,7 +432,7 @@ def bank_dashboard(request):
 
     context = {
         'grouped_properties': dict(grouped_properties),  # convert defaultdict to normal dict for template
-        'role': 'Seller',
+        'role': 'Bank',
         'total_listings': all_properties.count(),
         'approved_count': all_properties.filter(status='approved').count(),
         'rejected_count': all_properties.filter(status='rejected').count(),
@@ -750,3 +752,20 @@ def handle_join_request(request, request_id):
 def custom_logout(request):
     logout(request)
     return redirect('login')  # or wherever you want to go after logout
+
+
+# Add bank property view
+"""@login_required
+def add_bank_property(request):
+    if request.method == 'POST':
+        form = BankListingForm(request.POST, request.FILES)
+        if form.is_valid():
+            bank_listing = form.save(commit=False)
+            bank_listing.bank = request.user  # assuming bank is the current user
+            bank_listing.save()
+            # Optional: redirect to a bank property list page or dashboard
+            return redirect('bank_dashboard')  # change this to your correct URL name
+    else:
+        form = BankListingForm()
+    
+    return render(request, 'proedge/add_bank_property.html', {'form': form})"""

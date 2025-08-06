@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     #'staff',
     'adminpanel',
     'agencylistings',
+    'bankdashboard'
 ]
 
 MIDDLEWARE = [
