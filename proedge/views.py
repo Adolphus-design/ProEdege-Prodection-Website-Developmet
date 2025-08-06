@@ -25,8 +25,10 @@ from listings.forms import BidForm, AgencyForm
 from agencylistings.models import AgencyProperty
 from .forms import AgentJoinRequestForm
 from .models import AgentJoinRequest
+from bankdashboard.forms import BankPropertyForm
+from bankdashboard.models import BankProperty
 from bankdashboard.forms import BankListingForm
-from bankdashboard.models import BankListing
+
 
 
 # This view handles user registration
@@ -396,52 +398,31 @@ def tenant_dashboard(request):
 
 @login_required
 def bank_dashboard(request):
-    query = request.GET.get('q')
-    selected_status = request.GET.get('status')
-    sort_by = request.GET.get('sort')
+    if request.method == 'POST':
+        property_form = BankPropertyForm(request.POST)
+        listing_form = BankListingForm(request.POST)
 
-    # Unfiltered queryset for dashboard stats
-    all_properties = Property.objects.filter(seller=request.user)
+        if property_form.is_valid() and listing_form.is_valid():
+            bank_property = property_form.save(commit=False)
+            bank_property.bank = request.user  # assuming the logged-in user is the bank
+            bank_property.save()
 
-    # Filtered queryset for display
-    properties = all_properties
+            listing = listing_form.save(commit=False)
+            listing.property = bank_property
+            listing.save()
 
-    if selected_status in ['approved', 'rejected', 'pending', 'sold', 'available']:
-        properties = properties.filter(status=selected_status)
+            return redirect('bank_dashboard')
+    else:
+        property_form = BankPropertyForm()
+        listing_form = BankListingForm()
 
-    if query:
-        properties = properties.filter(
-            Q(title__icontains=query) |
-            Q(location__icontains=query) |
-            Q(description__icontains=query)
-        )
-
-    if sort_by == 'price_asc':
-        properties = properties.order_by('price')
-    elif sort_by == 'price_desc':
-        properties = properties.order_by('-price')
-    elif sort_by == 'newest':
-        properties = properties.order_by('-created_at')
-    elif sort_by == 'oldest':
-        properties = properties.order_by('created_at')
-
-    # ✅ Group properties by status for dynamic section display
-    grouped_properties = defaultdict(list)
-    for prop in properties:
-        grouped_properties[prop.status].append(prop)
+    # Get properties submitted by this bank
+    bank_properties = BankProperty.objects.filter(bank=request.user)
 
     context = {
-        'grouped_properties': dict(grouped_properties),  # convert defaultdict to normal dict for template
-        'role': 'Bank',
-        'total_listings': all_properties.count(),
-        'approved_count': all_properties.filter(status='approved').count(),
-        'rejected_count': all_properties.filter(status='rejected').count(),
-        'pending_count': all_properties.filter(status='pending').count(),
-        'sold_count': all_properties.filter(status='sold').count(),
-        'available_count': all_properties.filter(status='available').count(),
-        'selected_status': selected_status,
-        'query': query,
-        'user_name': request.user.get_full_name() or request.user.username,
+        'property_form': property_form,
+        'listing_form': listing_form,
+        'bank_properties': bank_properties
     }
 
     return render(request, 'proedge/bank_dashboard.html', context)
@@ -754,18 +735,31 @@ def custom_logout(request):
     return redirect('login')  # or wherever you want to go after logout
 
 
-# Add bank property view
-"""@login_required
+#add bank_property view
+@login_required
 def add_bank_property(request):
     if request.method == 'POST':
-        form = BankListingForm(request.POST, request.FILES)
-        if form.is_valid():
-            bank_listing = form.save(commit=False)
-            bank_listing.bank = request.user  # assuming bank is the current user
-            bank_listing.save()
-            # Optional: redirect to a bank property list page or dashboard
-            return redirect('bank_dashboard')  # change this to your correct URL name
+        form = BankPropertyForm(request.POST)
+        listing_form = BankListingForm(request.POST)
+
+        if form.is_valid() and listing_form.is_valid():
+            bank_property = form.save(commit=False)
+            bank_property.bank = request.user  # Assuming `bank` is the user
+            bank_property.save()
+
+            listing = listing_form.save(commit=False)
+            listing.property = bank_property
+            listing.save()
+
+            messages.success(request, "Bank property submitted successfully.")
+            return redirect('bank_dashboard')
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
-        form = BankListingForm()
-    
-    return render(request, 'proedge/add_bank_property.html', {'form': form})"""
+        form = BankPropertyForm()
+        listing_form = BankListingForm()
+
+    return render(request, 'bankdashboard/submit_bank_property.html', {
+        'form': form,
+        'listing_form': listing_form,
+    })

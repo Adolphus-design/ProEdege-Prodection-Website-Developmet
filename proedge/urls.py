@@ -32,7 +32,7 @@ urlpatterns = [
     path('agency/profile/', views.view_agency_profile, name='view_agency_profile'),
     path('agency/create/', views.complete_agency_profile, name='create_agency_profile'),
     #path('logout/', views.custom_logout, name='logout'),
-    #path('bank/add-property/', views.add_bank_property, name='add_bank_property'),
-
+    path('bank/add-property/', views.add_bank_property, name='add_bank_property'),
+    path('bank/dashboard/', bank_dashboard, name='bank_dashboard'),
 
 ]
