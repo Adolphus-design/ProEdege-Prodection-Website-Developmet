@@ -1,0 +1,102 @@
+.navbar-custom {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.navbar-custom .nav-link {
+  color: #fff;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.navbar-custom .nav-link:hover,
+.navbar-custom .nav-link:focus {
+  color: #fff;
+  background-color: #e63946;
+  border-radius: 4px;
+}
+
+.navbar-custom .nav-link.active {
+  background-color: #e63946;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.navbar-custom .btn-outline-light:hover {
+  background-color: #e63946;
+  color: #fff;
+  border-color: #e63946;
+}
+
+
+/*Seller Dashboard Styles*/
+.edit-property-container {
+  max-width: 900px;
+  margin: auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+.styled-form fieldset {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.styled-form legend {
+  font-weight: bold;
+  color: #c00;
+  padding: 0 5px;
+}
+
+.styled-form label {
+  font-weight: 600;
+  margin-top: 10px;
+  display: block;
+}
+
+.styled-form input[type="text"],
+.styled-form input[type="number"],
+.styled-form textarea,
+.styled-form select,
+.styled-form input[type="file"] {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.styled-form input[type="file"] {
+  border: none;
+}
+
+.styled-form button {
+  background-color: #c00;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.styled-form button:hover {
+  background-color: #900;
+}
+
+.current-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.image-wrapper img {
+  width: 120px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
