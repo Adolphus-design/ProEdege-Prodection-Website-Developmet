@@ -25,7 +25,12 @@ SECRET_KEY = 'django-insecure-q)3@9gh_m@lff88ry*v!ih#1%3!h!h5$!@*b(n(rw)i^h@sy#m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['proedegeproperty.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'proedegeproperty.onrender.com',
+    'www.proedegeproperty.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -42,12 +47,12 @@ INSTALLED_APPS = [
     #'staff',
     'adminpanel',
     'agencylistings',
-    'bankdashboard'
+    'bankdashboard',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Serve static files efficiently
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,18 +96,10 @@ DATABASES = {
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
 
@@ -121,41 +118,31 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-# Static files
-
-
-
-from os import path as os_path
 STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+# Media files (for user uploads)
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Media files (for uploaded images)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
+# Custom user model
 
-# Whitenoise configuration
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# Custom user model, that tell Django to use the CustomUser model defined in proedge/models.py
-# This is necessary for the authentication system to recognize the custom user model.
 AUTH_USER_MODEL = 'proedge.CustomUser'
 
 
-#Login and logout redirections
-LOGIN_REDIRECT_URL = '/dashboard/'     # After successful login
-LOGOUT_REDIRECT_URL = '/login/'        # After logout
+# Login and logout redirects
 
-#Login URL
-# This is the URL that Django will redirect to when a user tries to access a page that requires authentication.
+LOGIN_REDIRECT_URL = '/dashboard/'  # After successful login
+
+LOGOUT_REDIRECT_URL = '/login/'     # After logout
+
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard_redirect'
+
