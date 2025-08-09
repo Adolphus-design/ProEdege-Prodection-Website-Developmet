@@ -1,3 +1,19 @@
+"""
+URL configuration for core project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -5,26 +21,18 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    # Main pages
+    path('', include('proedge.urls')),
+    path('', include('listings.urls')),    
+    path('properties/', include('listings.urls')),
+    path('staff/', include('staff.urls')),
+    path('adminpanel/', include('adminpanel.urls', namespace='adminpanel')),
+    path('', include(('listings.urls', 'listings'), namespace='listings')),
     path('', include(('proedge.urls', 'proedge'), namespace='proedge')),
+    path('agency/', include('agencylistings.urls', namespace='agencylistings')),
+    #path('', include('bankdashboard.urls', namespace='bankdashboard')),
 
-    # Listings
-    path('listings/', include(('listings.urls', 'listings'), namespace='listings')),
-    path('properties/', include(('listings.urls', 'listings'))),  # alias route
 
-    # Staff
-    path('staff/', include(('staff.urls', 'staff'), namespace='staff')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-    # Admin panel
-    path('adminpanel/', include(('adminpanel.urls', 'adminpanel'), namespace='adminpanel')),
-
-    # Agency listings
-    path('agency/', include(('agencylistings.urls', 'agencylistings'), namespace='agencylistings')),
-
-    # Bank dashboard (uncomment if ready)
-    # path('bankdashboard/', include(('bankdashboard.urls', 'bankdashboard'), namespace='bankdashboard')),
-]
-
-# Serve media files even in production (temporary for Render)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
