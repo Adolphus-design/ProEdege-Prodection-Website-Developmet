@@ -8,6 +8,13 @@
 
   <form method="post" class="login-form">
     {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div style="color: red; margin-bottom: 10px;">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
     {{ form.as_p }}
     <button type="submit" class="btn">Login</button>
   </form>
@@ -17,4 +24,3 @@
   </p>
 </div>
 {% endblock %}
-

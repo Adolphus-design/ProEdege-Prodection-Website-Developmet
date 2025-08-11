@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-q)3@9gh_m@lff88ry*v!ih#1%3!h!h5$!@*b(n(rw)i^h@sy#m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'proedegeproperty.onrender.com',
@@ -145,4 +145,18 @@ LOGIN_REDIRECT_URL = '/dashboard/'  # After successful login
 LOGOUT_REDIRECT_URL = '/login/'     # After logout
 
 LOGIN_URL = 'login'
+
+#For email setting to send to regestering users
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'kamogelotshehla@gmail.com'
+EMAIL_HOST_PASSWORD = 'rorsmoxjwmmfkolq'
+DEFAULT_FROM_EMAIL = '<kamogelotshehla@gmail.com>'
+
+
 

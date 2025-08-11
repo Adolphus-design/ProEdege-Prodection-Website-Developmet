@@ -28,6 +28,19 @@ from .models import AgentJoinRequest
 from bankdashboard.forms import BankPropertyForm
 from bankdashboard.models import BankProperty
 from bankdashboard.forms import BankListingForm
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from .forms import EmailVerifiedAuthenticationForm
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+
 
 
 
@@ -37,17 +50,60 @@ def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Account created successfully! You can now log in.")
-            return redirect('login')  # You’ll define this route later
+            user = form.save(commit=False)
+            user.is_active = False  # deactivate account until email confirmed
+            user.save()
+
+            current_site = get_current_site(request)
+            subject = 'Activate your ProEdge account'
+            
+            html_message = render_to_string('proedge/account_activation_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
+            })
+            plain_message = strip_tags(html_message)  # converts HTML to plain text
+            
+            email = EmailMultiAlternatives(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+            )
+            email.attach_alternative(html_message, "text/html")
+            email.send(fail_silently=False)
+
+            messages.success(request, "Account created! Please check your email to activate your account.")
+            return redirect('login')
     else:
         form = CustomUserCreationForm()
-    
     return render(request, 'proedge/register.html', {'form': form})
+
+def activate_account(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.is_email_verified = True    # <-- Add this line
+        user.save()
+        messages.success(request, "Your account has been activated. You can now log in.")
+        return redirect('login')
+    else:
+        messages.error(request, "Activation link is invalid or expired.")
+        return redirect('register')
+    
+
 
 #code that haddles user login # logout and profile management will be added later
 class CustomLoginView(LoginView):
     template_name = 'proedge/login.html'
+    authentication_form = EmailVerifiedAuthenticationForm
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('login')

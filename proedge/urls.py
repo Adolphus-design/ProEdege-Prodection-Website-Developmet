@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import  buyer_dashboard, create_auction, edit_profile, register_view, CustomLoginView, CustomLogoutView, dashboard_redirect_view, seller_dashboard, tenant_dashboard, agent_dashboard, landlord_dashboard, bank_dashboard, auctioneer_dashboard, user_profile_view
 from . import views 
+
+from .views import activate_account
 # This file defines the URL patterns for the proedge app.
 urlpatterns = [
     path('register/', register_view, name='register'),
@@ -34,5 +36,6 @@ urlpatterns = [
     #path('logout/', views.custom_logout, name='logout'),
     path('bank/add-property/', views.add_bank_property, name='add_bank_property'),
     path('bank/dashboard/', bank_dashboard, name='bank_dashboard'),
+    path('activate/<uidb64>/<token>/', activate_account, name='activate'),
 
 ]

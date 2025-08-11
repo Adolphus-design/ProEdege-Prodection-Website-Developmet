@@ -4,6 +4,8 @@ from .models import CustomUser
 from .models import UserProfile
 from listings.models import Bid, Auction
 from .models import AgentJoinRequest
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.exceptions import ValidationError
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -56,4 +58,13 @@ class AgentJoinRequestForm(forms.ModelForm):
             'message': forms.Textarea(attrs={'rows': 3}),
         }
 
+
+class EmailVerifiedAuthenticationForm(AuthenticationForm):
+    def confirm_login_allowed(self, user):
+        super().confirm_login_allowed(user)
+        if not user.is_email_verified:
+            raise ValidationError(
+                "Your email address is not verified. Please check your email and click the verification link.",
+                code='email_not_verified',
+            )
         
