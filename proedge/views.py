@@ -118,6 +118,10 @@ def dashboard_redirect_view(request):
     user = request.user
 
     if user.is_authenticated:
+        # First check if superuser, redirect to adminpanel dashboard
+        if user.is_superuser:
+            return redirect('adminpanel:dashboard')  # <-- use the URL name for your adminpanel dashboard view
+
         role = getattr(user, 'role', None)
 
         if role == 'seller':
@@ -135,7 +139,6 @@ def dashboard_redirect_view(request):
         elif role == 'auctioneer':
             return redirect('auctioneer_dashboard')
         elif role == 'agency':
-            # 👇 Check if agency profile exists before dashboard redirect
             if not hasattr(user, 'agency_profile'):
                 return redirect('complete_agency_profile')
             return redirect('agency_dashboard')
