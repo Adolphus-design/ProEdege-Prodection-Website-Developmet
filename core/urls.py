@@ -21,18 +21,18 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('listings.urls')),
-    path('proedge/', include('proedge.urls')),
-    
+    path('', include('proedge.urls')),
+    path('', include('listings.urls')),    
+    path('properties/', include('listings.urls')),
     path('staff/', include('staff.urls')),
     path('adminpanel/', include('adminpanel.urls', namespace='adminpanel')),
-    path('listings/', include(('listings.urls', 'listings'), namespace='listings')),
-    #path('proedge/', include(('proedge.urls', 'proedge'), namespace='proedge')),
+    path('', include(('listings.urls', 'listings'), namespace='listings')),
+    path('', include(('proedge.urls', 'proedge'), namespace='proedge')),
     path('agency/', include('agencylistings.urls', namespace='agencylistings')),
     #path('', include('bankdashboard.urls', namespace='bankdashboard')),
 
 
-] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

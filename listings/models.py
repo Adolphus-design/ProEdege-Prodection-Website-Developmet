@@ -73,6 +73,15 @@ class Property(models.Model):
     class Meta:
         verbose_name_plural = "Properties"
 
+    def get_main_image_url(self):
+        main_img = self.images.filter(main_image__isnull=False).first()
+        if main_img and main_img.main_image:
+            return main_img.main_image.url
+        first_img = self.images.first()
+        if first_img and first_img.image:
+            return first_img.image.url
+        return None
+
 
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
