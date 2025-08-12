@@ -14,7 +14,7 @@ from collections import defaultdict
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import EditProfileForm
-from .models import UserProfile
+from .models import AgentDocument, UserProfile
 from listings.models import Property, Interest
 from collections import defaultdict
 from .forms import AuctionForm
@@ -25,6 +25,7 @@ from listings.forms import BidForm, AgencyForm
 from agencylistings.models import AgencyProperty
 from .forms import AgentJoinRequestForm
 from .models import AgentJoinRequest
+from .forms import AgentDocumentForm
 from bankdashboard.forms import BankPropertyForm
 from bankdashboard.models import BankProperty
 from bankdashboard.forms import BankListingForm
@@ -36,10 +37,16 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from .forms import EmailVerifiedAuthenticationForm
+from .forms import EmailVerifiedAuthenticationForm, AgentDocument
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.forms import modelformset_factory
+from django.contrib.auth import get_user_model
+from django.contrib import messages
+
+from .verification import automated_verify_agent_document
+
 
 
 
@@ -698,21 +705,35 @@ def complete_agency_profile(request):
     
 @login_required
 def request_join_agency(request):
+    AgentDocumentFormSet = modelformset_factory(AgentDocument, form=AgentDocumentForm, extra=2, max_num=2, validate_max=True)
+
     if request.method == 'POST':
         form = AgentJoinRequestForm(request.POST)
-        if form.is_valid():
+        formset = AgentDocumentFormSet(request.POST, request.FILES, queryset=AgentDocument.objects.none())
+
+        if form.is_valid() and formset.is_valid():
             join_request = form.save(commit=False)
             join_request.agent = request.user
             join_request.save()
-            return redirect('agent_dashboard')  # or a success page
+
+            for doc_form in formset:
+                doc = doc_form.save(commit=False)
+                doc.join_request = join_request
+                doc.save()
+
+                # Call automated verification here
+                automated_verify_agent_document(doc)
+
+            messages.success(request, "Join request and documents submitted successfully.")
+            return redirect('agent_dashboard')
     else:
         form = AgentJoinRequestForm()
-    return render(request, 'proedge/request_join_agency.html', {'form': form})
+        formset = AgentDocumentFormSet(queryset=AgentDocument.objects.none())
 
-
-from django.contrib.auth import get_user_model
-from django.views.decorators.http import require_POST
-
+    return render(request, 'proedge/request_join_agency.html', {
+        'form': form,
+        'formset': formset,
+    })
     
 
 
@@ -769,6 +790,8 @@ def view_agency_profile(request):
     return render(request, 'proedge/view_agency_profile.html', {
         'agency': agency
     })
+
+# Handle agent join request actions
 @login_required
 def handle_join_request(request, request_id):
     join_request = get_object_or_404(AgentJoinRequest, id=request_id, is_approved=False)

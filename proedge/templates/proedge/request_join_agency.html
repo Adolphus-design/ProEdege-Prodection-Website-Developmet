@@ -1,14 +1,51 @@
 {% extends "base.html" %}
 
+{% block title %}Request to Join Agency{% endblock %}
+
 {% block content %}
-  <div class="container mt-5">
-    <h2 class="mb-4">Request to Join an Agency</h2>
+<div class="container mt-4">
+  <h2>Request to Join Agency</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
 
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
+    <!-- Join Request Form -->
+    <div class="mb-3">
+      {{ form.agency.label_tag }}<br>
+      {{ form.agency }}
+      {% if form.agency.errors %}
+        <div class="text-danger">{{ form.agency.errors }}</div>
+      {% endif %}
+    </div>
+    <div class="mb-3">
+      {{ form.message.label_tag }}<br>
+      {{ form.message }}
+      {% if form.message.errors %}
+        <div class="text-danger">{{ form.message.errors }}</div>
+      {% endif %}
+    </div>
 
-      <button type="submit" class="btn btn-primary">Send Request</button>
-    </form>
-  </div>
+    <hr>
+
+    <!-- Documents Formset -->
+    <h4>Upload Documents</h4>
+    {{ formset.management_form }}
+    {% for doc_form in formset %}
+      <div class="mb-3 border rounded p-3">
+        {{ doc_form.document_type.label_tag }}<br>
+        {{ doc_form.document_type }}
+        {% if doc_form.document_type.errors %}
+          <div class="text-danger">{{ doc_form.document_type.errors }}</div>
+        {% endif %}
+
+        {{ doc_form.document.label_tag }}<br>
+        {{ doc_form.document }}
+        {% if doc_form.document.errors %}
+          <div class="text-danger">{{ doc_form.document.errors }}</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+  </form>
+</div>
 {% endblock %}

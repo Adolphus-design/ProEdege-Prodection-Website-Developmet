@@ -51,3 +51,26 @@ class AgentJoinRequest(models.Model):
 
     def __str__(self):
         return f"{self.agent.username} → {self.agency.name}"
+    
+
+class AgentDocument(models.Model):
+    DOC_TYPES = [
+        ('ID', 'ID Copy'),
+        ('FFC', 'FFC Certificate'),
+        # add more types if needed
+    ]
+
+    join_request = models.ForeignKey(AgentJoinRequest, on_delete=models.CASCADE, related_name='documents')
+    document_type = models.CharField(max_length=10, choices=DOC_TYPES)
+    document = models.FileField(upload_to='agent_docs/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    status = models.CharField(max_length=10, choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='pending')
+    rejection_reason = models.TextField(null=True, blank=True)
+    automated_checked = models.BooleanField(default=False)
+    
+    # Add expiry date field for your checks
+    expiry_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.join_request.agent.username} - {self.document_type} ({self.status})"

@@ -6,6 +6,7 @@ from listings.models import Bid, Auction
 from .models import AgentJoinRequest
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
+from .models import AgentDocument
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -56,6 +57,16 @@ class AgentJoinRequestForm(forms.ModelForm):
         fields = ['agency', 'message']
         widgets = {
             'message': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+class AgentDocumentForm(forms.ModelForm):
+    class Meta:
+        model = AgentDocument
+        fields = ['document_type', 'document']
+        widgets = {
+            'document_type': forms.Select(attrs={'class': 'form-select'}),
+            'document': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
 
