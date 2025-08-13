@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container mt-4">
+    <h3>Reject Document: {{ document.document_type }}</h3>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="reason" class="form-label">Rejection Reason</label>
+        <textarea id="reason" name="reason" rows="4" class="form-control" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-danger">Reject Document</button>
+      <a href="{% url 'agency_dashboard' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

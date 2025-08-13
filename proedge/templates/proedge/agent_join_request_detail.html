@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+  <h2>Documents for {{ join_request.agent.get_full_name|default:join_request.agent.username }}</h2>
+
+  {% if documents %}
+    <ul class="list-group">
+      {% for doc in documents %}
+        <li class="list-group-item">
+          <strong>{{ doc.get_document_type_display }}</strong><br>
+          Status: 
+          <span class="badge 
+            {% if doc.status == 'approved' %} bg-success 
+            {% elif doc.status == 'rejected' %} bg-danger
+            {% else %} bg-warning
+            {% endif %}">
+            {{ doc.status|title }}
+          </span>
+          {% if doc.status == 'rejected' and doc.rejection_reason %}
+            <br><small class="text-danger">Reason: {{ doc.rejection_reason }}</small>
+          {% endif %}
+          <br>
+          <a href="{{ doc.document.url }}" target="_blank">View Document</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No documents uploaded for this request.</p>
+  {% endif %}
+
+  <a href="{% url 'agency_dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>
+{% endblock %}

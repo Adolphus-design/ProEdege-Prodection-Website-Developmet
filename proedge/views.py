@@ -1,6 +1,8 @@
 from email.message import Message
 from urllib import request
 from django.shortcuts import get_object_or_404, render, redirect
+from proedge.verification import automated_verify_agent_document
+from proedge.email import notify_agency_new_join_request, notify_agent_request_decision
 from .forms import CustomUserCreationForm
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
@@ -44,7 +46,9 @@ from django.utils.html import strip_tags
 from django.forms import modelformset_factory
 from django.contrib.auth import get_user_model
 from django.contrib import messages
-
+import fitz  # PyMuPDF
+import re
+from datetime import datetime
 from .verification import automated_verify_agent_document
 
 
@@ -668,20 +672,35 @@ def agency_dashboard(request):
         return redirect('create_agency_profile')
     
     agents = AgentProfile.objects.filter(agency=agency)
-    agent_users = [agent.user for agent in agents]
-
-    # 👇 Fetch from agency listings, not default Property model
     agency_properties = AgencyProperty.objects.filter(agency=agency)
 
-    join_requests = AgentJoinRequest.objects.filter(is_approved=False)
+    # Fetch all join requests for this agency (approved, rejected, pending)
+    join_requests = AgentJoinRequest.objects.filter(agency=agency).order_by('-created_at')
+
+    pending_requests_count = join_requests.count()
+    approved_requests_count = join_requests.filter(is_approved=True).count()
+    rejected_requests_count = join_requests.filter(is_approved=False).count()
 
     return render(request, 'proedge/agency_dashboard.html', {
         'agency': agency,
         'agents': agents,
-        'properties': agency_properties,  # renamed from "properties"
+        'properties': agency_properties,
         'join_requests': join_requests,
+        'pending_requests_count': pending_requests_count,
+        'approved_requests_count': approved_requests_count,
+        'rejected_requests_count': rejected_requests_count,
     })
-   
+
+@login_required
+def agent_join_request_detail(request, request_id):
+    join_request = get_object_or_404(AgentJoinRequest, id=request_id)
+
+    documents = join_request.documents.all()
+
+    return render(request, 'proedge/agent_join_request_detail.html', {
+        'join_request': join_request,
+        'documents': documents,
+    })
    
 # This view allows users to create a new agency
 @login_required
@@ -705,7 +724,9 @@ def complete_agency_profile(request):
     
 @login_required
 def request_join_agency(request):
-    AgentDocumentFormSet = modelformset_factory(AgentDocument, form=AgentDocumentForm, extra=2, max_num=2, validate_max=True)
+    AgentDocumentFormSet = modelformset_factory(
+        AgentDocument, form=AgentDocumentForm, extra=2, max_num=5, validate_max=True
+    )
 
     if request.method == 'POST':
         form = AgentJoinRequestForm(request.POST)
@@ -716,24 +737,41 @@ def request_join_agency(request):
             join_request.agent = request.user
             join_request.save()
 
+            # Save docs and run the automated verification per doc
             for doc_form in formset:
+                if not doc_form.cleaned_data:
+                    continue
                 doc = doc_form.save(commit=False)
                 doc.join_request = join_request
                 doc.save()
-
-                # Call automated verification here
                 automated_verify_agent_document(doc)
 
-            messages.success(request, "Join request and documents submitted successfully.")
+            # Summarize auto-check results
+            docs = list(join_request.documents.all())
+            rejected = [d for d in docs if d.status == 'rejected']
+            approved = [d for d in docs if d.status == 'approved']
+
+            if rejected:
+                join_request.auto_check_status = 'failed'
+                reasons = [f"{d.document_type}: {d.rejection_reason}" for d in rejected]
+                join_request.auto_check_notes = "Auto-check failed. " + " | ".join(reasons)
+            else:
+                join_request.auto_check_status = 'passed'
+                join_request.auto_check_notes = f"Auto-check passed. {len(approved)} document(s) valid."
+
+            join_request.save()
+
+            # Notify the agency by email
+            summary = join_request.auto_check_notes or "Agent submitted a new join request."
+            notify_agency_new_join_request(join_request, summary)
+
+            messages.success(request, "Your join request and documents were submitted.")
             return redirect('agent_dashboard')
     else:
         form = AgentJoinRequestForm()
         formset = AgentDocumentFormSet(queryset=AgentDocument.objects.none())
 
-    return render(request, 'proedge/request_join_agency.html', {
-        'form': form,
-        'formset': formset,
-    })
+    return render(request, 'proedge/request_join_agency.html', {'form': form, 'formset': formset})
     
 
 
@@ -742,30 +780,106 @@ def request_join_agency(request):
 def reject_join_request(request, request_id):
     join_request = get_object_or_404(AgentJoinRequest, id=request_id, is_approved=False)
 
-    # Option 1: Delete the request completely
+    # Optionally fetch document rejection reasons if you want to include
+    docs = join_request.agent.agentdocument_set.filter(status='rejected')
+    reasons = "\n".join([f"{doc.get_document_type_display}: {doc.rejection_reason}" for doc in docs])
+
+    # Send rejection email to agent
+    send_mail(
+        subject="Your join request has been rejected",
+        message=f"Hi {join_request.agent.get_full_name() or join_request.agent.username},\n\n"
+                f"Unfortunately, your request to join the agency '{join_request.agency.name}' was rejected.\n"
+                f"Reasons:\n{reasons if reasons else 'No specific reasons provided.'}\n\n"
+                "Please contact the agency for more details.",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[join_request.agent.email],
+        fail_silently=True,
+    )
+
     join_request.delete()
-
-    # Optionally show a feedback message
     messages.success(request, "Agent join request rejected.")
-
     return redirect('agency_dashboard')
+
+
+
+@login_required
+def manual_approve_document(request, doc_id):
+    document = get_object_or_404(AgentDocument, id=doc_id)
+    # Update status to approved, clear rejection reason, mark automated_checked True
+    document.status = 'approved'
+    document.rejection_reason = ''
+    document.automated_checked = True
+    document.save()
+
+    # Update overall join request status
+    update_join_request_auto_status(document.join_request)
+
+    messages.success(request, f"Document {document.document_type} approved manually.")
+    return redirect('agency_dashboard')
+
+@login_required
+def manual_reject_document(request, doc_id):
+    document = get_object_or_404(AgentDocument, id=doc_id)
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+        if not reason:
+            messages.error(request, "Please provide a rejection reason.")
+            return redirect('view_agent_document', doc_id=doc_id)
+
+        document.status = 'rejected'
+        document.rejection_reason = reason
+        document.automated_checked = True
+        document.save()
+
+        # Update overall join request status
+        update_join_request_auto_status(document.join_request)
+
+        messages.success(request, f"Document {document.document_type} rejected manually.")
+        return redirect('agency_dashboard')
+    else:
+        # Render a simple form for rejection reason
+        return render(request, 'proedge/manual_reject_document.html', {'document': document})
+
+def update_join_request_auto_status(join_request):
+    docs = list(join_request.documents.all())
+    rejected = [d for d in docs if d.status == 'rejected']
+    approved = [d for d in docs if d.status == 'approved']
+
+    if rejected:
+        join_request.auto_check_status = 'failed'
+        reasons = [f"{d.document_type}: {d.rejection_reason}" for d in rejected]
+        join_request.auto_check_notes = "Manual check failed. " + " | ".join(reasons)
+    else:
+        join_request.auto_check_status = 'passed'
+        join_request.auto_check_notes = f"Manual check passed. {len(approved)} document(s) valid."
+
+    join_request.save()
+
 
 @login_required
 def approve_join_request(request, request_id):
     join_request = get_object_or_404(AgentJoinRequest, id=request_id, is_approved=False)
 
-    # Mark the request as approved
     join_request.is_approved = True
     join_request.save()
 
-    # Set the agent's profile to link to the agency
     agent_profile = AgentProfile.objects.get(user=join_request.agent)
     agent_profile.agency = join_request.agency
     agent_profile.save()
 
+    # Send approval email to agent
+    send_mail(
+        subject="Your join request has been approved",
+        message=f"Hi {join_request.agent.get_full_name() or join_request.agent.username},\n\n"
+                f"Your request to join the agency '{join_request.agency.name}' has been approved. Welcome aboard!",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[join_request.agent.email],
+        fail_silently=True,
+    )
+
     messages.success(request, f"{join_request.agent.username} has been approved and added to your agency.")
     return redirect('agency_dashboard')
-
 
 # This view allows agency owners to edit their agency profile
 @login_required
@@ -797,19 +911,28 @@ def handle_join_request(request, request_id):
     join_request = get_object_or_404(AgentJoinRequest, id=request_id, is_approved=False)
 
     action = request.POST.get('action')
+    reason = request.POST.get('reason', '')  # add a textarea in your form if you want to capture this
+
     if action == 'approve':
         join_request.is_approved = True
         join_request.save()
+
+        # Attach agent to agency (your existing behavior)
         agent_profile = AgentProfile.objects.get(user=join_request.agent)
         agent_profile.agency = join_request.agency
         agent_profile.save()
+
+        # Email agent
+        notify_agent_request_decision(join_request, approved=True)
+
         messages.success(request, "Agent approved.")
     elif action == 'reject':
-        join_request.delete()
+        # Instead of delete, keep a record & email agent (or keep your delete if you prefer)
+        # join_request.delete()  # if you really want to delete
+        notify_agent_request_decision(join_request, approved=False, reason=reason or "Not specified.")
         messages.success(request, "Agent rejected.")
 
     return redirect('agency_dashboard')
-
 
 # This view handles user logout
 def custom_logout(request):
@@ -845,3 +968,5 @@ def add_bank_property(request):
         'form': form,
         'listing_form': listing_form,
     })
+
+

@@ -108,10 +108,18 @@ LOGOUT_REDIRECT_URL = '/login/'
 LOGIN_URL = 'login'
 
 # Email backend configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+"""EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'kamogelotshehla@gmail.com'
 EMAIL_HOST_PASSWORD = 'rorsmoxjwmmfkolq'
-DEFAULT_FROM_EMAIL = 'kamogelotshehla@gmail.com'
+DEFAULT_FROM_EMAIL = 'kamogelotshehla@gmail.com'"""
+
+
+# Email settings for local development
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# This is the email address that will appear in the "From" field
+DEFAULT_FROM_EMAIL = "no-reply@proedge.local"
+

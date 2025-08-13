@@ -27,6 +27,14 @@ class PropertyForm(forms.ModelForm):
             'number_of_garages', 'floor_area_m2', 'erf_size_m2',
             'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots'
         ]
+
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'latitude': forms.FloatField(widget=forms.HiddenInput(), required=False),
+            'longitude': forms.FloatField(widget=forms.HiddenInput(), required=False),
+        }
+
+
         
 class SubmitPropertyForm(forms.ModelForm):
     class Meta:

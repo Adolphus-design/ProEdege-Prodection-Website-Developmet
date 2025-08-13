@@ -37,5 +37,7 @@ urlpatterns = [
     path('bank/add-property/', views.add_bank_property, name='add_bank_property'),
     path('bank/dashboard/', bank_dashboard, name='bank_dashboard'),
     path('activate/<uidb64>/<token>/', activate_account, name='activate'),
-
+    path('agency/join-request/<int:request_id>/', views.agent_join_request_detail, name='agent_join_request_detail'),
+     path('agent-document/<int:doc_id>/approve/', views.manual_approve_document, name='manual_approve_document'),
+    path('agent-document/<int:doc_id>/reject/', views.manual_reject_document, name='manual_reject_document'),
 ]

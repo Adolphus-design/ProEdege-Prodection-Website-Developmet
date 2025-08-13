@@ -34,27 +34,69 @@
   </div>
 
   <!-- Agent Join Requests -->
-  <div class="mb-5">
-    <h4>Agent Join Requests</h4>
-    {% if join_requests %}
-      <ul class="list-group">
-        {% for req in join_requests %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
+  <h4>Agent Join Requests</h4>
+  {% if join_requests %}
+    <ul class="list-group">
+      {% for req in join_requests %}
+        <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+
+          <div>
+            <a href="{% url 'agent_join_request_detail' req.id %}">
               <strong>{{ req.agent.get_full_name|default:req.agent.username }}</strong>
-              <small class="text-muted">requested to join your agency.</small>
-            </div>
-            <div>
-              <a href="{% url 'approve_join_request' req.id %}" class="btn btn-sm btn-success">Approve</a>
+            </a>
+            <small class="text-muted">requested to join your agency.</small>
+            <br>
+            <span class="badge 
+              {% if req.is_approved %} bg-success 
+              {% elif req.auto_check_status == 'failed' or req.manual_rejection_reason %} bg-danger
+              {% else %} bg-warning
+              {% endif %}">
+              {% if req.is_approved %}Approved
+              {% elif req.auto_check_status == 'failed' or req.manual_rejection_reason %}Rejected
+              {% else %}Pending
+              {% endif %}
+            </span>
+            {% if req.auto_check_status == 'failed' %}
+              <br><small class="text-danger">Reason: {{ req.auto_check_notes }}</small>
+            {% elif req.manual_rejection_reason %}
+              <br><small class="text-danger">Manual rejection reason: {{ req.manual_rejection_reason }}</small>
+            {% endif %}
+
+            <!-- Show documents with manual approve/reject links -->
+            <ul class="mt-2">
+              {% for doc in req.documents.all %}
+                <li>
+                  {{ doc.document_type }} - Status: {{ doc.status|title }}
+                  {% if doc.status == 'rejected' %}
+                    <br><small class="text-danger">Reason: {{ doc.rejection_reason }}</small>
+                  {% endif %}
+                  <br>
+                  <a href="{{ doc.document.url }}" target="_blank">View Document</a> |
+                  {% if doc.status != 'approved' %}
+                    <a href="{% url 'manual_approve_document' doc.id %}" class="text-success">Approve</a> |
+                  {% endif %}
+                  {% if doc.status != 'rejected' %}
+                    <a href="{% url 'manual_reject_document' doc.id %}" class="text-danger">Reject</a>
+                  {% endif %}
+                </li>
+              {% empty %}
+                <li class="text-muted"><em>No documents uploaded.</em></li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div class="mt-2 mt-md-0">
+            {% if not req.is_approved and not req.manual_rejection_reason and req.auto_check_status != 'failed' %}
+              <a href="{% url 'approve_join_request' req.id %}" class="btn btn-sm btn-success me-1">Approve</a>
               <a href="{% url 'reject_join_request' req.id %}" class="btn btn-sm btn-danger">Reject</a>
-            </div>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-muted">No pending join requests.</p>
-    {% endif %}
-  </div>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">No join requests found.</p>
+  {% endif %}
 
   <!-- Agents List -->
   <div class="mb-5">

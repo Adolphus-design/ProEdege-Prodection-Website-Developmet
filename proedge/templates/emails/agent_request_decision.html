@@ -1,0 +1,10 @@
+{% if approved %}
+  <p>Hello {{ join_request.agent.username }},</p>
+  <p>Your request to join <strong>{{ join_request.agency.name }}</strong> has been <strong>approved</strong>.</p>
+  <p>You can now access agency features.</p>
+{% else %}
+  <p>Hello {{ join_request.agent.username }},</p>
+  <p>Your request to join <strong>{{ join_request.agency.name }}</strong> was <strong>rejected</strong>.</p>
+  {% if reason %}<p>Reason: {{ reason }}</p>{% endif %}
+{% endif %}
+<p>Please log in to your dashboard for more details.</p>
