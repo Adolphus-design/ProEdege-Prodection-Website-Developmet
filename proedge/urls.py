@@ -31,6 +31,7 @@ urlpatterns = [
     path('reject-join-request/<int:request_id>/', views.reject_join_request, name='reject_join_request'),
     path('approve-join-request/<int:request_id>/', views.approve_join_request, name='approve_join_request'),
     path('agency/edit/', views.edit_agency_profile, name='edit_agency_profile'),
+    path('notifications/', views.notifications_list, name='notifications_list'),  # add view below
     path('agency/profile/', views.view_agency_profile, name='view_agency_profile'),
     path('agency/create/', views.complete_agency_profile, name='create_agency_profile'),
     #path('logout/', views.custom_logout, name='logout'),

@@ -1,6 +1,7 @@
 from email.message import Message
 from urllib import request
 from django.shortcuts import get_object_or_404, render, redirect
+from proedge.utils import notify
 from proedge.verification import automated_verify_agent_document
 from proedge.email import notify_agency_new_join_request, notify_agent_request_decision
 from .forms import CustomUserCreationForm
@@ -47,6 +48,7 @@ from django.forms import modelformset_factory
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 import fitz  # PyMuPDF
+from django.core.paginator import Paginator
 import re
 from datetime import datetime
 from .verification import automated_verify_agent_document
@@ -577,6 +579,8 @@ def user_profile_view(request):
 def interest_messages_view(request):
     user = request.user
     messages = Interest.objects.filter(property__agent=request.user).order_by('-created_at')
+    interests = Interest.objects.filter(property__seller=user).select_related('user', 'property')
+    
     # Filter messages based on user role
     if hasattr(user, 'agent'):
         interests = Interest.objects.filter(property__agent=user)
@@ -594,6 +598,7 @@ def interest_messages_view(request):
     context = {
         'interests': interests.order_by('-created_at'),
         'messages': messages,
+        'interests': interests,
     }
     return render(request, 'proedge/messages.html', context)
 
@@ -796,10 +801,39 @@ def reject_join_request(request, request_id):
         fail_silently=True,
     )
 
+
+    # keep record, add a manual reason if you capture it in a form
+    manual_reason = request.POST.get('reason', '').strip()
+    if manual_reason:
+        join_request.manual_rejection_reason = manual_reason
+        join_request.save()
+    else:
+        # if you still want to delete, it’s fine—but then you can’t show history later
+        # join_request.delete()
+        # Instead, mark as “failed”
+        join_request.auto_check_status = 'failed'
+        join_request.auto_check_notes = 'Rejected by agency (no reason provided).'
+        join_request.save()
+
+        # Notify agent
+    notify(
+        join_request.agent,
+        title="Your agency join request was rejected",
+        message=join_request.manual_rejection_reason or "Please contact the agency for more details."
+    )
+
     join_request.delete()
     messages.success(request, "Agent join request rejected.")
     return redirect('agency_dashboard')
 
+
+@login_required
+def notifications_list(request):
+    qs = request.user.notifications.all()
+    paginator = Paginator(qs, 15)
+    page = request.GET.get('page')
+    notifications = paginator.get_page(page)
+    return render(request, 'proedge/notifications.html', {'notifications': notifications})
 
 
 @login_required
@@ -857,6 +891,7 @@ def update_join_request_auto_status(join_request):
     join_request.save()
 
 
+
 @login_required
 def approve_join_request(request, request_id):
     join_request = get_object_or_404(AgentJoinRequest, id=request_id, is_approved=False)
@@ -878,8 +913,16 @@ def approve_join_request(request, request_id):
         fail_silently=True,
     )
 
+    # Notify agent
+    notify(
+        join_request.agent,
+        title="Your agency join request was approved 🎉",
+        message=f"{join_request.agency.name} approved your request."
+    )
+    
     messages.success(request, f"{join_request.agent.username} has been approved and added to your agency.")
     return redirect('agency_dashboard')
+
 
 # This view allows agency owners to edit their agency profile
 @login_required

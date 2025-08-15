@@ -3,19 +3,50 @@
 {% block content %}
 <div class="max-w-lg mx-auto mt-10 bg-white shadow-md rounded-xl p-6">
     <h2 class="text-xl font-semibold mb-4">Edit Your Profile</h2>
-    
+
+    <!-- Profile Picture Preview -->
+    {% if user.userprofile.profile_picture %}
+    <div class="flex justify-center mb-4">
+        <img src="{{ user.userprofile.profile_picture.url }}" 
+             class="w-32 h-32 rounded-full border-4 border-blue-600 object-cover">
+    </div>
+    {% endif %}
+
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-
-        <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
-    </form>
-
-    {% if user.userprofile.profile_picture %}
-        <div class="mt-6">
-            <p class="text-sm">Current profile picture:</p>
-            <img src="{{ user.userprofile.profile_picture.url }}" class="w-24 h-24 rounded-full mt-2">
+        
+        <!-- Personal Info Fields -->
+        <div class="mb-4">
+            {{ form.full_name.label_tag }} {{ form.full_name }}
         </div>
-    {% endif %}
+        <div class="mb-4">
+            {{ form.contact_number.label_tag }} {{ form.contact_number }}
+        </div>
+        <div class="mb-4">
+            {{ form.address.label_tag }} {{ form.address }}
+        </div>
+        <div class="mb-4">
+            {{ form.ffc_number.label_tag }} {{ form.ffc_number }}
+        </div>
+        <div class="mb-4">
+            {{ form.years_experience.label_tag }} {{ form.years_experience }}
+        </div>
+
+        <!-- Documents -->
+        <h3 class="font-semibold mb-2 mt-4">Upload Documents</h3>
+        <div class="mb-4">
+            {{ form.ffc_certificate.label_tag }} {{ form.ffc_certificate }}
+        </div>
+        <div class="mb-4">
+            {{ form.id_copy.label_tag }} {{ form.id_copy }}
+        </div>
+        <div class="mb-4">
+            {{ form.proof_of_address.label_tag }} {{ form.proof_of_address }}
+        </div>
+
+        <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Save Profile
+        </button>
+    </form>
 </div>
 {% endblock %}

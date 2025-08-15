@@ -31,10 +31,10 @@
 
 <!-- Navbar -->
 <header>
-  <nav class="navbar navbar-expand-lg navbar-custom">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm">
     <div class="container">
       <!-- Logo -->
-      <a class="navbar-brand" href="/">
+      <a class="navbar-brand fw-bold" href="/">
         <img src="{% static 'images/logo.png' %}" alt="ProEdge Logo" style="height: 40px;">
       </a>
 
@@ -47,7 +47,7 @@
       <div class="collapse navbar-collapse" id="navbarMain">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link {% if request.path == '/' or request.path == '/properties/' %}active{% endif %}" href="{% url 'property_list' %}">All Properties</a>
+            <a class="nav-link active {% if request.path == '/' or request.path == '/properties/' %}active{% endif %}" href="{% url 'property_list' %}">All Properties</a>
           </li>
           <li class="nav-item">
             <a class="nav-link {% if request.path == '/rent/' %}active{% endif %}" href="{% url 'property_list' %}">Rent Properties</a>
@@ -61,12 +61,12 @@
         </ul>
 
         <!-- Auth buttons -->
-        <div class="d-flex mb-2 mb-lg-0">
+        <div class="d-flex">
             {% if user.is_authenticated %}
-              <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+              <a class="btn btn-danger px-4 fw-semibold" href="{% url 'logout' %}">Logout</a>
             {% else %}
-              <a class="nav-link" href="{% url 'login' %}">Login</a>
-              <a class="nav-link" href="{% url 'register' %}">Register</a>
+              <a class="btn btn-outline-light me-2 px-4 fw-semibold" href="{% url 'login' %}">Login</a>
+              <a class="btn btn-danger px-4 fw-semibold" href="{% url 'register' %}">Register</a>
             {% endif %}
         </div>
       </div>
@@ -74,6 +74,9 @@
   </nav>
 </header>
 
+<div class="container " style="margin-top:80px;">
+  <h1>Welcome to ProEdge Property Group Listing Website</h1>
+</div>
 <!-- Flash messages -->
 <main class="container mt-4">
   {% if messages %}
@@ -84,10 +87,66 @@
 
   {% block content %}{% endblock %}
 </main>
-
+<hr>
+<div>
+  <div>
+    <ul>
+      <a href="#">Terms & Condtions</a>
+    </ul>
+    <ul>Contact Us
+      <li>Phone:</li>
+      <li>Email</li>
+      <li>Fax</li>
+    </ul>
+    <ul>Services</ul>
+    <Address>
+      <li>Province</li>
+      <li>Street</li>
+      <li>Postal Code</li>
+    </Address>
+  </div>
+</div>
 <!-- Footer -->
 <footer class="text-center text-muted mt-5 py-3 border-top">
-  &copy; {{ now|date:"Y" }} ProEdge Property Listings | Version 0.1 | developed by Gray-Tech Solutions
+
+          <style>
+
+            
+            .footer-link {
+                display: inline-block;
+                margin: 0 10px;
+                padding: 8px 15px;
+                border-radius: 5px;
+                background: rgba(3, 3, 3, 0.1);
+                color: rgb(14, 2, 2);
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+    
+            .footer-link:hover {
+                background-color: rgba(184, 7, 7, 0.3);
+                color: #b80707;
+                transform: scale(1.05);
+            }
+    
+            .footer-version {
+                margin-top: 10px;
+                font-size: 0.9rem;
+                color: #bb0e0e;
+            }
+        </style>
+    
+        <div>
+
+            <a href="mailto:info@youthportal.com" class="footer-link">📧 Email</a>
+            <a href="https://facebook.com" class="footer-link" target="https://www.facebook.com/share/1DmfHrHeEt/?mibextid=LQQJ4d">📘 Facebook</a>
+            <a href="https://twitter.com" class="footer-link" target="_blank">🐦 Twitter</a>
+            <a href="https://wa.me/1234567890" class="footer-link" target="_blank">💬 WhatsApp</a>
+        </div>
+    
+
+
+  &copy; {{ now|date:"Y" }} ProEdge Property Group | Version 0.1 | developed by Gray-Tech Solutions
 </footer>
 
 <!-- Scripts -->

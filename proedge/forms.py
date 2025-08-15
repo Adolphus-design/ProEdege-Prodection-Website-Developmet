@@ -16,10 +16,50 @@ class CustomUserCreationForm(UserCreationForm):
 class EditProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['address', 'contact_number', 'profile_picture']
+        fields = [
+            'profile_picture',
+            'contact_number',
+            'ffc_number',
+            'years_experience',
+            'address',
+            'ffc_certificate',
+            'id_copy',
+            'proof_of_address',
+        ]
         widgets = {
-            'contact_number': forms.TextInput(attrs={'placeholder': 'Enter contact number'}),
+            'contact_number': forms.TextInput(attrs={'placeholder': 'ex. 0791111111'}),
+            'address': forms.TextInput(attrs={'placeholder': 'ex. Gauteng, Benoni'}),
+            'ffc_number': forms.TextInput(attrs={'placeholder': 'ex. 2025/123456/07'}),
+            'years_experience': forms.NumberInput(attrs={'placeholder': 'ex. 5'}),
         }
+
+    def clean_profile_picture(self):
+        picture = self.cleaned_data.get('profile_picture')
+        if picture:
+            max_size = 2 * 1024 * 1024  # 2MB limit
+            if picture.size > max_size:
+                raise forms.ValidationError("Profile picture size cannot exceed 2MB.")
+        return picture
+    
+    def clean_ffc_certificate(self):
+        ffc = self.cleaned_data.get('ffc_certificate')
+        if ffc and ffc.size > 5 * 1024 * 1024:
+            raise ValidationError("FFC certificate must be under 5MB.")
+        return ffc
+
+    def clean_id_copy(self):
+        id_doc = self.cleaned_data.get('id_copy')
+        if id_doc and id_doc.size > 5 * 1024 * 1024:
+            raise ValidationError("ID copy must be under 5MB.")
+        return id_doc
+
+    def clean_proof_of_address(self):
+        poa = self.cleaned_data.get('proof_of_address')
+        if poa and poa.size > 5 * 1024 * 1024:
+            raise ValidationError("Proof of address must be under 5MB.")
+        return poa
+
+        
         
 from django.core.exceptions import ValidationError
 

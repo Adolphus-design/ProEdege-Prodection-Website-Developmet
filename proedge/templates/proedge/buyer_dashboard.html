@@ -11,6 +11,13 @@
     <a href="{% url 'user_profile' %}" class="btn btn-outline-dark btn-sm">👤 View Profile</a>
   </div>
 
+ <div class="mb-4 d-flex justify-content-between align-items-center">
+    <a href="{% url 'interest_messages' %}" class="btn btn-danger">
+      💬 Messages ({{ interests.count }})
+    </a>
+    <h2 class="mb-0">{{ role }} Dashboard</h2>
+     <a href="{% url 'request_join_agency' %}" class="btn btn-primary">Join Agency</a>
+  </div>
 
 
 

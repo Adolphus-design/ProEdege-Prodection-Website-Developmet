@@ -34,7 +34,10 @@
   </div>
 
   <!-- Agent Join Requests -->
+
+  
   <h4>Agent Join Requests</h4>
+  <a href="#"><strong>View Requests</strong> {{ join_requests.count }}</a>
   {% if join_requests %}
     <ul class="list-group">
       {% for req in join_requests %}

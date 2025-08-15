@@ -54,7 +54,7 @@ class SubmitPropertyForm(forms.ModelForm):
 class InterestForm(forms.ModelForm):
     class Meta:
         model = Interest
-        fields = ['interest_type', 'message', 'offer_price']
+        fields = ['interest_type', 'message', 'offer_price','contact_number']
 
         widgets = {
             'interest_type': forms.Select(attrs={'class': 'form-control'}),

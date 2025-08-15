@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 from django.utils import timezone
 import fitz  # PyMuPDF
 import pytesseract
+from .utils import notify
 from pdf2image import convert_from_path
 
 def automated_verify_agent_document(document_instance):
@@ -51,7 +52,11 @@ def automated_verify_agent_document(document_instance):
     document_instance.save()
     print(f"[auto-verify] Document ID {document_instance.id} verified with status: {document_instance.status}")
 
-
+    notify(
+        document_instance.join_request.agent,
+        title=f"Document auto-check: {document_instance.document_type} → {document_instance.status.upper()}",
+        message=document_instance.rejection_reason or "Passed automated checks."
+    )   
 def extract_issue_date_from_document(file_path):
     """
     Extract issue date from a PDF by text parsing.

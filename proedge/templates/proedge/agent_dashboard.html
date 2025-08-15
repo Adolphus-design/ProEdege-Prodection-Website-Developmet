@@ -22,7 +22,8 @@
           <span class="text-muted small">
             Type: {{ interest.interest_type }} | Offer: R{{ interest.offer_price|floatformat:2 }}<br>
             Message: {{ interest.message }}<br>
-            Contact: {{ interest.user.userprofile.contact_number|default:"N/A" }}
+            Contact: {{ interest.user.userprofile.contact_number|default:"N/A" }}<br>
+            Email: {{interest.user.email|default:"N/A"}}
           </span>
         </div>
       {% endfor %}
@@ -34,6 +35,12 @@
   <!-- Profile -->
   <div class="mb-4">
     <h5>Welcome, {{ request.user.get_full_name }}</h5>
+     {% if profile.profile_picture %}
+        <img src="{{ profile.profile_picture.url }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+    {% else %}
+        <p>No profile picture uploaded.</p>
+    {% endif %}
+
     <a href="{% url 'user_profile' %}" class="btn btn-outline-dark btn-sm">👤 View Profile</a>
   </div>
 
