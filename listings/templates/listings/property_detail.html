@@ -2,6 +2,20 @@
 {% load static %}
 
 {% block content %}
+
+
+{% if user.is_authenticated %}
+    {% if property.agent == user %}
+        <a href="{% url 'agent_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+    {% elif property.agency and property.agency.owner == user %}
+        <a href="{% url 'agency_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+    {% elif property.seller == user %}
+        <a href="{% url 'seller_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+    {% elif property.bank == user %}
+        <a href="{% url 'bank_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+    {% endif %}
+{% endif %}
+
 <div class="container my-5">
 
   <!-- Main Image + Overlay -->

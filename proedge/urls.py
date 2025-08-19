@@ -45,4 +45,7 @@ urlpatterns = [
     path('properties/<int:pk>/assign-agent/', assign_agent_to_property, name='assign_agent_to_property'),
     path('agency/create-agent/', views.create_agent, name='create_agent'),
     path('agency/view-agents/', views.view_agents, name='view_agents'),
+    path('agency/agent/<int:pk>/', views.agency_agent_detail, name='agency_agent_detail'),
+    path('agency/agent/<int:pk>/edit/', views.edit_agent_profile, name='edit_agent_profile'),
+
 ]

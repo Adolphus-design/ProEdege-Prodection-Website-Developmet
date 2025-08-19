@@ -154,7 +154,13 @@ def submit_property(request):
 # This view allows sellers or agents to edit an existing property listing
 @login_required
 def edit_property(request, pk):
-    prop = get_object_or_404(Property, pk=pk, seller=request.user)  # only allow user to edit their own
+    prop = get_object_or_404(Property, pk=pk)
+
+    # ✅ Permission check: seller OR agency
+    if not (prop.seller == request.user or
+            (request.user.role == 'agency' and prop.agency == getattr(request.user, 'agency_profile', None))):
+        messages.error(request, "You are not authorized to edit this property.")
+        return redirect_user_dashboard(request)
 
     if request.method == 'POST':
         form = SubmitPropertyForm(request.POST, request.FILES, instance=prop)
@@ -162,8 +168,6 @@ def edit_property(request, pk):
 
         if form.is_valid() and image_form.is_valid():
             form.save()
-
-            # handle new image uploads
             images = request.FILES.getlist('images')
             for image in images:
                 PropertyImage.objects.create(property=prop, image=image)
@@ -175,8 +179,7 @@ def edit_property(request, pk):
     else:
         form = SubmitPropertyForm(instance=prop)
         image_form = PropertyImageForm()
-        
-    
+
     return render(request, 'listings/edit_property.html', {
         'form': form,
         'image_form': image_form,
@@ -184,19 +187,20 @@ def edit_property(request, pk):
     })
 
 # This view allows sellers or agents to mark a property as sold 
-@login_required   
+@login_required
 def mark_property_sold(request, pk):
     prop = get_object_or_404(Property, pk=pk)
 
-    if prop.seller == request.user:
+    # ✅ Allow seller OR agency to mark sold
+    if prop.seller == request.user or (request.user.role == 'agency' and prop.agency == getattr(request.user, 'agency_profile', None)):
         prop.status = 'sold'
         prop.save()
         messages.success(request, 'Property marked as sold.')
     else:
         messages.error(request, 'You are not authorized to update this property.')
 
-    # Redirect back to user's dashboard
     return redirect_user_dashboard(request)
+
 
 
 
@@ -204,14 +208,14 @@ def mark_property_sold(request, pk):
 def mark_property_available(request, pk):
     prop = get_object_or_404(Property, pk=pk)
 
-    if prop.seller == request.user:
+    # ✅ Allow seller OR agency to mark available
+    if prop.seller == request.user or (request.user.role == 'agency' and prop.agency == getattr(request.user, 'agency_profile', None)):
         prop.status = 'approved'
         prop.save()
         messages.success(request, 'Property marked as available.')
     else:
         messages.error(request, 'You are not authorized to update this property.')
 
-    # Redirect back to user's dashboard
     return redirect_user_dashboard(request)
 
 def redirect_user_dashboard(request):
@@ -238,44 +242,37 @@ def redirect_user_dashboard(request):
 # It checks the user's role and ensures they are the owner of the property before allowing image uploads    
 @login_required
 def upload_property_images(request, pk):
-    try:
-        property = Property.objects.get(pk=pk)
-    except Property.DoesNotExist:
-        return redirect('dashboard_redirect')  # fallback if property not found
+    property_obj = get_object_or_404(Property, pk=pk)
 
-    # Ensure the logged-in user has permission to upload images
-    user_role = request.user.role
+    # 🚨 Restrict access so only the "owner" can upload
+    user_role = getattr(request.user, 'role', None)
     allowed = False
 
-    if user_role == 'seller' and property.seller == request.user:
+    if user_role == 'agency' and property_obj.agency == getattr(request.user, 'agency_profile', None):
         allowed = True
-    elif user_role == 'agency' and property.agency == getattr(request.user, 'agency_profile', None):
+    elif user_role == 'agent' and property_obj.agent == request.user:
         allowed = True
-    elif user_role == 'agent':
-        agent_profile = getattr(request.user, 'agentprofile', None)
-        if agent_profile and property.agent == agent_profile:
-            allowed = True
-    elif user_role == 'bank' and property.bank == request.user:
+    elif user_role == 'seller' and property_obj.seller == request.user:
         allowed = True
-    elif user_role == 'auctioneer' and property.auctioneer == request.user:
-        allowed = True
-    elif user_role == 'landlord' and property.landlord == request.user:
-        allowed = True
-    elif user_role == 'tenant' and property.tenant == request.user:
-        allowed = True
-    elif user_role == 'buyer' and property.buyer == request.user:
-        allowed = True
+    # add bank, landlord, etc. here if needed
 
     if not allowed:
-        return redirect('dashboard_redirect')  # deny access if not owner
+        return redirect('dashboard_redirect')  # or raise PermissionDenied
 
     if request.method == 'POST':
-        images = request.FILES.getlist('images')
-        for img in images:
-            PropertyImage.objects.create(property=property, image=img)
-        return redirect('property_detail', pk=property.pk)
+        form = PropertyImageForm(request.POST, request.FILES)
+        files = request.FILES.getlist('images')
+        if form.is_valid():
+            for f in files:
+                PropertyImage.objects.create(property=property_obj, image=f)
+            return redirect('property_detail', pk=property_obj.pk)
+    else:
+        form = PropertyImageForm()
 
-    return render(request, 'listings/upload_property_images.html', {'property': property})
+    return render(request, 'listings/upload_property_images.html', {
+        'form': form,
+        'property': property_obj,
+    })
 
 @login_required
 def contact_seller(request, property_id):

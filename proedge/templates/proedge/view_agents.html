@@ -5,9 +5,17 @@
   {% if agents %}
     <ul class="list-group">
       {% for agent in agents %}
-        <li class="list-group-item">
-          {{ agent.user.get_full_name|default:agent.user.username }}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <!-- Clickable agent name -->
+          <a href="{% url 'agency_agent_detail' agent.user.pk %}">
+            {{ agent.user.get_full_name|default:agent.user.username }}
+          </a>
           <span class="text-muted">({{ agent.user.email }})</span>
+
+          <!-- Optional edit button -->
+          <a href="{% url 'edit_agent_profile' agent.user.pk %}" class="btn btn-sm btn-warning">
+            Edit
+          </a>
         </li>
       {% endfor %}
     </ul>

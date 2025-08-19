@@ -1,5 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+
+from core import settings
 from .models import CustomUser
 from .models import UserProfile
 from listings.models import Bid, Auction, Property
@@ -150,32 +152,59 @@ class AssignAgentForm(forms.Form):
 CustomUser = get_user_model()
 
 class AgencyCreateAgentForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
+    first_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=True)
+    password = forms.CharField(widget=forms.PasswordInput, required=False)  # optional on edit
     ffc_certificate = forms.FileField(required=False)
     id_copy = forms.FileField(required=False)
     proof_of_address = forms.FileField(required=False)
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password', 'role']
+        fields = ['username', 'email', 'first_name', 'last_name', 'password', 'role']
 
     def save(self, commit=True, agency=None):
-        # Create the user
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data['password'])
+
+        # Only set password if provided (edit mode)
+        password = self.cleaned_data.get('password')
+        if password:
+            user.set_password(password)
+
         user.role = 'agent'
+        user.is_active = True
+        user.is_email_verified = True
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+
         if commit:
             user.save()
 
-            # Create the associated UserProfile
-            profile = UserProfile.objects.create(
-                user=user,
-                ffc_certificate=self.cleaned_data.get('ffc_certificate'),
-                id_copy=self.cleaned_data.get('id_copy'),
-                proof_of_address=self.cleaned_data.get('proof_of_address')
-            )
+            # Update or create UserProfile to avoid UNIQUE constraint error
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            if self.cleaned_data.get('ffc_certificate'):
+                profile.ffc_certificate = self.cleaned_data['ffc_certificate']
+            if self.cleaned_data.get('id_copy'):
+                profile.id_copy = self.cleaned_data['id_copy']
+            if self.cleaned_data.get('proof_of_address'):
+                profile.proof_of_address = self.cleaned_data['proof_of_address']
             if agency:
                 profile.agency = agency
-                profile.save()
+            profile.save()
+
+            # Optional: send welcome email only if created
+            """if created:
+                try:
+                    send_mail(
+                        subject="Welcome to ProEdge Property Group",
+                        message=f"Hi {user.first_name},\n\n"
+                                f"Your agent account has been created by {agency.name}.\n"
+                                "You can now log in using your credentials.\n\n- ProEdge Team",
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[user.email],
+                        fail_silently=True,
+                    )
+                except Exception as e:
+                    print(f"Failed to send email: {e}")"""
 
         return user

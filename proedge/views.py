@@ -58,6 +58,33 @@ from .verification import automated_verify_agent_document
 
 
 
+
+@login_required
+def agency_agent_detail(request, pk):
+    agent = get_object_or_404(CustomUser, pk=pk, role='agent')
+    profile = get_object_or_404(UserProfile, user=agent)
+
+    # Only allow the agency owner to view
+    if request.user.agency_profile != profile.agency:
+        return redirect('agency_dashboard')
+
+    if request.method == "POST":
+        form = AgencyCreateAgentForm(request.POST, request.FILES, instance=agent)
+        if form.is_valid():
+            form.save(agency=request.user.agency_profile)
+            messages.success(request, "Agent profile updated successfully!")
+            return redirect('agency_agent_detail', pk=agent.pk)
+    else:
+        form = AgencyCreateAgentForm(instance=agent)
+
+    return render(request, 'proedge/agency_agent_detail.html', {
+        'agent': agent,
+        'profile': profile,
+        'form': form,
+    })
+
+
+
 @login_required
 def view_agents(request):
     try:
@@ -96,10 +123,20 @@ def create_agent(request):
         return redirect('create_agency_profile')
     
     if request.method == 'POST':
-        form = AgencyCreateAgentForm(request.POST)
+        form = AgencyCreateAgentForm(request.POST, request.FILES)  # ✅ include FILES for docs
         if form.is_valid():
             agent = form.save(agency=agency)
-            messages.success(request, f"Agent {agent.username} created successfully!")
+
+            # ✅ Optional: Send welcome email
+            send_mail(
+                subject="Welcome to ProEdge Property Group",
+                message=f"Hi {agent.username},\n\nYour agent account has been created and activated by {agency.name}. You can now log in using your credentials.\n\n- ProEdge Team",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[agent.email],
+                fail_silently=True,
+            )
+
+            messages.success(request, f"Agent {agent.username} created and activated successfully!")
             return redirect('agency_dashboard')
     else:
         form = AgencyCreateAgentForm()
@@ -1064,6 +1101,30 @@ def edit_agency_profile(request):
         form = AgencyForm(instance=agency)
 
     return render(request, 'proedge/edit_agency_profile.html', {'form': form})
+
+
+@login_required
+def edit_agent_profile(request, pk):
+    agent = get_object_or_404(CustomUser, pk=pk, role='agent')
+    profile = get_object_or_404(UserProfile, user=agent)
+
+    if request.user.agency_profile != profile.agency:
+        return redirect('agency_dashboard')
+
+    if request.method == 'POST':
+        form = AgencyCreateAgentForm(request.POST, request.FILES, instance=agent)
+        if form.is_valid():
+            form.save(agency=request.user.agency_profile)
+            messages.success(request, "Agent profile updated successfully!")
+            return redirect('edit_agent_profile', pk=agent.pk)
+    else:
+        form = AgencyCreateAgentForm(instance=agent)
+
+    return render(request, 'proedge/edit_agent_profile.html', {
+        'agent': agent,
+        'profile': profile,
+        'form': form
+    })
 
 # This view allows agency owners to view their agency profile
 @login_required
