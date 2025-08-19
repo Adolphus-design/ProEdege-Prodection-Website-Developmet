@@ -113,42 +113,68 @@
     </div>
   </form>
 
-  <!-- Listings Table -->
-  {% for status, properties in grouped_properties.items %}
-    <h4 class="mt-4">{{ status|title }} Listings</h4>
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover align-middle mt-2">
-        <thead class="table-light">
-          <tr>
-            <th>Title</th>
-            <th>Location</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for property in properties %}
+  <!-- Property Listings -->
+<div class="mt-4">
+  <h4>Your Properties</h4>
+  {% if grouped_properties %}
+    {% for status, properties in grouped_properties.items %}
+      <h5 class="mt-4">{{ status|title }} Listings</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle mt-2">
+          <thead class="table-light">
             <tr>
-              <td>{{ property.title }}</td>
-              <td>{{ property.location }}</td>
-              <td>R{{ property.price|floatformat:2 }}</td>
-              <td><span class="badge bg-secondary">{{ property.status|title }}</span></td>
-              <td>
-                <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-info">View</a>
-                <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                {% if property.status == 'approved' or property.status == 'available' %}
-                  <a href="{% url 'mark_property_sold' property.pk %}" class="btn btn-sm btn-outline-danger">Mark Sold</a>
-                {% elif property.status == 'sold' %}
-                  <a href="{% url 'mark_property_available' property.pk %}" class="btn btn-sm btn-outline-success">Mark Available</a>
-                {% endif %}
-              </td>
+              <th>Title</th>
+              <th>Location</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Listed By</th>
+              <th>Actions</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% endfor %}
+          </thead>
+          <tbody>
+            {% for property in properties %}
+              <tr>
+                <td>{{ property.title }}</td>
+                <td>{{ property.location }}</td>
+                <td>R{{ property.price|floatformat:2 }}</td>
+                <td>
+                  <span class="badge 
+                    {% if property.status == 'sold' %}bg-danger
+                    {% elif property.status == 'approved' or property.status == 'available' %}bg-success
+                    {% else %}bg-secondary{% endif %}">
+                    {{ property.status|title }}
+                  </span>
+                </td>
+                <td>
+                  {% if property.agent %}
+                    <span class="badge bg-info">{{ property.agent.get_full_name|default:property.agent.username }}</span>
+                    {% if property.agent != user %}
+                      <small class="text-muted">(Assigned)</small>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-muted">Assigned</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-info">View</a>
+                  <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+
+                  {% if property.status == 'approved' or property.status == 'available' %}
+                    <a href="{% url 'mark_property_sold' property.pk %}" class="btn btn-sm btn-outline-danger">Mark Sold</a>
+                  {% elif property.status == 'sold' %}
+                    <a href="{% url 'mark_property_available' property.pk %}" class="btn btn-sm btn-outline-success">Mark Available</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">No properties assigned or listed yet.</p>
+  {% endif %}
+</div>
 
 </div>
 

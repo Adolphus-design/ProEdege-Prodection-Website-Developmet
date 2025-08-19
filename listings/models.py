@@ -69,6 +69,7 @@ class Property(models.Model):
     auctioneer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='auctioned_properties')
     agency = models.ForeignKey('Agency', on_delete=models.CASCADE, null=True, blank=True, related_name='properties')
     created_at = models.DateTimeField(auto_now_add=True)
+    listed_by_agent = models.ForeignKey("AgentProfile", on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"{self.title} - {self.location} - R{self.price}"

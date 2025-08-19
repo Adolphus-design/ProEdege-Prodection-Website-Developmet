@@ -135,6 +135,15 @@ def submit_property(request):
                     setattr(property, 'agency', request.user.agency_profile)
                 except Agency.DoesNotExist:
                     return redirect('create_agency_profile')
+
+            elif field_name == 'agent':
+                # Assign the property to the agent
+                property.agent = request.user
+
+                # ✅ Also assign to the agent’s agency (if they belong to one)
+                if hasattr(request.user, 'agentprofile') and request.user.agentprofile.agency:
+                    property.agency = request.user.agentprofile.agency
+
             elif field_name:
                 setattr(property, field_name, request.user)
 
@@ -149,6 +158,7 @@ def submit_property(request):
         form = PropertyForm()
 
     return render(request, 'listings/submit_property.html', {'form': form})
+
 
 
 # This view allows sellers or agents to edit an existing property listing

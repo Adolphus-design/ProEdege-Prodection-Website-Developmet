@@ -311,8 +311,14 @@ def dashboard_redirect_view(request):
 def agent_dashboard(request):
     user = request.user
 
-    # Get properties listed by this agent
-    properties = Property.objects.filter(seller=user).order_by('-created_at')
+    # ✅ Properties listed by the agent themselves
+    self_listed_properties = Property.objects.filter(agent=user)
+
+    # ✅ Properties assigned to this agent by the agency
+    assigned_properties = Property.objects.filter(agents=user)
+
+    # ✅ Combine QuerySets using union
+    properties = (self_listed_properties | assigned_properties).distinct().order_by('-created_at')
 
     # Filtering logic
     query = request.GET.get('q')
@@ -344,7 +350,7 @@ def agent_dashboard(request):
         grouped_properties[prop.status].append(prop)
 
     # Interest/offers for this agent’s properties
-    interests = Interest.objects.filter(property__seller=user).select_related('user', 'property')
+    interests = Interest.objects.filter(property__in=properties).select_related('user', 'property')
 
     context = {
         'role': 'Agent',
@@ -364,6 +370,7 @@ def agent_dashboard(request):
     }
 
     return render(request, 'proedge/agent_dashboard.html', context)
+
 
 @login_required
 def seller_dashboard(request):
