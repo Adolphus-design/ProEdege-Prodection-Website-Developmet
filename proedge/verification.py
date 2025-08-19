@@ -1,4 +1,4 @@
-import re
+"""import re
 from datetime import timedelta, datetime
 from django.utils import timezone
 import fitz  # PyMuPDF
@@ -142,4 +142,4 @@ def _parse_any_date(date_str):
             return datetime.strptime(date_str, fmt).date()
         except ValueError:
             continue
-    return None
+    return None"""
