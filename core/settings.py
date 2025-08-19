@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'bankdashboard',
     'cloudinary',
     'cloudinary_storage',
-    #'widget_tweaks',
+    'widget_tweaks',
     'agent'
 ]
 
