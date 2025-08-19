@@ -8,7 +8,7 @@
     {% if user.userprofile.profile_picture %}
     <div class="flex justify-center mb-4">
         <img src="{{ user.userprofile.profile_picture.url }}" 
-             class="w-32 h-32 rounded-full border-4 border-blue-600 object-cover">
+             class="w-32 h-32 rounded-full  border-4 border-blue-600 object-cover" style="width: 150px; height: 300px; object-fit: cover;">
     </div>
     {% endif %}
 
@@ -32,21 +32,14 @@
             {{ form.years_experience.label_tag }} {{ form.years_experience }}
         </div>
 
-        <!-- Documents -->
-        <h3 class="font-semibold mb-2 mt-4">Upload Documents</h3>
-        <div class="mb-4">
-            {{ form.ffc_certificate.label_tag }} {{ form.ffc_certificate }}
-        </div>
-        <div class="mb-4">
-            {{ form.id_copy.label_tag }} {{ form.id_copy }}
-        </div>
-        <div class="mb-4">
-            {{ form.proof_of_address.label_tag }} {{ form.proof_of_address }}
-        </div>
+
 
         <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             Save Profile
         </button>
     </form>
 </div>
+
+
+
 {% endblock %}

@@ -34,7 +34,9 @@ class Property(models.Model):
     location = models.CharField(max_length=255)
     province = models.CharField(max_length=100)  # Now a free-text field
     area = models.CharField(max_length=100, null=True, blank=True)
+
     
+
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES)
     listing_type = models.CharField(max_length=20, choices=LISTING_TYPE_CHOICES, default='')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
@@ -57,11 +59,12 @@ class Property(models.Model):
     number_of_parking_slots = models.CharField(max_length=10, blank=True, default="N/A")
 
     # User associations
-    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='properties')
+    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='properties', null=True, blank=True)
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='purchased_properties')
     landlord = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='rented_properties')
     tenant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='rented_by_properties')
-    agent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='listed_properties')
+    #agent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='listed_properties')
+    agents = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='properties_assigned')
     bank = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='banked_properties')
     auctioneer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='auctioned_properties')
     agency = models.ForeignKey('Agency', on_delete=models.CASCADE, null=True, blank=True, related_name='properties')

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Agents in {{ request.user.agency_profile.name }}</h2>
+  {% if agents %}
+    <ul class="list-group">
+      {% for agent in agents %}
+        <li class="list-group-item">
+          {{ agent.user.get_full_name|default:agent.user.username }}
+          <span class="text-muted">({{ agent.user.email }})</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">No agents registered yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

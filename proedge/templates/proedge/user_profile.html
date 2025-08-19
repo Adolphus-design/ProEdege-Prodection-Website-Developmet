@@ -3,13 +3,13 @@
 <div class="container mt-5">
     <h2 class="mb-4">Your Profile</h2>
 
-    
     {% if profile.profile_picture %}
         <img src="{{ profile.profile_picture.url }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
     {% else %}
         <p>No profile picture uploaded.</p>
     {% endif %}
-    <h3 class="mt-4">Profile Details</h3>               
+
+    <h3 class="mt-4">Profile Details</h3>
     <ul class="list-group">
         <li class="list-group-item"><strong>Full Name:</strong> {{ request.user.get_full_name }}</li>
         <li class="list-group-item"><strong>Email:</strong> {{ request.user.email }}</li>
@@ -17,11 +17,62 @@
         <li class="list-group-item"><strong>Years of Experience:</strong> {{ profile.years_experience|default:"Not provided" }}</li>
         <li class="list-group-item"><strong>Phone:</strong> {{ profile.contact_number|default:"Not provided" }}</li>
         <li class="list-group-item"><strong>Address:</strong> {{ profile.address|default:"Not provided" }}</li>
-        
     </ul>
 
-    <a href="{% url 'edit_profile' %}" class="btn btn-primary mt-3">Edit Profile</a>
-    <a href="{% url 'dashboard_redirect' %}" class="btn btn-primary">🏠 Back to Dashboard</a>
+<div class="card mt-4">
+  <div class="card-header">
+    <h5>Verification Documents</h5>
+  </div>
+  <div class="card-body">
+    <!-- FFC Certificate -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span>FFC Certificate</span>
+      {% if profile.ffc_certificate %}
+        <span class="badge 
+          {% if profile.ffc_certificate_status == 'approved' %} bg-success 
+          {% elif profile.ffc_certificate_status == 'rejected' %} bg-danger 
+          {% else %} bg-warning text-dark {% endif %}">
+          {{ profile.ffc_certificate_status|capfirst }}
+        </span>
+      {% else %}
+        <span class="badge bg-secondary text-dark">Not uploaded</span>
+      {% endif %}
+    </div>
 
+    <!-- ID Copy -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span>ID Copy</span>
+      {% if profile.id_copy %}
+        <span class="badge 
+          {% if profile.id_copy_status == 'approved' %} bg-success 
+          {% elif profile.id_copy_status == 'rejected' %} bg-danger 
+          {% else %} bg-warning text-dark {% endif %}">
+          {{ profile.id_copy_status|capfirst }}
+        </span>
+      {% else %}
+        <span class="badge bg-secondary text-dark">Not uploaded</span>
+      {% endif %}
+    </div>
+
+    <!-- Proof of Address -->
+    <div class="d-flex justify-content-between align-items-center">
+      <span>Proof of Address</span>
+      {% if profile.proof_of_address %}
+        <span class="badge 
+          {% if profile.proof_of_address_status == 'approved' %} bg-success 
+          {% elif profile.proof_of_address_status == 'rejected' %} bg-danger 
+          {% else %} bg-warning text-dark {% endif %}">
+          {{ profile.proof_of_address_status|capfirst }}
+        </span>
+      {% else %}
+        <span class="badge bg-secondary text-dark">Not uploaded</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary mt-3">Edit Profile</a>
+    <a href="{% url 'upload_documents' %}" class="btn btn-success">Upload Documents</a>
+    <a href="{% url 'dashboard_redirect' %}" class="btn btn-primary">🏠 Back to Dashboard</a>
 </div>
 {% endblock %}

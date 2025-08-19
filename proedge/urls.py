@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import  buyer_dashboard, create_auction, edit_profile, register_view, CustomLoginView, CustomLogoutView, dashboard_redirect_view, seller_dashboard, tenant_dashboard, agent_dashboard, landlord_dashboard, bank_dashboard, auctioneer_dashboard, user_profile_view
+from .views import  assign_agent_to_property, buyer_dashboard, create_auction, edit_profile, register_view, CustomLoginView, CustomLogoutView, dashboard_redirect_view, seller_dashboard, tenant_dashboard, agent_dashboard, landlord_dashboard, bank_dashboard, auctioneer_dashboard, user_profile_view
 from . import views 
 
 from .views import activate_account
@@ -41,4 +41,8 @@ urlpatterns = [
     path('agency/join-request/<int:request_id>/', views.agent_join_request_detail, name='agent_join_request_detail'),
      path('agent-document/<int:doc_id>/approve/', views.manual_approve_document, name='manual_approve_document'),
     path('agent-document/<int:doc_id>/reject/', views.manual_reject_document, name='manual_reject_document'),
+    path('upload-documents/', views.upload_documents, name='upload_documents'),
+    path('properties/<int:pk>/assign-agent/', assign_agent_to_property, name='assign_agent_to_property'),
+    path('agency/create-agent/', views.create_agent, name='create_agent'),
+    path('agency/view-agents/', views.view_agents, name='view_agents'),
 ]

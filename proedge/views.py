@@ -1,5 +1,6 @@
 from email.message import Message
 from urllib import request
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from proedge.utils import notify
 from proedge.verification import automated_verify_agent_document
@@ -10,6 +11,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from .forms import DocumentUploadForm
 from django.http import HttpResponse
 from listings.models import Property
 from django.db.models import Q
@@ -17,8 +19,8 @@ from collections import defaultdict
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import EditProfileForm
-from .models import AgentDocument, UserProfile
-from listings.models import Property, Interest
+from .models import AgentDocument, CustomUser, UserProfile
+from listings.models import Property, Interest, Agency
 from collections import defaultdict
 from .forms import AuctionForm
 from django.contrib.auth import logout
@@ -28,7 +30,7 @@ from listings.forms import BidForm, AgencyForm
 from agencylistings.models import AgencyProperty
 from .forms import AgentJoinRequestForm
 from .models import AgentJoinRequest
-from .forms import AgentDocumentForm
+from .forms import AgentDocumentForm, AgencyCreateAgentForm
 from bankdashboard.forms import BankPropertyForm
 from bankdashboard.models import BankProperty
 from bankdashboard.forms import BankListingForm
@@ -49,11 +51,115 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages
 import fitz  # PyMuPDF
 from django.core.paginator import Paginator
+from .forms import AssignAgentForm
 import re
 from datetime import datetime
 from .verification import automated_verify_agent_document
 
 
+
+@login_required
+def view_agents(request):
+    try:
+        agency = request.user.agency_profile
+    except Agency.DoesNotExist:
+        return redirect('create_agency_profile')
+    
+    agents = UserProfile.objects.filter(user__role='agent', agency=agency)
+    
+    return render(request, 'proedge/view_agents.html', {'agents': agents})
+
+@login_required
+def create_agent(request):
+    try:
+        agency = request.user.agency_profile
+    except Agency.DoesNotExist:
+        return redirect('create_agency_profile')
+    
+    if request.method == 'POST':
+        form = AgencyCreateAgentForm(request.POST)
+        if form.is_valid():
+            agent = form.save(agency=agency)
+            messages.success(request, f"Agent {agent.username} created successfully!")
+            return redirect('agency_dashboard')
+    else:
+        form = AgencyCreateAgentForm()
+    
+    return render(request, 'proedge/create_agent.html', {'form': form})
+
+
+@login_required
+def create_agent(request):
+    try:
+        agency = request.user.agency_profile
+    except Agency.DoesNotExist:
+        return redirect('create_agency_profile')
+    
+    if request.method == 'POST':
+        form = AgencyCreateAgentForm(request.POST)
+        if form.is_valid():
+            agent = form.save(agency=agency)
+            messages.success(request, f"Agent {agent.username} created successfully!")
+            return redirect('agency_dashboard')
+    else:
+        form = AgencyCreateAgentForm()
+    
+    return render(request, 'proedge/create_agent.html', {'form': form})
+
+
+@login_required
+def assign_agent_to_property(request, pk):
+    property = get_object_or_404(Property, pk=pk)
+
+    # Only agency owner can assign agents
+    if not hasattr(request.user, 'agency_profile') or property.agency != request.user.agency_profile:
+        messages.error(request, "You are not allowed to assign agents to this property.")
+        return redirect('agency_dashboard')
+
+    # Fetch all users with role='agent' under this agency
+    agents = CustomUser.objects.filter(
+        role='agent',
+        userprofile__agency=request.user.agency_profile
+    )
+
+    if request.method == "POST":
+        selected_agent_ids = request.POST.getlist('agents')
+        # Convert to integers
+        selected_agent_ids = [int(a) for a in selected_agent_ids if a.isdigit()]
+
+        # Assign only existing users
+        valid_agents = agents.filter(id__in=selected_agent_ids)
+        property.agents.set(valid_agents)  # Use ManyToManyField
+        property.save()
+
+        messages.success(request, "Agent(s) assigned successfully.")
+        return redirect('agency_dashboard')
+
+    return render(request, 'proedge/assign_agent.html', {
+        'property': property,
+        'agents': agents
+    })
+
+
+
+@login_required
+def upload_documents(request):
+    user_profile = request.user.userprofile
+
+    if request.method == 'POST':
+        form = DocumentUploadForm(request.POST, request.FILES, instance=user_profile)
+        if form.is_valid():
+            form.save()  # Save uploaded files
+            user_profile.update_document_statuses()  # Auto-check and update status fields
+            return redirect('user_profile')  # Redirect back to the profile view page
+    else:
+        form = DocumentUploadForm(instance=user_profile)
+
+    context = {
+        'form': form,
+        'profile': user_profile  # pass profile to template for dynamic badges
+    }
+    return render(request, 'proedge/upload_documents.html', context)
 
 
 
@@ -671,30 +777,49 @@ def edit_auction(request, auction_id):
 
 @login_required
 def agency_dashboard(request):
+    """
+    Dashboard for an Agency:
+    - Shows all agents under this agency
+    - Shows all properties listed by this agency (grouped by status)
+    - Shows join requests with counts (pending, approved, rejected)
+    """
+    # ✅ Make sure this user actually owns an agency
     try:
-        agency = Agency.objects.get(owner=request.user)
+        agency = request.user.agency_profile  
     except Agency.DoesNotExist:
-        return redirect('create_agency_profile')
-    
+        return redirect("create_agency_profile")
+
+    # ✅ Get all properties linked to this agency
+    properties = Property.objects.filter(agency=agency).order_by("-created_at")
+
+    # ✅ Group properties by status for template display
+    grouped_properties = defaultdict(list)
+    for prop in properties:
+        grouped_properties[prop.status].append(prop)
+
+    # ✅ Get all agents linked to this agency
     agents = AgentProfile.objects.filter(agency=agency)
-    agency_properties = AgencyProperty.objects.filter(agency=agency)
 
-    # Fetch all join requests for this agency (approved, rejected, pending)
-    join_requests = AgentJoinRequest.objects.filter(agency=agency).order_by('-created_at')
+    # ✅ Get all join requests
+    join_requests = AgentJoinRequest.objects.filter(agency=agency).order_by("-created_at")
 
-    pending_requests_count = join_requests.count()
+    # ✅ Count join request statuses
+    pending_requests_count = join_requests.filter(is_approved=False).count()
     approved_requests_count = join_requests.filter(is_approved=True).count()
-    rejected_requests_count = join_requests.filter(is_approved=False).count()
+    rejected_requests_count = join_requests.filter(is_approved=False).exclude(is_approved=None).count()
 
-    return render(request, 'proedge/agency_dashboard.html', {
-        'agency': agency,
-        'agents': agents,
-        'properties': agency_properties,
-        'join_requests': join_requests,
-        'pending_requests_count': pending_requests_count,
-        'approved_requests_count': approved_requests_count,
-        'rejected_requests_count': rejected_requests_count,
-    })
+    context = {
+        "agency": agency,
+        "properties": properties,
+        "grouped_properties": dict(grouped_properties),
+        "agents": agents,
+        "join_requests": join_requests,
+        "pending_requests_count": pending_requests_count,
+        "approved_requests_count": approved_requests_count,
+        "rejected_requests_count": rejected_requests_count,
+    }
+
+    return render(request, "proedge/agency_dashboard.html", context)
 
 @login_required
 def agent_join_request_detail(request, request_id):

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Property, PropertyImage
+from .models import Property, PropertyImage, Agency, AgentProfile
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
@@ -9,10 +9,11 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from .forms import PropertyForm, PropertyImageForm
 from django.contrib import messages
-from .models import  Property, Interest
+from .models import  Property, Interest, Agency
 from django.http import HttpResponseForbidden
 from .forms import InterestForm
 from django.views.decorators.http import require_POST
+from django.urls import reverse
 
 
 # This view handles the listing of properties
@@ -48,42 +49,62 @@ from django.shortcuts import render, get_object_or_404
 from .models import Property
 
 
+
 def property_detail(request, pk):
     try:
         prop = Property.objects.get(pk=pk)
     except Property.DoesNotExist:
         return render(request, '404.html', status=404)
 
-    # User can view the property if it's approved or they are the owner
-    if prop.status in ['approved', 'sold'] or prop.seller == request.user:
-        # Determine dashboard URL name based on group
-        if request.user.groups.filter(name='Agents').exists():
-            dashboard_url_name = 'agent_dashboard'
-        elif request.user.groups.filter(name='Sellers').exists():
-            dashboard_url_name = 'seller_dashboard'
-        elif request.user.groups.filter(name='Buyers').exists():
-            dashboard_url_name = 'buyer_dashboard'
-        elif request.user.groups.filter(name='Tenants').exists():
-            dashboard_url_name = 'tenant_dashboard'
-        elif request.user.groups.filter(name='Landlords').exists():
-            dashboard_url_name = 'landlord_dashboard'
-        elif request.user.groups.filter(name='Auctioneers').exists():
-            dashboard_url_name = 'auctioneer_dashboard'
-        elif request.user.groups.filter(name='Bank').exists():
-            dashboard_url_name = 'bank_dashboard'
-        else:
-            dashboard_url_name = 'dashboard_redirect'
+    user_role = getattr(request.user, 'role', None)
+    allowed = False
 
-        images = prop.images.all()
+    # Allow viewing if property is approved/sold
+    if prop.status in ['approved', 'sold']:
+        allowed = True
+    else:
+        # Check if the current user owns this property based on their role
+        if user_role == 'seller' and prop.seller == request.user:
+            allowed = True
+        elif user_role == 'agency' and prop.agency == getattr(request.user, 'agency_profile', None):
+            allowed = True
+        elif user_role == 'agent' and prop.agent == request.user:
+            allowed = True
+        elif user_role == 'bank' and prop.bank == request.user:
+            allowed = True
+        elif user_role == 'auctioneer' and prop.auctioneer == request.user:
+            allowed = True
+        elif user_role == 'landlord' and prop.landlord == request.user:
+            allowed = True
+        elif user_role == 'tenant' and prop.tenant == request.user:
+            allowed = True
+        elif user_role == 'buyer' and prop.buyer == request.user:
+            allowed = True
 
-        return render(request, 'listings/property_detail.html', {
-            'property': prop,
-            'images': images,
-            'user_dashboard_url_name': dashboard_url_name,
-        })
+    if not allowed:
+        return HttpResponseForbidden("You are not allowed to view this property.")
 
-    # If the user isn't allowed to view
-    return HttpResponseForbidden("You are not allowed to view this property.")
+    # Determine the dashboard URL dynamically
+    dashboard_url_name = 'dashboard_redirect'  # fallback
+    role_dashboard_map = {
+        'seller': 'seller_dashboard',
+        'agent': 'agent_dashboard',
+        'buyer': 'buyer_dashboard',
+        'tenant': 'tenant_dashboard',
+        'landlord': 'landlord_dashboard',
+        'auctioneer': 'auctioneer_dashboard',
+        'bank': 'bank_dashboard',
+        'agency': 'agency_dashboard',
+    }
+    dashboard_url_name = role_dashboard_map.get(user_role, 'dashboard_redirect')
+
+    images = prop.images.all()
+
+    return render(request, 'listings/property_detail.html', {
+        'property': prop,
+        'images': images,
+        'user_dashboard_url_name': dashboard_url_name,
+    })
 
 # This view allows sellers or agents to submit a new property listing
 # It checks the user's role and renders a form for submitting property details
@@ -94,33 +115,36 @@ def submit_property(request):
         form = PropertyForm(request.POST, request.FILES)
         if form.is_valid():
             property = form.save(commit=False)
-            property.seller = request.user
-            property.status = 'pending'  # Ensure property is pending by default
+
+            # Map user roles to Property fields
+            role_field_map = {
+                'seller': 'seller',
+                'agent': 'agent',
+                'agency': 'agency',
+                'bank': 'bank',
+                'landlord': 'landlord',
+                'tenant': 'tenant',
+                'auctioneer': 'auctioneer',
+            }
+
+            user_role = getattr(request.user, 'role', None)
+            field_name = role_field_map.get(user_role)
+
+            if field_name == 'agency':
+                try:
+                    setattr(property, 'agency', request.user.agency_profile)
+                except Agency.DoesNotExist:
+                    return redirect('create_agency_profile')
+            elif field_name:
+                setattr(property, field_name, request.user)
+
+            property.status = 'approved'
             property.save()
             form.save_m2m()
 
-            # ✅ New redirect to upload images
+            # 🔥 UNIVERSAL redirect: all roles go to upload images
             return redirect('upload_property_images', pk=property.pk)
 
-            # ⛔️ (Optional backup - kept for reference)
-            """
-            if request.user.groups.filter(name='Sellers').exists():
-                return redirect('seller_dashboard')
-            elif request.user.groups.filter(name='Agents').exists():
-                return redirect('agent_dashboard')
-            elif request.user.groups.filter(name='Landlords').exists():
-                return redirect('landlord_dashboard')
-            elif request.user.groups.filter(name='Auctioneers').exists():
-                return redirect('auctioneer_dashboard')
-            elif request.user.groups.filter(name='Bank').exists():
-                return redirect('bank_dashboard')
-            elif request.user.groups.filter(name='Buyers').exists():
-                return redirect('buyer_dashboard')
-            elif request.user.groups.filter(name='Tenants').exists():
-                return redirect('tenant_dashboard')
-            else:
-                return redirect('dashboard_redirect')
-            """
     else:
         form = PropertyForm()
 
@@ -214,24 +238,41 @@ def redirect_user_dashboard(request):
 # It checks the user's role and ensures they are the owner of the property before allowing image uploads    
 @login_required
 def upload_property_images(request, pk):
-    property = get_object_or_404(Property, pk=pk)
+    try:
+        property = Property.objects.get(pk=pk)
+    except Property.DoesNotExist:
+        return redirect('dashboard_redirect')  # fallback if property not found
 
-    # ✅ Only allow the owner of the property to upload images
-    if property.seller != request.user:
-        return HttpResponseForbidden("You are not allowed to upload images for this property.")
+    # Ensure the logged-in user has permission to upload images
+    user_role = request.user.role
+    allowed = False
+
+    if user_role == 'seller' and property.seller == request.user:
+        allowed = True
+    elif user_role == 'agency' and property.agency == getattr(request.user, 'agency_profile', None):
+        allowed = True
+    elif user_role == 'agent':
+        agent_profile = getattr(request.user, 'agentprofile', None)
+        if agent_profile and property.agent == agent_profile:
+            allowed = True
+    elif user_role == 'bank' and property.bank == request.user:
+        allowed = True
+    elif user_role == 'auctioneer' and property.auctioneer == request.user:
+        allowed = True
+    elif user_role == 'landlord' and property.landlord == request.user:
+        allowed = True
+    elif user_role == 'tenant' and property.tenant == request.user:
+        allowed = True
+    elif user_role == 'buyer' and property.buyer == request.user:
+        allowed = True
+
+    if not allowed:
+        return redirect('dashboard_redirect')  # deny access if not owner
 
     if request.method == 'POST':
-        main_image = request.FILES.get('main_image')
-        gallery_images = request.FILES.getlist('images')
-
-        if main_image:
-            property.main_image = main_image
-            property.save()
-
-        for image in gallery_images:
-            PropertyImage.objects.create(property=property, image=image)
-
-        messages.success(request, "Images uploaded successfully.")
+        images = request.FILES.getlist('images')
+        for img in images:
+            PropertyImage.objects.create(property=property, image=img)
         return redirect('property_detail', pk=property.pk)
 
     return render(request, 'listings/upload_property_images.html', {'property': property})

@@ -4,6 +4,7 @@ from django import forms
 from .models import Property
 from .models import Bid
 from .models import Agency
+from django.contrib.auth import get_user_model
 
 # This form is used for submitting property images
 # It allows multiple file uploads and uses a ClearableFileInput widget for better user experience.
@@ -86,3 +87,5 @@ class AgencyForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+

@@ -45,30 +45,68 @@
       <p>{{ property.description }}</p>
     </div>
     <div class="col-md-4" id="seller">
-  <h5 class="mb-3 border-bottom pb-2">Seller / Agent Info</h5>
-  {% if user.is_authenticated %}
-    <div class="bg-light p-3 rounded shadow-sm d-flex align-items-center gap-3">
-      {% if property.seller.userprofile.profile_picture %}
-        <img src="{{ property.seller.userprofile.profile_picture.url }}" alt="Profile Picture"
-             class="rounded-circle border" style="width: 60px; height: 60px; object-fit: cover;">
-      {% else %}
-        <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center text-white fw-bold"
-             style="width: 60px; height: 60px;">
-          {{ property.seller.username|first|upper }}
-        </div>
-      {% endif %}
+      <h5 class="mb-3 border-bottom pb-2">Seller / Agent Info</h5>
+      {% if user.is_authenticated %}
+        <div class="bg-light p-3 rounded shadow-sm d-flex align-items-center gap-3">
 
-      <div>
-        <p class="mb-1 fw-semibold">{{ property.seller.get_full_name|default:property.seller.username }}</p>
-        <a href="{% url 'contact_seller' property.id %}" class="btn btn-danger btn-sm">
-          <i class="fas fa-envelope"></i> Contact Seller/Agent
-        </a>
-      </div>
+          {% if property.seller %}
+            {% if property.seller.userprofile.profile_picture %}
+              <img src="{{ property.seller.userprofile.profile_picture.url }}" alt="Profile Picture"
+                   class="rounded-circle border" style="width: 60px; height: 60px; object-fit: cover;">
+            {% else %}
+              <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center text-white fw-bold"
+                   style="width: 60px; height: 60px;">
+                {{ property.seller.username|first|upper }}
+              </div>
+            {% endif %}
+            <div>
+              <p class="mb-1 fw-semibold">{{ property.seller.get_full_name|default:property.seller.username }}</p>
+              <a href="{% url 'contact_seller' property.id %}" class="btn btn-danger btn-sm">
+                <i class="fas fa-envelope"></i> Contact Seller
+              </a>
+            </div>
+
+          {% elif property.agency %}
+            <div>
+              <p class="mb-1 fw-semibold">{{ property.agency.name }}</p>
+              <a href="{% url 'contact_seller' property.id %}" class="btn btn-danger btn-sm">
+                <i class="fas fa-envelope"></i> Contact Agency
+              </a>
+            </div>
+
+          {% elif property.landlord %}
+            <div>
+              <p class="mb-1 fw-semibold">{{ property.landlord.username }}</p>
+              <a href="{% url 'contact_seller' property.id %}" class="btn btn-danger btn-sm">
+                <i class="fas fa-envelope"></i> Contact Landlord
+              </a>
+            </div>
+
+          {% elif property.bank %}
+            <div>
+              <p class="mb-1 fw-semibold">{{ property.bank.username }}</p>
+              <a href="{% url 'contact_seller' property.id %}" class="btn btn-danger btn-sm">
+                <i class="fas fa-envelope"></i> Contact Bank
+              </a>
+            </div>
+
+          {% elif property.agent %}
+            <div>
+              <p class="mb-1 fw-semibold">{{ property.agent.username }}</p>
+              <a href="{% url 'contact_seller' property.id %}" class="btn btn-danger btn-sm">
+                <i class="fas fa-envelope"></i> Contact Agent
+              </a>
+            </div>
+
+          {% else %}
+            <p class="text-muted">No seller/agent information available.</p>
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="text-danger">Please <a href="{% url 'login' %}">login</a> to contact the seller/agent.</p>
+      {% endif %}
     </div>
-  {% else %}
-    <p class="text-danger">Please <a href="{% url 'login' %}">login</a> to contact the seller/agent.</p>
-  {% endif %}
-</div>
+  </div>
 
   <!-- Key Features -->
   <div id="features" class="mb-5">
@@ -81,19 +119,16 @@
     </div>
   </div>
 
-  
-<div id="lightgallery" class="row g-3">
-  {% for image in images %}
-    <div class="col-6 col-md-3">
-      <a href="{{ image.image.url }}" class="gallery-item">
-        <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Gallery Image">
-      </a>
-    </div>
-  {% endfor %}
-</div>
-
-
-
+  <!-- Gallery -->
+  <div id="lightgallery" class="row g-3">
+    {% for image in images %}
+      <div class="col-6 col-md-3">
+        <a href="{{ image.image.url }}" class="gallery-item">
+          <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Gallery Image">
+        </a>
+      </div>
+    {% endfor %}
+  </div>
 
   <!-- Map View -->
   {% if property.latitude and property.longitude %}
@@ -132,20 +167,11 @@
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script>
 
-
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     lightGallery(document.getElementById("lightgallery"), {
       selector: '.gallery-item',
-      plugins: [
-        lgZoom,
-        lgThumbnail,
-        lgFullscreen,
-        lgShare,
-        lgPager,
-        lgAutoplay,
-        lgSwipe
-      ],
+      plugins: [lgZoom],
       mode: 'lg-slide',
       speed: 600,
       thumbnail: true,
@@ -153,7 +179,5 @@
     });
   });
 </script>
-
-
 
 {% endblock %}

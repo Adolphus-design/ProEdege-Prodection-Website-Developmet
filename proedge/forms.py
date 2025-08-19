@@ -2,11 +2,13 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from .models import UserProfile
-from listings.models import Bid, Auction
+from listings.models import Bid, Auction, Property
 from .models import AgentJoinRequest
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 from .models import AgentDocument
+
+from django.contrib.auth import get_user_model
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -33,14 +35,13 @@ class EditProfileForm(forms.ModelForm):
             'years_experience': forms.NumberInput(attrs={'placeholder': 'ex. 5'}),
         }
 
-    def clean_profile_picture(self):
-        picture = self.cleaned_data.get('profile_picture')
-        if picture:
-            max_size = 2 * 1024 * 1024  # 2MB limit
-            if picture.size > max_size:
-                raise forms.ValidationError("Profile picture size cannot exceed 2MB.")
-        return picture
-    
+
+
+class DocumentUploadForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['ffc_certificate', 'id_copy', 'proof_of_address']
+
     def clean_ffc_certificate(self):
         ffc = self.cleaned_data.get('ffc_certificate')
         if ffc and ffc.size > 5 * 1024 * 1024:
@@ -58,6 +59,22 @@ class EditProfileForm(forms.ModelForm):
         if poa and poa.size > 5 * 1024 * 1024:
             raise ValidationError("Proof of address must be under 5MB.")
         return poa
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+
+        # Reset status when new docs are uploaded
+        if self.cleaned_data.get('ffc_certificate'):
+            profile.ffc_certificate_status = 'pending'
+        if self.cleaned_data.get('id_copy'):
+            profile.id_copy_status = 'pending'
+        if self.cleaned_data.get('proof_of_address'):
+            profile.proof_of_address_status = 'pending'
+
+        if commit:
+            profile.save()
+        return profile
+    
 
         
         
@@ -119,3 +136,46 @@ class EmailVerifiedAuthenticationForm(AuthenticationForm):
                 code='email_not_verified',
             )
         
+
+User = get_user_model()
+
+class AssignAgentForm(forms.Form):
+    agent = forms.ModelChoiceField(
+        queryset=UserProfile.objects.none(),  # We’ll set the queryset in the view
+        label="Select Agent",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+
+CustomUser = get_user_model()
+
+class AgencyCreateAgentForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+    ffc_certificate = forms.FileField(required=False)
+    id_copy = forms.FileField(required=False)
+    proof_of_address = forms.FileField(required=False)
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'password', 'role']
+
+    def save(self, commit=True, agency=None):
+        # Create the user
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data['password'])
+        user.role = 'agent'
+        if commit:
+            user.save()
+
+            # Create the associated UserProfile
+            profile = UserProfile.objects.create(
+                user=user,
+                ffc_certificate=self.cleaned_data.get('ffc_certificate'),
+                id_copy=self.cleaned_data.get('id_copy'),
+                proof_of_address=self.cleaned_data.get('proof_of_address')
+            )
+            if agency:
+                profile.agency = agency
+                profile.save()
+
+        return user

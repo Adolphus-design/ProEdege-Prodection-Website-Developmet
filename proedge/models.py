@@ -9,7 +9,8 @@ from django.utils import timezone
 # Create your models here.
 
 def user_profile_picture_path(instance, filename):
-    return f'profile_pictures/user_{instance.user.id}/{filename}'
+    return f"user_{instance.user.id}/profile_pictures/{filename}"
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -19,21 +20,60 @@ class UserProfile(models.Model):
     address = models.CharField(blank=False)
     is_profile_complete = models.BooleanField(default=False)
 
+    agency = models.ForeignKey('listings.Agency', on_delete=models.SET_NULL, null=True, blank=True)
+
     ffc_number = models.CharField(max_length=64, blank=True)
     years_experience = models.PositiveIntegerField(default=0)
 
-    # NEW: agent verification documents
+    # Agent verification documents
     ffc_certificate = models.FileField(upload_to='agent_docs/ffc_certificates/', blank=True, null=True)
     id_copy = models.FileField(upload_to='agent_docs/id_copies/', blank=True, null=True)
     proof_of_address = models.FileField(upload_to='agent_docs/proof_of_address/', blank=True, null=True)
 
-    # NEW: automated verification status
-    # Choices: pending, approved, rejected
-    verification_status = models.CharField(
-        max_length=20,
-        choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')],
-        default='pending'
-    )
+    # Status fields for dynamic badges
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    ffc_certificate_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    id_copy_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    proof_of_address_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
+    def check_document_status(self, document_field):
+        """
+        Checks a single document and returns 'pending', 'approved', or 'rejected'.
+        """
+        doc = getattr(self, document_field)
+        if not doc:
+            return 'pending'  # Document not uploaded
+        if not doc.name.lower().endswith(('.pdf', '.jpg', '.jpeg', '.png')):
+            return 'rejected'  # Invalid file type
+        if doc.size > 5 * 1024 * 1024:
+            return 'rejected'  # Exceeds 5MB
+        return 'approved'  # Document exists and is valid
+
+    def update_document_statuses(self):
+        """
+        Updates all document status fields based on current files.
+        """
+        self.ffc_certificate_status = self.check_document_status('ffc_certificate')
+        self.id_copy_status = self.check_document_status('id_copy')
+        self.proof_of_address_status = self.check_document_status('proof_of_address')
+        self.save()
+
+    def validate_documents(self):
+        """
+        Legacy method: Checks if all documents pass basic validation.
+        """
+        for file_field in [self.ffc_certificate, self.id_copy, self.proof_of_address]:
+            if not file_field:
+                return False
+            if not file_field.name.lower().endswith(('.pdf', '.jpg', '.jpeg', '.png')):
+                return False
+            if file_field.size > 5 * 1024 * 1024:
+                return False
+        return True
 
     def __str__(self):
         return self.user.username
@@ -91,14 +131,13 @@ class AgentJoinRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     manual_rejection_reason = models.TextField(blank=True)
 
-    # NEW: store automated checker’s overall result & notes
-    AUTO_CHOICES = [
-        ('not_run', 'Not run'),
-        ('passed', 'Passed'),
-        ('failed', 'Failed'),
-    ]
-    auto_check_status = models.CharField(max_length=20, choices=AUTO_CHOICES, default='not_run')
-    auto_check_notes = models.TextField(blank=True)  # summarize doc decisions
+    # Keep auto check fields but do not use them for now
+    auto_check_status = models.CharField(max_length=20, choices=[
+        ('not_run','Not run'), 
+        ('passed','Passed'), 
+        ('failed','Failed')
+    ], default='not_run')
+    auto_check_notes = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.agent.username} → {self.agency.name}"

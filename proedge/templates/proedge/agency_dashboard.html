@@ -33,9 +33,11 @@
     </div>
   </div>
 
-  <!-- Agent Join Requests -->
+  <div class="text-end mt-3 mb-4">
+    <a href="{% url 'submit_property' %}" class="btn btn-primary">+ List New Property</a>
+  </div>
 
-  
+  <!-- Agent Join Requests
   <h4>Agent Join Requests</h4>
   <a href="#"><strong>View Requests</strong> {{ join_requests.count }}</a>
   {% if join_requests %}
@@ -49,23 +51,15 @@
             </a>
             <small class="text-muted">requested to join your agency.</small>
             <br>
-            <span class="badge 
-              {% if req.is_approved %} bg-success 
-              {% elif req.auto_check_status == 'failed' or req.manual_rejection_reason %} bg-danger
-              {% else %} bg-warning
-              {% endif %}">
-              {% if req.is_approved %}Approved
-              {% elif req.auto_check_status == 'failed' or req.manual_rejection_reason %}Rejected
-              {% else %}Pending
-              {% endif %}
-            </span>
-            {% if req.auto_check_status == 'failed' %}
-              <br><small class="text-danger">Reason: {{ req.auto_check_notes }}</small>
-            {% elif req.manual_rejection_reason %}
-              <br><small class="text-danger">Manual rejection reason: {{ req.manual_rejection_reason }}</small>
-            {% endif %}
+            <span class="badge {% if req.is_approved %} bg-success {% elif req.manual_rejection_reason %} bg-danger {% else %} bg-warning {% endif %}">
+                {% if req.is_approved %}Approved
+                {% elif req.manual_rejection_reason %}Rejected
+                {% else %}Pending
+                {% endif %}
+              </span>
+            <br>
 
-            <!-- Show documents with manual approve/reject links -->
+           
             <ul class="mt-2">
               {% for doc in req.documents.all %}
                 <li>
@@ -89,10 +83,10 @@
           </div>
 
           <div class="mt-2 mt-md-0">
-            {% if not req.is_approved and not req.manual_rejection_reason and req.auto_check_status != 'failed' %}
+            
               <a href="{% url 'approve_join_request' req.id %}" class="btn btn-sm btn-success me-1">Approve</a>
               <a href="{% url 'reject_join_request' req.id %}" class="btn btn-sm btn-danger">Reject</a>
-            {% endif %}
+           
           </div>
         </li>
       {% endfor %}
@@ -100,60 +94,74 @@
   {% else %}
     <p class="text-muted">No join requests found.</p>
   {% endif %}
+  -->
 
-  <!-- Agents List -->
-  <div class="mb-5">
-    <h4>Agents in Your Agency</h4>
-    {% if agents %}
-      <ul class="list-group">
-        {% for agent in agents %}
-          <li class="list-group-item">
-            {{ agent.user.get_full_name|default:agent.user.username }}
-            <span class="text-muted small">({{ agent.user.email }})</span>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-muted">No agents added yet.</p>
-    {% endif %}
-  </div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+  
+  <a href="{% url 'create_agent' %}" class="btn btn-sm btn-success">+ Register New Agent</a>
+  <a href="{% url 'view_agents' %}" class="btn btn-sm btn-outline-primary">View All Agents</a>
+</div>
+
+
+
+ 
 
   <!-- Property Listings -->
-  <div>
-    <h4>Your Properties</h4>
-    {% if properties %}
-      <table class="table table-bordered table-hover align-middle mt-2">
-        <thead class="table-light">
-          <tr>
-            <th>Title</th>
-            <th>Location</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for prop in properties %}
+<div class="mt-4">
+  <h4>Your Properties</h4>
+  {% if grouped_properties %}
+    {% for status, properties in grouped_properties.items %}
+      <h5 class="mt-4">{{ status|title }} Listings</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle mt-2">
+          <thead class="table-light">
             <tr>
-              <td>{{ prop.title }}</td>
-              <td>{{ prop.location }}</td>
-              <td>R{{ prop.price|floatformat:2 }}</td>
-              <td><span class="badge bg-secondary">{{ prop.status|title }}</span></td>
-              <td>
-                <a href="{% url 'property_detail' prop.pk %}" class="btn btn-sm btn-outline-info">View</a>
-                <a href="{% url 'edit_property' prop.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-              </td>
+              <th>Title</th>
+              <th>Location</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Agent</th>
+              <th>Actions</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p class="text-muted">No properties listed yet.</p>
-    {% endif %}
-    <div class="text-end mt-3">
-      <a href="{% url 'submit_property' %}" class="btn btn-primary">+ List New Property</a>
-    </div>
-  </div>
+          </thead>
+          <tbody>
+            {% for property in properties %}
+              <tr>
+                <td>{{ property.title }}</td>
+                <td>{{ property.location }}</td>
+                <td>R{{ property.price|floatformat:2 }}</td>
+                <td><span class="badge bg-secondary">{{ property.status|title }}</span></td>
+               <td>
+                {% for agent in property.agents.all %}
+                  <span class="badge bg-info">{{ agent.get_full_name|default:agent.username }}</span>
+                {% empty %}
+                  <span class="text-muted">No agents assigned</span>
+                {% endfor %}
+              </td>
+                <td>
+                  <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-info">View</a>
+                  <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+
+                  {% if property.status == 'approved' or property.status == 'available' %}
+                    <a href="{% url 'mark_property_sold' property.pk %}" class="btn btn-sm btn-outline-danger">Mark Sold</a>
+                  {% elif property.status == 'sold' %}
+                    <a href="{% url 'mark_property_available' property.pk %}" class="btn btn-sm btn-outline-success">Mark Available</a>
+                  {% endif %}
+
+                  {% if request.user.role == 'agency' %}
+                    <a href="{% url 'assign_agent_to_property' property.pk %}" class="btn btn-sm btn-outline-primary">Assign Agent</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">No properties listed yet.</p>
+  {% endif %}
+</div>
 
 </div>
 {% endblock %}

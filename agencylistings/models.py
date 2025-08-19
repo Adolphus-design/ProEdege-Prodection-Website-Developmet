@@ -44,3 +44,4 @@ class AgencyProperty(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
