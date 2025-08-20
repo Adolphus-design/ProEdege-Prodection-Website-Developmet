@@ -167,7 +167,7 @@ def edit_property(request, pk):
     prop = get_object_or_404(Property, pk=pk)
 
     # ✅ Permission check: seller OR agency
-    if not (prop.seller == request.user or
+    if not (prop.agent == request.user or
             (request.user.role == 'agency' and prop.agency == getattr(request.user, 'agency_profile', None))):
         messages.error(request, "You are not authorized to edit this property.")
         return redirect_user_dashboard(request)
@@ -202,7 +202,7 @@ def mark_property_sold(request, pk):
     prop = get_object_or_404(Property, pk=pk)
 
     # ✅ Allow seller OR agency to mark sold
-    if prop.seller == request.user or (request.user.role == 'agency' and prop.agency == getattr(request.user, 'agency_profile', None)):
+    if prop.agent == request.user or (request.user.role == 'agency' and prop.agency == getattr(request.user, 'agency_profile', None)):
         prop.status = 'sold'
         prop.save()
         messages.success(request, 'Property marked as sold.')

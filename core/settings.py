@@ -109,19 +109,21 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
 LOGIN_URL = 'login'
 
-# Email backend configuration
-"""EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'kamogelotshehla@gmail.com'
-EMAIL_HOST_PASSWORD = 'rorsmoxjwmmfkolq'
-DEFAULT_FROM_EMAIL = 'kamogelotshehla@gmail.com'"""
+# --- ProEdge SMTP email ---
+"""EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "mail20.domains.co.za"
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True  # since port 465 is SSL
+EMAIL_HOST_USER = "noreply@proedgepropertygroup.co.za"
+EMAIL_HOST_PASSWORD = "Adolphus@0917"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+EMAIL_TIMEOUT = 30"""
 
 
 # Email settings for local development
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # This is the email address that will appear in the "From" field
-DEFAULT_FROM_EMAIL = "no-reply@proedge.local"
+#DEFAULT_FROM_EMAIL = "no-reply@proedge.local"
 

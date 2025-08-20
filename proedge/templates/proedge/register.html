@@ -1,56 +1,136 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
-{% block title %}Register | ProEdge{% endblock %}
+{% load widget_tweaks %}
+{% block title %}Login / Register | ProEdge{% endblock %}
 
 {% block content %}
+<style>
+  /* Page background */
+  body {
+    background: url("{% static 'images/login-bg.jpg' %}") no-repeat center center fixed;
+    background-size: cover;
+  }
 
-    <h2>Create Your Account</h2>
+  /* Overlay for forms */
+  .form-overlay {
+    background-color: rgba(0,0,0,0.6);
+    padding: 2rem;
+    border-radius: 10px;
+    color: white;
+  }
 
-   
+  .form-label {
+    text-transform: uppercase;
+    font-weight: 600;
+  }
 
-     <h2>Create Your Account</h2>
+  .form-control {
+    background-color: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 5px;
+    color: black;
+  }
 
-    <form method="post" class="registration-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
-        <button type="submit">Register</button>
-    </form>
+  .form-control:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(184,7,7,0.5);
+  }
 
+  .btn-proedge {
+    background-color: #b80707;
+    color: white;
+  }
 
-<!--
-    <div class="register-container">
-  <div class="form-card">
-    <h2>Sign Up for a <span class="highlight">free</span> account</h2>
-    <form method="POST" novalidate>
-        {{ form.as_p }}
-        {% csrf_token %}
-      <div class="form-grid">
-        <div class="form-group">
-          {{ form.username.label_tag }}
-          {{ form.username }}
-        </div>
-        <div class="form-group">
-          {{ form.contact_number.label_tag }}
-          {{ form.contact_number }}
-        </div>
-        <div class="form-group">
-          {{ form.whatsapp_number.label_tag }}
-          {{ form.whatsapp_number }}
-        </div>
-        <div class="form-group">
-          {{ form.password1.label_tag }}
-          {{ form.password1 }}
-        </div>
-        <div class="form-group">
-          {{ form.password2.label_tag }}
-          {{ form.password2 }}
-        </div>
+  .btn-proedge:hover {
+    background-color: #e30f0f;
+    color: white;
+  }
+
+  /* Join benefits */
+  .benefits {
+    background-color: rgba(255,255,255,0.85);
+    padding: 2rem;
+    border-radius: 10px;
+    color: black;
+  }
+
+  .benefits h4 {
+    color: #b80707;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 1200px) {
+    .login-col, .register-col, .benefits-col {
+      margin-bottom: 2rem;
+    }
+  }
+</style>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <!-- Login Section -->
+    <div class="col-xl-3 col-lg-4 col-md-6 login-col">
+      <div class="form-overlay">
+        <h3 class="mb-4">Login</h3>
+        <form method="post" action="{% url 'login' %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <label class="form-check-label">
+                <input type="checkbox" name="remember"> Remember me
+              </label>
+            </div>
+            <a href="#" class="text-danger">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn btn-proedge w-100">Login</button>
+        </form>
       </div>
-      <button type="submit">Register</button>
-    </form>
-  </div>
-</div>-->
+    </div>
 
-    
+    <!-- Register Section -->
+    <div class="col-xl-4 col-lg-5 col-md-6 register-col">
+      <div class="form-overlay">
+        <h3 class="mb-4">Register</h3>
+        <form method="post" action="{% url 'register' %}">
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label|upper }}</label>
+              {{ field|add_class:"form-control" }}
+              {% if field.help_text %}
+                <small class="text-white">{{ field.help_text }}</small>
+              {% endif %}
+              {% for error in field.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-proedge w-100 mt-2">Register</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Join Benefits Section -->
+    <div class="col-xl-3 col-lg-4 benefits-col">
+      <div class="benefits">
+        <h4>Why Join ProEdge?</h4>
+        <ul>
+          <li>Access thousands of property listings.</li>
+          <li>Connect directly with sellers and agents.</li>
+          <li>Track your favorite properties easily.</li>
+          <li>Receive notifications on new listings.</li>
+          <li>Boost your own listings to reach more buyers.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

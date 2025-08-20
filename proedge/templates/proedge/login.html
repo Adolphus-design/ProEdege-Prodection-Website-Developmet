@@ -1,26 +1,52 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
 
 {% block title %}Login | ProEdge{% endblock %}
 
 {% block content %}
-<div class="login-container">
-  <h2>Login</h2>
+<style>
+  /* Background for the entire login page */
+  body {
+    background: url("{% static 'images/login-bg.jpg' %}") no-repeat center center fixed;
+    background-size: cover;
+  }
 
-  <form method="post" class="login-form">
-    {% csrf_token %}
+  /* Optional: add a slight overlay behind the form */
+  .login-overlay {
+    background-color: rgba(0,0,0,0.5); /* dark transparent */
+    padding: 2rem;
+    border-radius: 10px;
+  }
+</style>
 
-    {% if form.non_field_errors %}
-      <div style="color: red; margin-bottom: 10px;">
-        {{ form.non_field_errors }}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <!-- Login Section -->
+    <div class="col-md-5 mb-4">
+      <div class="login-overlay text-white">
+        <h3 class="mb-4">Login</h3>
+        <form method="post" action="{% url 'login' %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="username" class="form-label text-uppercase">Username</label>
+            <input type="text" name="username" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label text-uppercase">Password</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <label class="form-check-label">
+                <input type="checkbox" name="remember"> Remember me
+              </label>
+            </div>
+            <a href="#" class="text-danger">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn btn-danger w-100">Login</button>
+        </form>
       </div>
-    {% endif %}
-
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-dark">Login</button>
-  </form>
-
-  <p class="register-link">
-    Don't have an account? <a href="{% url 'register' %}">Register here</a>
-  </p>
+    </div>
+  </div>
 </div>
 {% endblock %}

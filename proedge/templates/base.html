@@ -32,46 +32,65 @@
 <!-- Navbar -->
 <header>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm">
-    <div class="container">
-      <!-- Logo -->
-      <a class="navbar-brand fw-bold" href="/">
-        <img src="{% static 'images/logo.png' %}" alt="ProEdge Logo" style="height: 40px;">
-      </a>
+  <div class="container">
+    <!-- Logo -->
+    <a class="navbar-brand fw-bold" href="/">
+      <img src="{% static 'images/logo.png' %}" alt="ProEdge Logo" style="height: 40px;">
+    </a>
 
-      <!-- Toggler -->
-      <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    <!-- Toggler -->
+    <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-      <!-- Nav links -->
-      <div class="collapse navbar-collapse" id="navbarMain">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active {% if request.path == '/' or request.path == '/properties/' %}active{% endif %}" href="{% url 'property_list' %}">All Properties</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.path == '/rent/' %}active{% endif %}" href="{% url 'property_list' %}">Rent Properties</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.path == '/bank/' %}active{% endif %}" href="{% url 'property_list' %}">Bank Properties</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.path == '/auctions/' %}active{% endif %}" href="{% url 'property_list' %}">Auction Properties</a>
-          </li>
-        </ul>
+    <!-- Nav links -->
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == '/' or request.path == '/properties/' %}active{% endif %}" href="{% url 'property_list' %}">All Properties</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == '/rent/' %}active{% endif %}" href="{% url 'property_list' %}">Rent Properties</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == '/bank/' %}active{% endif %}" href="{% url 'property_list' %}">Bank Properties</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == '/auctions/' %}active{% endif %}" href="{% url 'property_list' %}">Auction Properties</a>
+        </li>
+      </ul>
 
-        <!-- Auth buttons -->
-        <div class="d-flex">
-            {% if user.is_authenticated %}
-              <a class="btn btn-danger px-4 fw-semibold" href="{% url 'logout' %}">Logout</a>
-            {% else %}
-              <a class="btn btn-outline-light me-2 px-4 fw-semibold" href="{% url 'login' %}">Login</a>
-              <a class="btn btn-danger px-4 fw-semibold" href="{% url 'register' %}">Register</a>
-            {% endif %}
-        </div>
+      <!-- User initials dropdown -->
+      <div class="d-flex align-items-center">
+        {% if user.is_authenticated %}
+          <div class="dropdown d-flex align-items-center">
+            <!-- Initials + Name clickable -->
+            <a class="d-flex align-items-center text-decoration-none text-white me-1" href="{% url 'dashboard_redirect' %}">
+              <div class="rounded-circle bg-danger text-white d-flex justify-content-center align-items-center fw-bold" 
+                   style="width: 40px; height: 40px;">
+                {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+              </div>
+              <span class="ms-2">{{ user.get_full_name|default:user.username }}</span>
+            </a>
+
+            <!-- Enlarged Dropdown arrow -->
+            <a class="dropdown-toggle text-white fs-5" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="margin-left: 5px;"></a>
+
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-1"></i> Settings</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+            </ul>
+          </div>
+        {% else %}
+          <a class="btn btn-outline-light me-2 px-4 fw-semibold" href="{% url 'login' %}">Login</a>
+          <a class="btn btn-danger px-4 fw-semibold" href="{% url 'register' %}">Register</a>
+        {% endif %}
       </div>
     </div>
-  </nav>
+  </div>
+</nav>
+
 </header>
 
 <div class="container " style="margin-top:80px;">
@@ -88,66 +107,158 @@
   {% block content %}{% endblock %}
 </main>
 <hr>
-<div>
-  <div>
-    <ul>
-      <a href="#">Terms & Condtions</a>
-    </ul>
-    <ul>Contact Us
-      <li>Phone:</li>
-      <li>Email</li>
-      <li>Fax</li>
-    </ul>
-    <ul>Services</ul>
-    <Address>
-      <li>Province</li>
-      <li>Street</li>
-      <li>Postal Code</li>
-    </Address>
-  </div>
-</div>
 <!-- Footer -->
-<footer class="text-center text-muted mt-5 py-3 border-top">
+<!-- Footer -->
+<footer class="bg-dark text-white mt-5 pt-5 pb-3 border-top">
+    <div class="container">
+        <div class="row">
 
-          <style>
+            <!-- Links -->
+            <div class="col-6 col-md-3 mb-3">
+                <h6 class="fw-bold mb-2">Quick Links</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-white text-decoration-none footer-link">Terms & Conditions</a></li>
+                    <li><a href="#" class="text-white text-decoration-none footer-link">Privacy Policy</a></li>
+                    <li><a href="#" class="text-white text-decoration-none footer-link">About Us</a></li>
+                </ul>
+            </div>
 
-            
-            .footer-link {
-                display: inline-block;
-                margin: 0 10px;
-                padding: 8px 15px;
-                border-radius: 5px;
-                background: rgba(3, 3, 3, 0.1);
-                color: rgb(14, 2, 2);
-                text-decoration: none;
-                transition: all 0.3s ease;
-            }
-    
-            .footer-link:hover {
-                background-color: rgba(184, 7, 7, 0.3);
-                color: #b80707;
-                transform: scale(1.05);
-            }
-    
-            .footer-version {
-                margin-top: 10px;
-                font-size: 0.9rem;
-                color: #bb0e0e;
-            }
-        </style>
-    
-        <div>
+            <!-- Contact -->
+            <div class="col-6 col-md-3 mb-3">
+                <h6 class="fw-bold mb-2">Contact Us</h6>
+                <ul class="list-unstyled">
+                    <li>📞 Phone: +27 123 456 789</li>
+                    <li>📧 Email: <a href="mailto:info@youthportal.com" class="text-white footer-link">info@youthportal.com</a></li>
+                    <li>📠 Fax: +27 987 654 321</li>
+                </ul>
+            </div>
 
-            <a href="mailto:info@youthportal.com" class="footer-link">📧 Email</a>
-            <a href="https://facebook.com" class="footer-link" target="https://www.facebook.com/share/1DmfHrHeEt/?mibextid=LQQJ4d">📘 Facebook</a>
-            <a href="https://twitter.com" class="footer-link" target="_blank">🐦 Twitter</a>
-            <a href="https://wa.me/1234567890" class="footer-link" target="_blank">💬 WhatsApp</a>
+            <!-- Services -->
+            <div class="col-6 col-md-3 mb-3">
+                <h6 class="fw-bold mb-2">Services</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-white text-decoration-none footer-link">Property Listings</a></li>
+                    <li><a href="#" class="text-white text-decoration-none footer-link">Auctions</a></li>
+                    <li><a href="#" class="text-white text-decoration-none footer-link">Valuations</a></li>
+                </ul>
+            </div>
+
+            <!-- Address -->
+            <div class="col-6 col-md-3 mb-3">
+                <h6 class="fw-bold mb-2">Address</h6>
+                <ul class="list-unstyled">
+                    <li>Province: Gauteng</li>
+                    <li>Street: 123 Main St</li>
+                    <li>Postal Code: 2000</li>
+                </ul>
+            </div>
         </div>
-    
 
+        <!-- Social Media -->
+        <div class="d-flex justify-content-center gap-2 mb-3 flex-wrap">
+          <a href="mailto:info@youthportal.com" class="social-btn" title="Email Us">📧 Email</a>
+          <a href="https://facebook.com" target="_blank" class="social-btn" title="Facebook">📘 Facebook</a>
+          <a href="https://twitter.com" target="_blank" class="social-btn" title="Twitter">🐦 Twitter</a>
+          <a href="https://wa.me/1234567890" target="_blank" class="social-btn" title="WhatsApp">💬 WhatsApp</a>
+      </div>
 
-  &copy; {{ now|date:"Y" }} ProEdge Property Group | Version 0.1 | developed by Gray-Tech Solutions
+        <!-- Copyright -->
+        <div class="text-center text-muted footer-version mt-3">
+            &copy; {{ now|date:"Y" }} ProEdge Property Group | Version 0.1 | Developed by Gray-Tech Solutions
+        </div>
+    </div>
 </footer>
+
+<!-- Footer Styling -->
+<style>
+    .footer-link {
+        display: inline-block;
+        margin: 4px 0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: rgba(184, 7, 7, 0.1);
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .footer-link:hover {
+        background: #b80707;
+        color: #fff;
+        transform: scale(1.05);
+        text-decoration: none;
+    }
+
+    @media (max-width: 767px) {
+        footer .row > div {
+            text-align: center;
+        }
+
+        footer .d-flex.justify-content-center {
+            justify-content: center;
+        }
+    }
+</style>
+
+
+<!-- Footer Styling -->
+<style>
+    .footer-link {
+        display: inline-block;
+        margin: 4px 0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: rgba(184, 7, 7, 0.1);
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .footer-link:hover {
+        background: #b80707;
+        color: #fff;
+        transform: scale(1.05);
+        text-decoration: none;
+    }
+
+    @media (max-width: 767px) {
+        footer .row > div {
+            text-align: center;
+        }
+
+        footer .d-flex.justify-content-center {
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- Social Button Styling -->
+<style>
+    .social-btn {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        background-color: #000;
+        color: #b80707;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 1px solid #b80707;
+    }
+
+    .social-btn:hover {
+        background-color: #b80707;
+        color: #fff;
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    @media (max-width: 767px) {
+        .social-btn {
+            flex: 1 1 45%;
+            text-align: center;
+            margin: 5px 2px;
+        }
+    }
+</style>
 
 <!-- Scripts -->
 

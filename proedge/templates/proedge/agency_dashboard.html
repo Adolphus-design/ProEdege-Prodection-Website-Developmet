@@ -106,7 +106,7 @@
 
  
 
-<!-- Property Listings -->
+  <!-- Property Listings -->
 <div class="mt-4">
   <h4>Your Properties</h4>
   {% if grouped_properties %}
@@ -130,30 +130,14 @@
                 <td>{{ property.title }}</td>
                 <td>{{ property.location }}</td>
                 <td>R{{ property.price|floatformat:2 }}</td>
-                <td>
-                  <span class="badge bg-secondary">{{ property.status|title }}</span>
-                </td>
-
-                <!-- Updated Agent column -->
-                <td>
-                  {% if property.agent %}
-                    <span class="badge bg-primary">
-                      {{ property.agent.get_full_name|default:property.agent.username }}
-                    </span>
-                  {% endif %}
-
-                  {% for agent in property.agents.all %}
-                    <span class="badge bg-info">
-                      {{ agent.get_full_name|default:agent.username }}
-                    </span>
-                  {% empty %}
-                    {% if not property.agent %}
-                      <span class="text-muted">No agents assigned</span>
-                    {% endif %}
-                  {% endfor %}
-                </td>
-                <!-- End Agent column -->
-
+                <td><span class="badge bg-secondary">{{ property.status|title }}</span></td>
+               <td>
+                {% for agent in property.agents.all %}
+                  <span class="badge bg-info">{{ agent.get_full_name|default:agent.username }}</span>
+                {% empty %}
+                  <span class="text-muted">No agents assigned</span>
+                {% endfor %}
+              </td>
                 <td>
                   <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-info">View</a>
                   <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
