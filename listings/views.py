@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect
 from .forms import PropertyForm, PropertyImageForm
 from django.contrib import messages
 from .models import  Property, Interest, Agency
+from listings.models import Property
 from django.http import HttpResponseForbidden
 from .forms import InterestForm
 from django.views.decorators.http import require_POST
@@ -349,3 +350,7 @@ def delete_property_image(request, image_id):
     image.delete()
     messages.success(request, "Image deleted successfully.")
     return redirect('edit_property', pk=image.property.pk)
+
+
+
+

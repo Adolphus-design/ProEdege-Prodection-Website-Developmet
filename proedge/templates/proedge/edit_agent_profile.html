@@ -1,13 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-5">
-  <h2>Edit Profile: {{ agent.first_name }} {{ agent.last_name }}</h2>
 
-  <form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Save Changes</button>
-    <a href="{% url 'agency_agent_detail' agent.pk %}" class="btn btn-secondary">Cancel</a>
-  </form>
+{% load widget_tweaks %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <h2 class="mb-4 text-dark text-center">Edit Agent Profile: {{ agent.first_name }} {{ agent.last_name }}</h2>
+
+      <form method="POST" enctype="multipart/form-data" class="p-5 bg-dark bg-opacity-75 rounded shadow-lg">
+        {% csrf_token %}
+
+        <!-- Profile Picture -->
+        {% if agent.profile_picture %}
+        <div class="mb-4 text-center">
+          <p class="text-white">Current Profile Picture</p>
+          <img src="{{ agent.profile_picture.url }}" class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+        </div>
+        {% endif %}
+
+        <div class="row g-3">
+          {% for field in form %}
+          <div class="col-md-6 col-12">
+            <label for="{{ field.id_for_label }}" class="form-label text-uppercase text-white">{{ field.label }}</label>
+            {{ field|add_class:"form-control bg-light text-dark rounded shadow-sm" }}
+            {% if field.help_text %}
+              <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+              <div class="text-danger mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between">
+          <button type="submit" class="btn btn-danger fw-bold rounded-pill px-5 shadow-sm">
+            Save Changes
+          </button>
+          <a href="{% url 'agency_agent_detail' agent.pk %}" 
+             class="btn btn-dark fw-bold rounded-pill px-5 shadow-sm">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}

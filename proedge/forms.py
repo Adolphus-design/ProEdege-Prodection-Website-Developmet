@@ -37,6 +37,8 @@ class EditProfileForm(forms.ModelForm):
             'years_experience': forms.NumberInput(attrs={'placeholder': 'ex. 5'}),
         }
 
+        
+
 
 
 class DocumentUploadForm(forms.ModelForm):
@@ -158,6 +160,7 @@ class AgencyCreateAgentForm(forms.ModelForm):
     ffc_certificate = forms.FileField(required=False)
     id_copy = forms.FileField(required=False)
     proof_of_address = forms.FileField(required=False)
+    profile_picture = forms.ImageField(required=False)  # ✅ Added profile picture
 
     class Meta:
         model = CustomUser
@@ -182,29 +185,18 @@ class AgencyCreateAgentForm(forms.ModelForm):
 
             # Update or create UserProfile to avoid UNIQUE constraint error
             profile, created = UserProfile.objects.get_or_create(user=user)
+
             if self.cleaned_data.get('ffc_certificate'):
                 profile.ffc_certificate = self.cleaned_data['ffc_certificate']
             if self.cleaned_data.get('id_copy'):
                 profile.id_copy = self.cleaned_data['id_copy']
             if self.cleaned_data.get('proof_of_address'):
                 profile.proof_of_address = self.cleaned_data['proof_of_address']
+            if self.cleaned_data.get('profile_picture'):  # ✅ Save profile picture
+                profile.profile_picture = self.cleaned_data['profile_picture']
+
             if agency:
                 profile.agency = agency
             profile.save()
-
-            # Optional: send welcome email only if created
-            """if created:
-                try:
-                    send_mail(
-                        subject="Welcome to ProEdge Property Group",
-                        message=f"Hi {user.first_name},\n\n"
-                                f"Your agent account has been created by {agency.name}.\n"
-                                "You can now log in using your credentials.\n\n- ProEdge Team",
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[user.email],
-                        fail_silently=True,
-                    )
-                except Exception as e:
-                    print(f"Failed to send email: {e}")"""
 
         return user

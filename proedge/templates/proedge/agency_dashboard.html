@@ -1,40 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container my-5">
+<div class="container my-5 text-white" style="background-color: #000; border-radius: 10px; padding: 20px;">
 
   <!-- Top Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Agency Dashboard</h2>
-    <a href="{% url 'edit_agency_profile' %}" class="btn btn-outline-primary">✏️ Edit Agency Profile</a>
+    <h2 class="mb-0 text-white">Agency Dashboard</h2>
+    <a href="{% url 'edit_agency_profile' %}" class="btn btn-danger text-white">✏️ Edit Agency Profile</a>
   </div>
 
   <!-- Welcome Banner -->
   <div class="mb-4">
-    <h5>Welcome, {{ request.user.get_full_name }}</h5>
-    <a href="{% url 'view_agency_profile' %}" class="btn btn-outline-dark btn-sm">🏢 View Agency</a>
+    <h5 class="text-white">Welcome, {{ request.user.get_full_name }}</h5>
+    <a href="{% url 'view_agency_profile' %}" class="btn btn-danger btn-sm text-white">🏢 View Agency</a>
   </div>
+
+</div>
+
 
   <!-- Summary Cards -->
-  <div class="row g-3 mb-4">
+ <div class="row g-3 mb-4">
     <div class="col-md-3 col-sm-6">
-      <div class="bg-primary text-white rounded p-3 text-center">
-        <strong>Total Listings</strong><br>{{ properties.count }}
-      </div>
+        <div class="bg-dark text-white rounded p-3 text-center shadow-sm">
+            <strong>Total Listings</strong><br>{{ properties.count }}
+        </div>
     </div>
     <div class="col-md-3 col-sm-6">
-      <div class="bg-success text-white rounded p-3 text-center">
-        <strong>Approved Agents</strong><br>{{ agents.count }}
-      </div>
+        <div class="bg-danger text-white rounded p-3 text-center shadow-sm">
+            <strong>Approved Agents</strong><br>{{ agents.count }}
+        </div>
     </div>
     <div class="col-md-3 col-sm-6">
-      <div class="bg-warning text-dark rounded p-3 text-center">
-        <strong>Pending Requests</strong><br>{{ join_requests.count }}
-      </div>
+        <div class="bg-black text-white rounded p-3 text-center shadow-sm">
+            <strong>Pending Requests</strong><br>{{ join_requests.count }}
+        </div>
     </div>
-  </div>
+</div>
+
 
   <div class="text-end mt-3 mb-4">
-    <a href="{% url 'submit_property' %}" class="btn btn-primary">+ List New Property</a>
+    <a href="{% url 'submit_property' %}" class="btn btn-danger">+ List New Property</a>
   </div>
 
   <!-- Agent Join Requests
@@ -97,9 +101,9 @@
   -->
 
   <div class="d-flex justify-content-between align-items-center mb-3">
-  
-  <a href="{% url 'create_agent' %}" class="btn btn-sm btn-success">+ Register New Agent</a>
-  <a href="{% url 'view_agents' %}" class="btn btn-sm btn-outline-primary">View All Agents</a>
+
+  <a href="{% url 'create_agent' %}" class="btn btn-sm btn-danger">+ Register New Agent</a>
+  <a href="{% url 'view_agents' %}" class="btn btn-sm btn-dark">View All Agents</a>
 </div>
 
 
@@ -108,49 +112,64 @@
 
   <!-- Property Listings -->
 <div class="mt-4">
-  <h4>Your Properties</h4>
+  <h4 class="fw-bold">Your Properties</h4>
   {% if grouped_properties %}
     {% for status, properties in grouped_properties.items %}
-      <h5 class="mt-4">{{ status|title }} Listings</h5>
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle mt-2">
-          <thead class="table-light">
+      <h5 class="mt-4 text-primary">{{ status|title }} Listings</h5>
+      <div class="table-responsive shadow-sm rounded-3">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-dark text-white">
             <tr>
-              <th>Title</th>
-              <th>Location</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Agent</th>
-              <th>Actions</th>
+              <th scope="col">Title</th>
+              <th scope="col">Location</th>
+              <th scope="col">Price</th>
+              <th scope="col">Status</th>
+              <th scope="col">Agent</th>
+              <th scope="col" class="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for property in properties %}
               <tr>
-                <td>{{ property.title }}</td>
+                <td class="fw-semibold">{{ property.title }}</td>
                 <td>{{ property.location }}</td>
-                <td>R{{ property.price|floatformat:2 }}</td>
-                <td><span class="badge bg-secondary">{{ property.status|title }}</span></td>
-               <td>
-                {% for agent in property.agents.all %}
-                  <span class="badge bg-info">{{ agent.get_full_name|default:agent.username }}</span>
-                {% empty %}
-                  <span class="text-muted">No agents assigned</span>
-                {% endfor %}
-              </td>
+                <td class="text-success">R{{ property.price|floatformat:2 }}</td>
                 <td>
-                  <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-info">View</a>
-                  <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                  <span class="badge 
+                    {% if property.status == 'approved' or property.status == 'available' %}bg-success
+                    {% elif property.status == 'sold' %}bg-danger
+                    {% else %}bg-secondary{% endif %}">
+                    {{ property.status|title }}
+                  </span>
+                </td>
+                <td>
+                  {% for agent in property.agents.all %}
+                    <span class="badge bg-danger">{{ agent.get_full_name|default:agent.username }}</span>
+                  {% empty %}
+                    <span class="text-muted">No agents assigned</span>
+                  {% endfor %}
+                </td>
+                <td class="text-center">
+  <div class="d-flex flex-wrap gap-2 justify-content-center">
 
-                  {% if property.status == 'approved' or property.status == 'available' %}
-                    <a href="{% url 'mark_property_sold' property.pk %}" class="btn btn-sm btn-outline-danger">Mark Sold</a>
-                  {% elif property.status == 'sold' %}
-                    <a href="{% url 'mark_property_available' property.pk %}" class="btn btn-sm btn-outline-success">Mark Available</a>
-                  {% endif %}
+    <!-- View (light outline for contrast) -->
+                    <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-dark text-dark">View</a>
 
-                  {% if request.user.role == 'agency' %}
-                    <a href="{% url 'assign_agent_to_property' property.pk %}" class="btn btn-sm btn-outline-primary">Assign Agent</a>
-                  {% endif %}
+                    <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-dark text-white">Edit</a>
+
+                    <!-- Status actions (red = sold, dark = available) -->
+                    {% if property.status == 'approved' or property.status == 'available' %}
+                      <a href="{% url 'mark_property_sold' property.pk %}" class="btn btn-sm btn-danger text-white">Mark Sold</a>
+                    {% elif property.status == 'sold' %}
+                      <a href="{% url 'mark_property_available' property.pk %}" class="btn btn-sm btn-dark text-white">Mark Available</a>
+                    {% endif %}
+
+                    <!-- Assign Agent (red for consistency with ProEdge theme) -->
+                    {% if request.user.role == 'agency' %}
+                      <a href="{% url 'assign_agent_to_property' property.pk %}" class="btn btn-sm btn-dark text-white">Assign Agent</a>
+                    {% endif %}
+                    
+                  </div>
                 </td>
               </tr>
             {% endfor %}
@@ -163,5 +182,4 @@
   {% endif %}
 </div>
 
-</div>
 {% endblock %}

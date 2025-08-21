@@ -1,45 +1,83 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-lg mx-auto mt-10 bg-white shadow-md rounded-xl p-6">
-    <h2 class="text-xl font-semibold mb-4">Edit Your Profile</h2>
 
-    <!-- Profile Picture Preview -->
-    {% if user.userprofile.profile_picture %}
-    <div class="flex justify-center mb-4">
-        <img src="{{ user.userprofile.profile_picture.url }}" 
-             class="w-32 h-32 rounded-full  border-4 border-blue-600 object-cover" style="width: 150px; height: 300px; object-fit: cover;">
-    </div>
-    {% endif %}
+{% load widget_tweaks %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8 col-12">
+      <div class="p-5 bg-dark bg-opacity-75 rounded shadow-lg">
+        <h2 class="text-center text-white mb-4">Edit Your Profile</h2>
 
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        
-        <!-- Personal Info Fields -->
-        <div class="mb-4">
-            {{ form.full_name.label_tag }} {{ form.full_name }}
+        <!-- Profile Picture Preview -->
+        {% if user.userprofile.profile_picture %}
+        <div class="text-center mb-4">
+          <img src="{{ user.userprofile.profile_picture.url }}" 
+               class="rounded-circle border border-danger shadow-sm"
+               style="width: 150px; height: 150px; object-fit: cover;">
         </div>
-        <div class="mb-4">
-            {{ form.contact_number.label_tag }} {{ form.contact_number }}
-        </div>
-        <div class="mb-4">
-            {{ form.address.label_tag }} {{ form.address }}
-        </div>
-        <div class="mb-4">
-            {{ form.ffc_number.label_tag }} {{ form.ffc_number }}
-        </div>
-        <div class="mb-4">
-            {{ form.years_experience.label_tag }} {{ form.years_experience }}
-        </div>
+        {% endif %}
 
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
 
+          <!-- Form Fields 
+          <div class="mb-3">
+            <label for="{{ form.full_name.id_for_label }}" class="form-label text-uppercase text-white">
+              Full Name
+            </label>
+            {{ User.full_name|add_class:"form-control bg-light text-dark rounded shadow-sm" }}
+            {% for error in form.full_name.errors %}
+              <div class="text-danger mt-1">{{ error }}</div>
+            {% endfor %}
+          </div> -->
 
-        <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <div class="mb-3">
+            <label for="{{ form.contact_number.id_for_label }}" class="form-label text-uppercase text-white">
+              Contact Number
+            </label>
+            {{ form.contact_number|add_class:"form-control bg-light text-dark rounded shadow-sm" }}
+            {% for error in form.contact_number.errors %}
+              <div class="text-danger mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.address.id_for_label }}" class="form-label text-uppercase text-white">
+              Address
+            </label>
+            {{ form.address|add_class:"form-control bg-light text-dark rounded shadow-sm" }}
+            {% for error in form.address.errors %}
+              <div class="text-danger mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.ffc_number.id_for_label }}" class="form-label text-uppercase text-white">
+              FFC Number
+            </label>
+            {{ form.ffc_number|add_class:"form-control bg-light text-dark rounded shadow-sm" }}
+            {% for error in form.ffc_number.errors %}
+              <div class="text-danger mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.years_experience.id_for_label }}" class="form-label text-uppercase text-white">
+              Years of Experience
+            </label>
+            {{ form.years_experience|add_class:"form-control bg-light text-dark rounded shadow-sm" }}
+            {% for error in form.years_experience.errors %}
+              <div class="text-danger mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <button type="submit" class="btn btn-danger w-100 mt-4 fw-bold rounded-pill shadow-sm">
             Save Profile
-        </button>
-    </form>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
-
-
-
 {% endblock %}

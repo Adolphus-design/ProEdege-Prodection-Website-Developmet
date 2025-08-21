@@ -4,6 +4,14 @@
 {% block content %}
 <div class="container my-5">
 
+    {% if request.user.is_authenticated %}
+<div class="mb-3">
+  <a href="{% url 'dashboard_redirect' %}" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm">
+    ← Back to Dashboard
+  </a>
+</div>
+{% endif %}
+
   <!-- Main Image + Overlay -->
   {% if images %}
     <div class="position-relative mb-4">
