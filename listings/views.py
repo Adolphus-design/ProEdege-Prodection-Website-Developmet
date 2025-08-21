@@ -148,6 +148,15 @@ def submit_property(request):
             elif field_name:
                 setattr(property, field_name, request.user)
 
+            # -----------------------------
+            # SAVE LATITUDE AND LONGITUDE
+            # -----------------------------
+            lat = form.cleaned_data.get('latitude')
+            lng = form.cleaned_data.get('longitude')
+            if lat and lng:
+                property.latitude = lat
+                property.longitude = lng
+
             property.status = 'approved'
             property.save()
             form.save_m2m()

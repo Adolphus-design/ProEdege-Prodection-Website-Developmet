@@ -41,8 +41,8 @@ class Property(models.Model):
     listing_type = models.CharField(max_length=20, choices=LISTING_TYPE_CHOICES, default='')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
 
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=100, decimal_places=50, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=100, decimal_places=50, null=True, blank=True)
     floor_plan = models.FileField(upload_to='floor_plans/', null=True, blank=True)
 
     # Property specs

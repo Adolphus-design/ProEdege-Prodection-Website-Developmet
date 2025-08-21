@@ -256,37 +256,39 @@
   </div>
 
 <!-- Map View -->
-<div id="map" class="mb-5">
-    <h5 class="mb-3 border-bottom pb-2">Map View</h5>
+<div id="map" class="mb-5" style="height: 400px;"></div>
 
-    {% if property.latitude and property.longitude %}
-        <div id="map-container" class="rounded-lg shadow-lg w-full h-64 sm:h-80 md:h-96">
-        </div>
+{% if property.latitude and property.longitude %}
+<script>
+  function initMap() {
+    const propertyLocation = { 
+      lat: {{ property.latitude|default:"0" }}, 
+      lng: {{ property.longitude|default:"0" }} 
+    };
 
-        <script>
-          function initMap() {
-            const location = { lat: {{ property.latitude }}, lng: {{ property.longitude }} };
-            const map = new google.maps.Map(document.getElementById("map-container"), {
-              zoom: 15,
-              center: location,
-              mapTypeControl: false,
-              streetViewControl: false,
-              fullscreenControl: false
-            });
-            new google.maps.Marker({ position: location, map: map });
-          }
-        </script>
+    const map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 15,
+      center: propertyLocation,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false
+    });
 
-        <script async
-            src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
-        </script>
+    new google.maps.Marker({
+      position: propertyLocation,
+      map: map
+    });
+  }
+</script>
 
-    {% else %}
-        <div class="rounded-lg shadow-lg w-full h-64 sm:h-80 md:h-96 flex items-center justify-center bg-gray-100 text-gray-500 text-center">
-            <p>No location coordinates provided for this property.</p>
-        </div>
-    {% endif %}
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCd3bl10Viq12p8pxNP2dPqV-veDWfF5ac&callback=initMap">
+</script>
+{% else %}
+<div class="rounded-lg shadow-lg w-full h-64 flex items-center justify-center bg-gray-100 text-gray-500 text-center">
+  <p>No location coordinates provided for this property.</p>
 </div>
+{% endif %}
 
 
 <!-- Other Actions -->
