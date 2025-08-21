@@ -13,7 +13,8 @@ from django import forms
 class PropertyImageForm(forms.Form):
     images = forms.FileField(
         required=False,
-        label="Upload Property Images"
+        label="Upload Property Images",
+        
     )
 
 

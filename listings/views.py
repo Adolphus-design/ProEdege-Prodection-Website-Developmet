@@ -255,7 +255,7 @@ def redirect_user_dashboard(request):
 def upload_property_images(request, pk):
     property_obj = get_object_or_404(Property, pk=pk)
 
-    # 🚨 Restrict access so only the "owner" can upload
+    # 🚨 Restrict access: only the owner/authorized roles
     user_role = getattr(request.user, 'role', None)
     allowed = False
 
@@ -273,10 +273,19 @@ def upload_property_images(request, pk):
     if request.method == 'POST':
         form = PropertyImageForm(request.POST, request.FILES)
         files = request.FILES.getlist('images')
+        main_image_file = request.FILES.get('main_image')
+
         if form.is_valid():
+            # Save main image
+            if main_image_file:
+                PropertyImage.objects.create(property=property_obj, main_image=main_image_file)
+
+            # Save gallery images
             for f in files:
                 PropertyImage.objects.create(property=property_obj, image=f)
+
             return redirect('property_detail', pk=property_obj.pk)
+
     else:
         form = PropertyImageForm()
 

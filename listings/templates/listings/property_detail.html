@@ -13,29 +13,31 @@
 {% endif %}
 
   <!-- Main Image + Overlay -->
-  {% if images %}
-    <div class="position-relative mb-4">
-      <img src="{{ images.0.image.url }}" class="img-fluid rounded w-100" style="height: 400px; object-fit: cover;" alt="Property-image">
+{% with main_image_url=property.get_main_image_url %}
+    {% if main_image_url %}
+        <div class="position-relative mb-4">
+            <img src="{{ main_image_url }}" class="img-fluid rounded w-100" style="height: 400px; object-fit: cover;" alt="Property-image">
 
-      <!-- Overlay Card -->
-      <div class="position-absolute top-0 start-0 bg-dark bg-opacity-75 text-white p-3 rounded m-3" style="max-width: 340px;">
-        <h4 class="mb-2">{{ property.title }}</h4>
-        <p class="mb-2"><i class="fas fa-map-marker-alt me-1"></i> {{ property.location }}, {{ property.province }}</p>
-
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h4 class="mb-0 text-danger fw-bold">R{{ property.price|floatformat:0 }}</h4>
-          <a href="{% url 'submit_interest' property.id %}" class="btn btn-danger btn-sm">Make Offer</a>
+            <!-- Overlay Card -->
+            <div class="position-absolute top-0 start-0 bg-dark bg-opacity-75 text-white p-3 rounded m-3" style="max-width: 340px;">
+                <h4 class="mb-2">{{ property.title }}</h4>
+                <p class="mb-2"><i class="fas fa-map-marker-alt me-1"></i> {{ property.location }}, {{ property.province }}</p>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="mb-0 text-danger fw-bold">R{{ property.price|floatformat:0 }}</h4>
+                    <a href="{% url 'submit_interest' property.id %}" class="btn btn-danger btn-sm">Make Offer</a>
+                </div>
+                <div class="d-flex gap-3 mt-3 small">
+                    {% if property.number_of_bedrooms %}<span><i class="fas fa-bed"></i> {{ property.number_of_bedrooms }}</span>{% endif %}
+                    {% if property.number_of_bathrooms %}<span><i class="fas fa-shower"></i> {{ property.number_of_bathrooms }}</span>{% endif %}
+                    {% if property.number_of_kitchens %}<span><i class="fas fa-utensils"></i> {{ property.number_of_kitchens }}</span>{% endif %}
+                    {% if property.number_of_garages %}<span><i class="fas fa-warehouse"></i> {{ property.number_of_garages }}</span>{% endif %}
+                </div>
+            </div>
         </div>
-
-        <div class="d-flex gap-3 mt-3 small">
-          {% if property.number_of_bedrooms %}<span><i class="fas fa-bed"></i> {{ property.number_of_bedrooms }}</span>{% endif %}
-          {% if property.number_of_bathrooms %}<span><i class="fas fa-shower"></i> {{ property.number_of_bathrooms }}</span>{% endif %}
-          {% if property.number_of_kitchens %}<span><i class="fas fa-utensils"></i> {{ property.number_of_kitchens }}</span>{% endif %}
-          {% if property.number_of_garages %}<span><i class="fas fa-warehouse"></i> {{ property.number_of_garages }}</span>{% endif %}
-        </div>
-      </div>
-    </div>
-  {% endif %}
+    {% else %}
+        <img src="{% static 'images/default.jpg' %}" class="img-fluid rounded w-100" style="height: 400px; object-fit: cover;" alt="Default image">
+    {% endif %}
+{% endwith %}
 
   <!-- Quick Nav Buttons -->
   <div class="d-flex flex-wrap gap-2 mb-4">
@@ -243,11 +245,13 @@
   <!-- Gallery -->
   <div id="lightgallery" class="row g-3">
     {% for image in images %}
-      <div class="col-6 col-md-3">
-        <a href="{{ image.image.url }}" class="gallery-item">
-          <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Gallery Image">
-        </a>
-      </div>
+        {% if image.image %}
+            <div class="col-6 col-md-3">
+                <a href="{{ image.image.url }}" class="gallery-item">
+                    <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Gallery Image">
+                </a>
+            </div>
+        {% endif %}
     {% endfor %}
   </div>
 
