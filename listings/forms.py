@@ -83,7 +83,30 @@ class AgencyForm(forms.ModelForm):
         model = Agency
         fields = ['name', 'address', 'description', 'contact_email', 'phone_number', 'logo']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 3}),
+            'name': forms.TextInput(attrs={
+                'class': 'form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded',
+                'placeholder': 'Enter agency name'
+            }),
+            'address': forms.TextInput(attrs={
+                'class': 'form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded',
+                'placeholder': 'Enter address'
+            }),
+            'description': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded',
+                'placeholder': 'Enter description'
+            }),
+            'contact_email': forms.EmailInput(attrs={
+                'class': 'form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded',
+                'placeholder': 'Enter contact email'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded',
+                'placeholder': 'Enter phone number'
+            }),
+            'logo': forms.ClearableFileInput(attrs={
+                'class': 'form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded'
+            }),
         }
 
 

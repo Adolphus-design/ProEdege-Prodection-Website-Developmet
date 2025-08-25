@@ -7,12 +7,12 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-#SECRET_KEY = 'django-insecure-q)3@9gh_m@lff88ry*v!ih#1%3!h!h5$!@*b(n(rw)i^h@sy#m'
+SECRET_KEY = 'django-insecure-q)3@9gh_m@lff88ry*v!ih#1%3!h!h5$!@*b(n(rw)i^h@sy#m'
 
-SECRET_KEY = config("DJANGO_SECRET_KEY", default="unsafe-secret-key")
+#SECRET_KEY = config("DJANGO_SECRET_KEY", default="unsafe-secret-key")
 
-#DEBUG = True
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = True
+#DEBUG = config("DEBUG", default=False, cast=bool)
 
 load_dotenv()
 
@@ -151,18 +151,18 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 EMAIL_TIMEOUT = 30"""
 
-"""EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "mail20.domains.co.za"
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
 EMAIL_USE_TLS = False  # IMPORTANT: do not enable both
 EMAIL_HOST_USER = "noreply@proedgepropertygroup.co.za"
 EMAIL_HOST_PASSWORD = "Adolphus@0917"
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER"""
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Email settings for local development
 #
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # This is the email address that will appear in the "From" field
 #DEFAULT_FROM_EMAIL = "no-reply@proedge.local"
