@@ -17,7 +17,7 @@ class UserProfile(models.Model):
     full_name = models.CharField(max_length=255, blank=True)
     profile_picture = models.ImageField(upload_to=user_profile_picture_path, blank=True, null=True)
     contact_number = models.CharField(max_length=10, blank=False)
-    address = models.CharField(blank=False)
+    address = models.CharField(max_length=255)
     is_profile_complete = models.BooleanField(default=False)
 
     agency = models.ForeignKey('listings.Agency', on_delete=models.SET_NULL, null=True, blank=True)

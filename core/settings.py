@@ -1,11 +1,20 @@
 import os
 from pathlib import Path
 
+import dj_database_url
+from decouple import config
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-q)3@9gh_m@lff88ry*v!ih#1%3!h!h5$!@*b(n(rw)i^h@sy#m'
+#SECRET_KEY = 'django-insecure-q)3@9gh_m@lff88ry*v!ih#1%3!h!h5$!@*b(n(rw)i^h@sy#m'
 
-DEBUG = True
+SECRET_KEY = config("DJANGO_SECRET_KEY", default="unsafe-secret-key")
+
+#DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
+
+load_dotenv()
 
 ALLOWED_HOSTS = [
     'proedegeproperty.onrender.com',
@@ -74,13 +83,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-DATABASES = {
+
+#sqlite3 default database
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
+}"""
 
+
+"""#postgress database config
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'proedge_db',
+        'USER': 'proedge_user',
+        'PASSWORD': 'Adolphus@0917',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}"""
+
+
+#Neon Postgres database config
+DATABASES = {
+    'default': dj_database_url.config(
+        default=config("DATABASE_URL")
+    )
+}
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
@@ -120,8 +151,17 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 EMAIL_TIMEOUT = 30"""
 
+"""EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "mail20.domains.co.za"
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_USE_TLS = False  # IMPORTANT: do not enable both
+EMAIL_HOST_USER = "noreply@proedgepropertygroup.co.za"
+EMAIL_HOST_PASSWORD = "Adolphus@0917"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER"""
 
 # Email settings for local development
+#
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # This is the email address that will appear in the "From" field
