@@ -84,8 +84,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-#sqlite3 default database
-"""DATABASES = {
+"""#sqlite3 default database
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
@@ -93,8 +93,8 @@ WSGI_APPLICATION = 'core.wsgi.application'
 }"""
 
 
-"""#postgress database config
-DATABASES = {
+#postgress database config
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'proedge_db',
@@ -103,8 +103,8 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     }
-}"""
-
+}
+"""
 
 #Neon Postgres database config
 DATABASES = {
@@ -112,6 +112,8 @@ DATABASES = {
         default=config("DATABASE_URL")
     )
 }
+
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},

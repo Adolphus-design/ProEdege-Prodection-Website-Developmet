@@ -33,6 +33,7 @@
           {% endfor %}
         </div>
 
+        <!-- Save and Cancel Buttons -->
         <div class="mt-4 d-flex justify-content-between">
           <button type="submit" class="btn btn-danger fw-bold rounded-pill px-5 shadow-sm">
             Save Changes
@@ -42,8 +43,18 @@
             Cancel
           </a>
         </div>
+
+        <!-- Change Password Button -->
+        <div class="mt-3 text-center">
+          <a href="{% url 'change_password' %}" 
+             class="btn btn-outline-light fw-bold rounded-pill px-4 shadow-sm">
+            🔒 Change Password
+          </a>
+        </div>
+
       </form>
     </div>
   </div>
 </div>
+
 {% endblock %}

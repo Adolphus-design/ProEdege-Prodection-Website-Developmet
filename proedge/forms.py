@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from core import settings
 from .models import CustomUser
 from .models import UserProfile
-from listings.models import Bid, Auction, Property
+from listings.models import Bid, Auction, Property, AgentProfile
 from .models import AgentJoinRequest
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
@@ -12,11 +12,19 @@ from .models import AgentDocument
 
 from django.contrib.auth import get_user_model
 
+
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ['username', 'email', 'first_name', 'last_name', 'role', 'password1', 'password2']
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if CustomUser.objects.filter(email=email).exists():
+            raise ValidationError("This email is already registered. Please use a different email.")
+        return email
+    
+    
 class EditProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
@@ -160,7 +168,7 @@ class AgencyCreateAgentForm(forms.ModelForm):
     ffc_certificate = forms.FileField(required=False)
     id_copy = forms.FileField(required=False)
     proof_of_address = forms.FileField(required=False)
-    profile_picture = forms.ImageField(required=False)  # ✅ Added profile picture
+    profile_picture = forms.ImageField(required=False)  # Added profile picture
 
     class Meta:
         model = CustomUser
@@ -169,7 +177,7 @@ class AgencyCreateAgentForm(forms.ModelForm):
     def save(self, commit=True, agency=None):
         user = super().save(commit=False)
 
-        # Only set password if provided (edit mode)
+        # Set password if provided
         password = self.cleaned_data.get('password')
         if password:
             user.set_password(password)
@@ -183,7 +191,7 @@ class AgencyCreateAgentForm(forms.ModelForm):
         if commit:
             user.save()
 
-            # Update or create UserProfile to avoid UNIQUE constraint error
+            # Update or create UserProfile
             profile, created = UserProfile.objects.get_or_create(user=user)
 
             if self.cleaned_data.get('ffc_certificate'):
@@ -192,11 +200,15 @@ class AgencyCreateAgentForm(forms.ModelForm):
                 profile.id_copy = self.cleaned_data['id_copy']
             if self.cleaned_data.get('proof_of_address'):
                 profile.proof_of_address = self.cleaned_data['proof_of_address']
-            if self.cleaned_data.get('profile_picture'):  # ✅ Save profile picture
+            if self.cleaned_data.get('profile_picture'):
                 profile.profile_picture = self.cleaned_data['profile_picture']
 
+            # Link profile to agency if provided
             if agency:
                 profile.agency = agency
             profile.save()
+
+            # ✅ Create or get AgentProfile for this user
+            AgentProfile.objects.get_or_create(user=user, defaults={'agency': agency})
 
         return user

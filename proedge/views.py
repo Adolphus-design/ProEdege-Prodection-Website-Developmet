@@ -54,9 +54,29 @@ from django.core.paginator import Paginator
 from .forms import AssignAgentForm
 import re
 from datetime import datetime
+from django.contrib.auth.forms import PasswordChangeForm
 from .verification import automated_verify_agent_document
+from django.contrib.auth import update_session_auth_hash
 
 
+
+
+@login_required
+def change_password_view(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Keep user logged in after password change
+            update_session_auth_hash(request, user)
+            messages.success(request, "Your password was successfully updated!")
+            return redirect('dashboard_redi')  # redirect to profile or wherever you want
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = PasswordChangeForm(user=request.user)
+
+    return render(request, 'proedge/change_password.html', {'form': form})
 
 
 @login_required
@@ -146,6 +166,8 @@ def create_agent(request):
 
 @login_required
 def assign_agent_to_property(request, pk):
+
+    
     property = get_object_or_404(Property, pk=pk)
 
     # Only agency owner can assign agents
@@ -171,6 +193,7 @@ def assign_agent_to_property(request, pk):
 
         messages.success(request, "Agent(s) assigned successfully.")
         return redirect('agency_dashboard')
+    
 
     return render(request, 'proedge/assign_agent.html', {
         'property': property,
@@ -821,49 +844,61 @@ def edit_auction(request, auction_id):
 
 @login_required
 def agency_dashboard(request):
-    """
-    Dashboard for an Agency:
-    - Shows all agents under this agency
-    - Shows all properties listed by this agency (grouped by status)
-    - Shows join requests with counts (pending, approved, rejected)
-    """
-    # ✅ Make sure this user actually owns an agency
     try:
-        agency = request.user.agency_profile  
+        agency = request.user.agency_profile
     except Agency.DoesNotExist:
         return redirect("create_agency_profile")
 
-    # ✅ Get all properties linked to this agency
-    properties = Property.objects.filter(agency=agency).order_by("-created_at")
+    # Get all agents under this agency
+    agents = AgentProfile.objects.filter(agency=agency)
+    agent_users = [agent.user for agent in agents]
+    
 
-    # ✅ Group properties by status for template display
+    # 1️⃣ Properties listed by the agency itself
+    agency_properties = Property.objects.filter(agency=agency)
+
+    # 2️⃣ Properties listed by agents of this agency
+    agent_listed_properties = Property.objects.filter(agent__in=agent_users)
+
+    # 3️⃣ Properties assigned to agents of this agency
+    assigned_properties = Property.objects.filter(agents__in=agent_users)
+
+    # Combine all three querysets
+    all_properties = (agency_properties | agent_listed_properties | assigned_properties).distinct().order_by('-created_at')
+
+    # Group by status
     grouped_properties = defaultdict(list)
-    for prop in properties:
+    for prop in all_properties:
         grouped_properties[prop.status].append(prop)
 
-    # ✅ Get all agents linked to this agency
-    agents = AgentProfile.objects.filter(agency=agency)
+    
 
-    # ✅ Get all join requests
+    # Join requests
     join_requests = AgentJoinRequest.objects.filter(agency=agency).order_by("-created_at")
 
-    # ✅ Count join request statuses
-    pending_requests_count = join_requests.filter(is_approved=False).count()
-    approved_requests_count = join_requests.filter(is_approved=True).count()
-    rejected_requests_count = join_requests.filter(is_approved=False).exclude(is_approved=None).count()
+    print("Agents in this agency:", agent_users)
+    print("Properties listed by agents:", Property.objects.filter(agent__in=agent_users))
+
+
+    print("Agency:", agency)
+    print("Agents under agency:", agents)
+    print("Agent users:", agent_users)
+    print("Agent-listed properties:", agent_listed_properties)
 
     context = {
         "agency": agency,
-        "properties": properties,
-        "grouped_properties": dict(grouped_properties),
         "agents": agents,
+        "properties": all_properties,
+        "grouped_properties": dict(grouped_properties),
         "join_requests": join_requests,
-        "pending_requests_count": pending_requests_count,
-        "approved_requests_count": approved_requests_count,
-        "rejected_requests_count": rejected_requests_count,
+        "pending_requests_count": join_requests.filter(is_approved=False).count(),
+        "approved_requests_count": join_requests.filter(is_approved=True).count(),
+        "rejected_requests_count": join_requests.filter(is_approved=False).exclude(is_approved=None).count(),
     }
 
     return render(request, "proedge/agency_dashboard.html", context)
+
+
 
 @login_required
 def agent_join_request_detail(request, request_id):

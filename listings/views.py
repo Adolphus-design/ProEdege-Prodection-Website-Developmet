@@ -117,37 +117,26 @@ def submit_property(request):
         if form.is_valid():
             property = form.save(commit=False)
 
-            # Map user roles to Property fields
-            role_field_map = {
-                'seller': 'seller',
-                'agent': 'agent',
-                'agency': 'agency',
-                'bank': 'bank',
-                'landlord': 'landlord',
-                'tenant': 'tenant',
-                'auctioneer': 'auctioneer',
-            }
-
             user_role = getattr(request.user, 'role', None)
-            field_name = role_field_map.get(user_role)
 
-            if field_name == 'agency':
+            if user_role == 'agency':
                 try:
-                    setattr(property, 'agency', request.user.agency_profile)
+                    property.agency = request.user.agency_profile
                 except Agency.DoesNotExist:
                     return redirect('create_agency_profile')
 
-            elif field_name == 'agent':
+            elif user_role == 'agent':
                 property.agent = request.user
-                if hasattr(request.user, 'agentprofile') and request.user.agentprofile.agency:
-                    property.agency = request.user.agentprofile.agency
+                agency = getattr(request.user.agentprofile, 'agency', None) if hasattr(request.user, 'agentprofile') else None
+                property.agency = agency  # Will be None if agent has no agency
 
-            elif field_name:
-                setattr(property, field_name, request.user)
+                property.save()  # Save first for ManyToManyField
+                property.agents.add(request.user)  # Assign to self for consistency
 
-            # -----------------------------
-            # SAVE LATITUDE AND LONGITUDE
-            # -----------------------------
+            elif user_role:
+                setattr(property, user_role, request.user)
+
+            # Save latitude and longitude if provided
             lat = form.cleaned_data.get('latitude')
             lng = form.cleaned_data.get('longitude')
             if lat and lng:
@@ -163,7 +152,7 @@ def submit_property(request):
     else:
         form = PropertyForm()
 
-    # ✅ Add the field lists here for the template
+    # Field lists for template
     basic_fields = [
         'title', 'description', 'province', 'location', 'area',
         'property_type', 'listing_type', 'price', 'number_of_rooms'

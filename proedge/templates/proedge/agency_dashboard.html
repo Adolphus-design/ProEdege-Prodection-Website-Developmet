@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %} 
 {% block content %}
 <div class="container my-5 text-white" style="background-color: #000; border-radius: 10px; padding: 20px;">
 
@@ -16,101 +16,35 @@
 
 </div>
 
-
-  <!-- Summary Cards -->
- <div class="row g-3 mb-4">
-    <div class="col-md-3 col-sm-6">
-        <div class="bg-dark text-white rounded p-3 text-center shadow-sm">
-            <strong>Total Listings</strong><br>{{ properties.count }}
-        </div>
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-sm-6">
+    <div class="bg-dark text-white rounded p-3 text-center shadow-sm">
+      <strong>Total Listings</strong><br>{{ properties.count }}
     </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="bg-danger text-white rounded p-3 text-center shadow-sm">
-            <strong>Approved Agents</strong><br>{{ agents.count }}
-        </div>
+  </div>
+  <div class="col-md-3 col-sm-6">
+    <div class="bg-danger text-white rounded p-3 text-center shadow-sm">
+      <strong>Approved Agents</strong><br>{{ agents.count }}
     </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="bg-black text-white rounded p-3 text-center shadow-sm">
-            <strong>Pending Requests</strong><br>{{ join_requests.count }}
-        </div>
+  </div>
+  <div class="col-md-3 col-sm-6">
+    <div class="bg-black text-white rounded p-3 text-center shadow-sm">
+      <strong>Pending Requests</strong><br>{{ join_requests.count }}
     </div>
+  </div>
 </div>
 
+<div class="text-end mt-3 mb-4">
+  <a href="{% url 'submit_property' %}" class="btn btn-danger">+ List New Property</a>
+</div>
 
-  <div class="text-end mt-3 mb-4">
-    <a href="{% url 'submit_property' %}" class="btn btn-danger">+ List New Property</a>
-  </div>
-
-  <!-- Agent Join Requests
-  <h4>Agent Join Requests</h4>
-  <a href="#"><strong>View Requests</strong> {{ join_requests.count }}</a>
-  {% if join_requests %}
-    <ul class="list-group">
-      {% for req in join_requests %}
-        <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-
-          <div>
-            <a href="{% url 'agent_join_request_detail' req.id %}">
-              <strong>{{ req.agent.get_full_name|default:req.agent.username }}</strong>
-            </a>
-            <small class="text-muted">requested to join your agency.</small>
-            <br>
-            <span class="badge {% if req.is_approved %} bg-success {% elif req.manual_rejection_reason %} bg-danger {% else %} bg-warning {% endif %}">
-                {% if req.is_approved %}Approved
-                {% elif req.manual_rejection_reason %}Rejected
-                {% else %}Pending
-                {% endif %}
-              </span>
-            <br>
-
-           
-            <ul class="mt-2">
-              {% for doc in req.documents.all %}
-                <li>
-                  {{ doc.document_type }} - Status: {{ doc.status|title }}
-                  {% if doc.status == 'rejected' %}
-                    <br><small class="text-danger">Reason: {{ doc.rejection_reason }}</small>
-                  {% endif %}
-                  <br>
-                  <a href="{{ doc.document.url }}" target="_blank">View Document</a> |
-                  {% if doc.status != 'approved' %}
-                    <a href="{% url 'manual_approve_document' doc.id %}" class="text-success">Approve</a> |
-                  {% endif %}
-                  {% if doc.status != 'rejected' %}
-                    <a href="{% url 'manual_reject_document' doc.id %}" class="text-danger">Reject</a>
-                  {% endif %}
-                </li>
-              {% empty %}
-                <li class="text-muted"><em>No documents uploaded.</em></li>
-              {% endfor %}
-            </ul>
-          </div>
-
-          <div class="mt-2 mt-md-0">
-            
-              <a href="{% url 'approve_join_request' req.id %}" class="btn btn-sm btn-success me-1">Approve</a>
-              <a href="{% url 'reject_join_request' req.id %}" class="btn btn-sm btn-danger">Reject</a>
-           
-          </div>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="text-muted">No join requests found.</p>
-  {% endif %}
-  -->
-
-  <div class="d-flex justify-content-between align-items-center mb-3">
-
+<div class="d-flex justify-content-between align-items-center mb-3">
   <a href="{% url 'create_agent' %}" class="btn btn-sm btn-danger">+ Register New Agent</a>
   <a href="{% url 'view_agents' %}" class="btn btn-sm btn-dark">View All Agents</a>
 </div>
 
-
-
- 
-
-  <!-- Property Listings -->
+<!-- Property Listings -->
 <div class="mt-4">
   <h4 class="fw-bold">Your Properties</h4>
   {% if grouped_properties %}
@@ -124,7 +58,7 @@
               <th scope="col">Location</th>
               <th scope="col">Price</th>
               <th scope="col">Status</th>
-              <th scope="col">Agent</th>
+              <th scope="col">Listed By</th>
               <th scope="col" class="text-center">Actions</th>
             </tr>
           </thead>
@@ -143,32 +77,45 @@
                   </span>
                 </td>
                 <td>
-                  {% for agent in property.agents.all %}
-                    <span class="badge bg-danger">{{ agent.get_full_name|default:agent.username }}</span>
-                  {% empty %}
-                    <span class="text-muted">No agents assigned</span>
-                  {% endfor %}
+                  {% comment %} Listing agent {% endcomment %}
+                  {% if property.agent %}
+                    <span class="badge bg-info">{{ property.agent.get_full_name|default:property.agent.username }}</span>
+                    <small class="text-muted">(Listed by agent)</small>
+                  {% endif %}
+
+                  {% comment %} Agency listing {% endcomment %}
+                  {% if property.agency %}
+                    <span class="badge bg-primary">{{ property.agency.name }}</span>
+                    <small class="text-muted">(Listed by agency)</small>
+                  {% endif %}
+
+                  {% comment %} Assigned agents {% endcomment %}
+                  {% if property.agents.exists %}
+                    {% for agent in property.agents.all %}
+                      <span class="badge bg-danger">{{ agent.get_full_name|default:agent.username }}</span>
+                    {% endfor %}
+                    <small class="text-muted">(Assigned)</small>
+                  {% endif %}
+
+                  {% comment %} No agent or agency assigned {% endcomment %}
+                  {% if not property.agent and not property.agency and not property.agents.exists %}
+                    <span class="text-muted">No agent assigned</span>
+                  {% endif %}
                 </td>
                 <td class="text-center">
-  <div class="d-flex flex-wrap gap-2 justify-content-center">
-
-    <!-- View (light outline for contrast) -->
+                  <div class="d-flex flex-wrap gap-2 justify-content-center">
                     <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-dark text-dark">View</a>
-
                     <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-dark text-white">Edit</a>
 
-                    <!-- Status actions (red = sold, dark = available) -->
                     {% if property.status == 'approved' or property.status == 'available' %}
                       <a href="{% url 'mark_property_sold' property.pk %}" class="btn btn-sm btn-danger text-white">Mark Sold</a>
                     {% elif property.status == 'sold' %}
                       <a href="{% url 'mark_property_available' property.pk %}" class="btn btn-sm btn-dark text-white">Mark Available</a>
                     {% endif %}
 
-                    <!-- Assign Agent (red for consistency with ProEdge theme) -->
                     {% if request.user.role == 'agency' %}
                       <a href="{% url 'assign_agent_to_property' property.pk %}" class="btn btn-sm btn-dark text-white">Assign Agent</a>
                     {% endif %}
-                    
                   </div>
                 </td>
               </tr>
@@ -181,5 +128,7 @@
     <p class="text-muted">No properties listed yet.</p>
   {% endif %}
 </div>
+
+
 
 {% endblock %}

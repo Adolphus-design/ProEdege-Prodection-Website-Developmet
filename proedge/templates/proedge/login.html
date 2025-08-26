@@ -5,23 +5,34 @@
 
 {% block content %}
 <style>
-  /* Background for the entire login page */
   body {
     background: url("{% static 'images/login-bg.jpg' %}") no-repeat center center fixed;
     background-size: cover;
   }
 
-  /* Optional: add a slight overlay behind the form */
   .login-overlay {
-    background-color: rgba(0,0,0,0.5); /* dark transparent */
+    background-color: rgba(0,0,0,0.5);
     padding: 2rem;
     border-radius: 10px;
+    position: relative;
+  }
+
+  .password-wrapper {
+    position: relative;
+  }
+
+  .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #fff;
   }
 </style>
 
 <div class="container py-5">
   <div class="row justify-content-center">
-    <!-- Login Section -->
     <div class="col-md-5 mb-4">
       <div class="login-overlay text-white">
         <h3 class="mb-4">Login</h3>
@@ -29,19 +40,22 @@
           {% csrf_token %}
 
           {% if form.non_field_errors %}
-      <div style="color: rgb(255, 255, 255); margin-bottom: 10px;">
-        {{ form.non_field_errors }}
-      </div>
-    {% endif %}
+            <div style="color: rgb(255, 255, 255); margin-bottom: 10px;">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
 
           <div class="mb-3">
             <label for="username" class="form-label text-uppercase">Username</label>
             <input type="text" name="username" class="form-control" required>
           </div>
-          <div class="mb-3">
+
+          <div class="mb-3 password-wrapper">
             <label for="password" class="form-label text-uppercase">Password</label>
-            <input type="password" name="password" class="form-control" required>
+            <input type="password" name="password" id="password-field" class="form-control" required>
+            <span class="toggle-password" onclick="togglePassword()">👁️</span>
           </div>
+
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
               <label class="form-check-label">
@@ -50,10 +64,23 @@
             </div>
             <a href="#" class="text-white">Forgot password?</a>
           </div>
+
           <button type="submit" class="btn btn-danger w-100">Login</button>
         </form>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  function togglePassword() {
+    const passwordField = document.getElementById('password-field');
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text';
+    } else {
+      passwordField.type = 'password';
+    }
+  }
+</script>
+
 {% endblock %}
