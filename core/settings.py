@@ -166,4 +166,3 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # This is the email address that will appear in the "From" field
 #DEFAULT_FROM_EMAIL = "no-reply@proedge.local"
-

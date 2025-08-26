@@ -2,24 +2,64 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Agency Profile</h2>
+<div class="container mt-5">
+    <h2 class="text-center text-danger fw-bold mb-4">Agency Profile</h2>
 
-    <div class="card p-4">
-        {% if agency.logo %}
-            <img src="{{ agency.logo.url }}" alt="Agency Logo" class="img-thumbnail mb-3" style="max-height: 120px;">
-        {% else %}
-            <p><em>No logo uploaded.</em></p>
-        {% endif %}
+    <div class="card p-4 shadow-sm bg-dark bg-opacity-75 text-white rounded">
+        <!-- Logo -->
+        <div class="text-center mb-4">
+            {% if agency.logo %}
+                <img src="{{ agency.logo.url }}" alt="Agency Logo" class="img-fluid rounded-3 border border-secondary shadow-sm" style="max-height: 150px; width: auto; object-fit: cover;">
+            {% else %}
+                <div class="d-flex justify-content-center align-items-center bg-secondary rounded-3" style="width: 150px; height: 150px;">
+                    <span class="text-white">No Logo</span>
+                </div>
+            {% endif %}
+        </div>
 
-        <p><strong>Name:</strong> {{ agency.name }}</p>
-        <p><strong>Address:</strong> {{ agency.address }}</p>
-        <p><strong>Description:</strong> {{ agency.description }}</p>
-        <p><strong>Email:</strong> {{ agency.contact_email }}</p>
-        <p><strong>Phone Number:</strong> {{ agency.phone_number }}</p>
+        <!-- Agency Details -->
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item bg-dark text-white"><strong>Name:</strong> {{ agency.name }}</li>
+            <li class="list-group-item bg-dark text-white"><strong>Address:</strong> {{ agency.address }}</li>
+            <li class="list-group-item bg-dark text-white"><strong>Description:</strong> {{ agency.description }}</li>
+            <li class="list-group-item bg-dark text-white"><strong>Email:</strong> {{ agency.contact_email }}</li>
+            <li class="list-group-item bg-dark text-white"><strong>Phone Number:</strong> {{ agency.phone_number }}</li>
+        </ul>
 
-        <a href="{% url 'edit_agency_profile' %}" class="btn btn-outline-primary mt-3">Edit Profile</a>
-        <a href="{% url 'agency_dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center gap-2 flex-wrap">
+            <a href="{% url 'edit_agency_profile' %}" class="btn btn-outline-light fw-bold px-4">Edit Profile</a>
+            <a href="{% url 'agency_dashboard' %}" class="btn btn-secondary fw-bold px-4">Back to Dashboard</a>
+        </div>
     </div>
 </div>
+
+<style>
+    .card ul.list-group-item {
+        border: none;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .card img {
+        transition: transform 0.3s ease;
+    }
+
+    .card img:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #b80707;
+        border-color: #b80707;
+        color: white;
+        transform: scale(1.05);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-secondary:hover {
+        transform: scale(1.02);
+        transition: all 0.2s ease-in-out;
+    }
+</style>
 {% endblock %}

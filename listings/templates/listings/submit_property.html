@@ -5,145 +5,168 @@
 {% block title %}Submit Property | ProEdge{% endblock %}
 
 {% block content %}
-<h2>Submit Property Listing</h2>
-<a href="{% url 'dashboard_redirect' %}" class="btn btn-primary">🏠 Back to Dashboard</a>
+<div class="container mt-5">
+    <h2 class="text-center text-danger fw-bold mb-4">Submit Property Listing</h2>
 
-{% if form.errors %}
-  <div class="alert alert-danger">
-    <ul>
-      {% for field in form %}
-        {% for error in field.errors %}
-          <li>{{ field.label }}: {{ error }}</li>
-        {% endfor %}
-      {% endfor %}
-      {% for error in form.non_field_errors %}
-        <li>{{ error }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-{% endif %}
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-
-  <!-- ✅ Basic Info -->
-  <div class="property-info-section">
-    <h3>Basic Details</h3>
-    <div class="form-group">{{ form.title.label_tag }} {{ form.title }}</div>
-    <div class="form-group">{{ form.description.label_tag }} {{ form.description }}</div>
-    <div class="form-group">{{ form.province.label_tag }} {{ form.province }}</div>
-    <div class="form-group">
-      {{ form.location.label_tag }}
-      {{ form.location }}
-      <small class="form-text text-muted">Start typing the address and select from suggestions.</small>
+    <div class="mb-3 text-center">
+        <a href="{% url 'dashboard_redirect' %}" class="btn btn-primary fw-bold px-4">🏠 Back to Dashboard</a>
     </div>
-    <div class="form-group">{{ form.area.label_tag }} {{ form.area }}</div>
-    <div class="form-group">{{ form.property_type.label_tag }} {{ form.property_type }}</div>
-    <div class="form-group">{{ form.listing_type.label_tag }} {{ form.listing_type }}</div>
-    <div class="form-group">{{ form.price.label_tag }} {{ form.price }}</div>
-    <div class="form-group">{{ form.number_of_rooms.label_tag }} {{ form.number_of_rooms }}</div>
-  </div>
 
-  <!-- Hidden latitude and longitude fields (add these to your PropertyForm!) -->
-  <input type="hidden" id="id_latitude" name="latitude" value="{{ form.latitude.value|default_if_none:'' }}">
-  <input type="hidden" id="id_longitude" name="longitude" value="{{ form.longitude.value|default_if_none:'' }}">
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
-  <!-- ✅ Expandable Advanced Info -->
-  <button type="button" id="toggle-advanced-btn" style="margin-top: 15px;">Add Additional Property Info</button>
+    <form method="post" enctype="multipart/form-data" class="glass-card mx-auto">
+        {% csrf_token %}
 
-  <div id="advanced-fields" style="display: none; margin-top: 15px;">
-    <h4>Additional Property Info</h4>
-    <div class="form-group">{{ form.number_of_bedrooms.label_tag }} {{ form.number_of_bedrooms }}</div>
-    <div class="form-group">{{ form.number_of_kitchens.label_tag }} {{ form.number_of_kitchens }}</div>
-    <div class="form-group">{{ form.number_of_bathrooms.label_tag }} {{ form.number_of_bathrooms }}</div>
-    <div class="form-group">{{ form.number_of_garages.label_tag }} {{ form.number_of_garages }}</div>
-    <div class="form-group">{{ form.floor_area_m2.label_tag }} {{ form.floor_area_m2 }}</div>
-    <div class="form-group">{{ form.erf_size_m2.label_tag }} {{ form.erf_size_m2 }}</div>
-    <div class="form-group">{{ form.price_per_m2.label_tag }} {{ form.price_per_m2 }}</div>
-    <div class="form-group">{{ form.price_per_erf_m2.label_tag }} {{ form.price_per_erf_m2 }}</div>
-    <div class="form-group">{{ form.has_parking.label_tag }} {{ form.has_parking }}</div>
-    <div class="form-group">{{ form.number_of_parking_slots.label_tag }} {{ form.number_of_parking_slots }}</div>
-  </div>
+        <!-- Basic Details -->
+        <h4 class="text-white mb-3">Basic Details</h4>
+        <div class="row g-3">
+            {% for field in form %}
+                {% if field.name in basic_fields %}
+                    <div class="col-md-6 col-12">
+                        <label for="{{ field.id_for_label }}" class="form-label text-white fw-semibold">{{ field.label }}</label>
+                        {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="text-danger mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
 
-  <!-- Map Preview -->
-  <div id="map" style="height: 400px; margin-top: 15px;"></div>
+        <!-- Hidden latitude and longitude fields -->
+        <input type="hidden" id="id_latitude" name="latitude" value="{{ form.latitude.value|default_if_none:'' }}">
+        <input type="hidden" id="id_longitude" name="longitude" value="{{ form.longitude.value|default_if_none:'' }}">
 
-  <!-- ✅ Submit -->
-  <div style="margin-top: 30px;">
-    <button type="submit">Submit Property</button>
-  </div>
-</form>
+        <!-- Advanced Fields Toggle -->
+        <button type="button" id="toggle-advanced-btn" class="btn btn-secondary mt-4 mb-3 w-100">Add Additional Property Info</button>
 
+        <div id="advanced-fields" style="display: none;">
+            <h5 class="text-white mb-3">Additional Property Info</h5>
+            <div class="row g-3">
+                {% for field in form %}
+                    {% if field.name in advanced_fields %}
+                        <div class="col-md-6 col-12">
+                            <label for="{{ field.id_for_label }}" class="form-label text-white fw-semibold">{{ field.label }}</label>
+                            {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
 
-<!-- ✅ JavaScript -->
+        <!-- Map Preview -->
+        <div id="map" style="height: 400px; margin-top: 20px;"></div>
+
+        <!-- Submit -->
+        <div class="mt-4 text-center">
+            <button type="submit" class="btn btn-danger fw-bold px-5 shadow-sm">Submit Property</button>
+        </div>
+    </form>
+</div>
+
+<!-- Glass Card CSS -->
+<style>
+.glass-card {
+    background: rgba(0, 0, 0, 0.5);          /* semi-transparent black */
+    backdrop-filter: blur(10px);            /* glass blur effect */
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 2rem;
+    transition: all 0.3s ease-in-out;
+}
+.glass-card:hover {
+    box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.5);
+    transform: translateY(-2px);
+}
+
+.form-control-dark {
+    transition: all 0.3s ease-in-out;
+}
+.form-control-dark:focus {
+    box-shadow: 0 0 0 0.2rem rgba(184, 7, 7, 0.25);
+    border-color: #b80707;
+    background-color: #1a1a1a;
+    color: #fff;
+}
+button.btn-danger:hover {
+    background-color: #a00505;
+    border-color: #a00505;
+    transform: scale(1.02);
+    transition: all 0.2s ease-in-out;
+}
+button.btn-secondary:hover {
+    transform: scale(1.02);
+    transition: all 0.2s ease-in-out;
+}
+</style>
+
+<!-- JS -->
 <script>
-  // Toggle additional fields
-  document.getElementById('toggle-advanced-btn').addEventListener('click', function () {
-    const section = document.getElementById('advanced-fields');
-    section.style.display = (section.style.display === 'none') ? 'block' : 'none';
-    this.textContent = section.style.display === 'none' ? 'Add Additional Property Info' : 'Hide Additional Info';
-  });
-
-  // Google Places Autocomplete & Map
-  let map;
-  let marker;
-
-  function initMap() {
-    // Initialize map centered on current lat/lng if available, else fallback
-    const latInput = document.getElementById('id_latitude');
-    const lngInput = document.getElementById('id_longitude');
-
-    const lat = latInput.value ? parseFloat(latInput.value) : -33.918861;  // Example fallback: Cape Town
-    const lng = lngInput.value ? parseFloat(lngInput.value) : 18.4233;
-
-    const center = { lat: lat, lng: lng };
-
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: center,
-      zoom: 15,
+    // Toggle advanced fields
+    const toggleBtn = document.getElementById('toggle-advanced-btn');
+    const advancedFields = document.getElementById('advanced-fields');
+    toggleBtn.addEventListener('click', () => {
+        advancedFields.style.display = advancedFields.style.display === 'none' ? 'block' : 'none';
+        toggleBtn.textContent = advancedFields.style.display === 'none' ? 'Add Additional Property Info' : 'Hide Additional Info';
     });
 
-    marker = new google.maps.Marker({
-      position: center,
-      map: map,
-      draggable: true,
-    });
+    // Google Maps & Places Autocomplete
+    let map, marker;
+    function initMap() {
+        const latInput = document.getElementById('id_latitude');
+        const lngInput = document.getElementById('id_longitude');
+        const lat = latInput.value ? parseFloat(latInput.value) : -33.918861;
+        const lng = lngInput.value ? parseFloat(lngInput.value) : 18.4233;
+        const center = { lat: lat, lng: lng };
 
-    // Update hidden fields when marker is dragged
-    marker.addListener('dragend', function(event) {
-      latInput.value = event.latLng.lat();
-      lngInput.value = event.latLng.lng();
-    });
+        map = new google.maps.Map(document.getElementById('map'), { center: center, zoom: 15 });
+        marker = new google.maps.Marker({ position: center, map: map, draggable: true });
 
-    // Setup autocomplete on location input
-    const input = document.getElementById('id_location');
-    const autocomplete = new google.maps.places.Autocomplete(input);
+        marker.addListener('dragend', function(event) {
+            latInput.value = event.latLng.lat();
+            lngInput.value = event.latLng.lng();
+        });
 
-    autocomplete.addListener('place_changed', function() {
-      const place = autocomplete.getPlace();
-      if (!place.geometry) {
-        alert('No details available for input: "' + place.name + '"');
-        return;
-      }
-
-      // Update map center & marker position
-      const location = place.geometry.location;
-      map.setCenter(location);
-      marker.setPosition(location);
-
-      // Update hidden fields
-      latInput.value = location.lat();
-      lngInput.value = location.lng();
-    });
-  }
+        const input = document.getElementById('id_location');
+        const autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            if (!place.geometry) return alert('No details available for input: "' + place.name + '"');
+            const location = place.geometry.location;
+            map.setCenter(location);
+            marker.setPosition(location);
+            latInput.value = location.lat();
+            lngInput.value = location.lng();
+        });
+    }
 </script>
 
 <script async
   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCd3bl10Viq12p8pxNP2dPqV-veDWfF5ac&libraries=places&callback=initMap" defer>
-</script>
-
-<script>
-  // The existing code for your buttons (image upload, etc.) can remain here
-  // Make sure any event listeners on buttons are wrapped in DOMContentLoaded if necessary
 </script>
 
 {% endblock %}

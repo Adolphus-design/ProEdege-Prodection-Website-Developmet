@@ -138,10 +138,7 @@ def submit_property(request):
                     return redirect('create_agency_profile')
 
             elif field_name == 'agent':
-                # Assign the property to the agent
                 property.agent = request.user
-
-                # ✅ Also assign to the agent’s agency (if they belong to one)
                 if hasattr(request.user, 'agentprofile') and request.user.agentprofile.agency:
                     property.agency = request.user.agentprofile.agency
 
@@ -161,13 +158,28 @@ def submit_property(request):
             property.save()
             form.save_m2m()
 
-            # 🔥 UNIVERSAL redirect: all roles go to upload images
             return redirect('upload_property_images', pk=property.pk)
 
     else:
         form = PropertyForm()
 
-    return render(request, 'listings/submit_property.html', {'form': form})
+    # ✅ Add the field lists here for the template
+    basic_fields = [
+        'title', 'description', 'province', 'location', 'area',
+        'property_type', 'listing_type', 'price', 'number_of_rooms'
+    ]
+
+    advanced_fields = [
+        'number_of_bedrooms', 'number_of_kitchens', 'number_of_bathrooms',
+        'number_of_garages', 'floor_area_m2', 'erf_size_m2',
+        'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots'
+    ]
+
+    return render(request, 'listings/submit_property.html', {
+        'form': form,
+        'basic_fields': basic_fields,
+        'advanced_fields': advanced_fields
+    })
 
 
 
