@@ -18,6 +18,8 @@ load_dotenv()
 
 ALLOWED_HOSTS = [
     #'proedegeproperty.onrender.com',
+    'proedege-property-group.onrender.com',
+    'www.proedge-property-group.onrender.com',
     'proedgepropertygroup.co.za',
     'www.proedgepropertygroup.co.za',
     #'www.proedegeproperty.onrender.com',
