@@ -107,8 +107,8 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     }
-}
-"""
+}"""
+
 
 #Neon Postgres database config
 DATABASES = {
@@ -157,18 +157,24 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 EMAIL_TIMEOUT = 30"""
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+"""EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "mail20.domains.co.za"
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
 EMAIL_USE_TLS = False  # IMPORTANT: do not enable both
 EMAIL_HOST_USER = "noreply@proedgepropertygroup.co.za"
 EMAIL_HOST_PASSWORD = "Adolphus@0917"
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER"""
 
 # Email settings for local development
 #
-#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # This is the email address that will appear in the "From" field
 #DEFAULT_FROM_EMAIL = "no-reply@proedge.local"
+
+
+
+"""SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True"""

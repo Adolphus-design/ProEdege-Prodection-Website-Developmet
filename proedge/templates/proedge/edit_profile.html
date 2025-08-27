@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
 {% load widget_tweaks %}
+
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-lg-6 col-md-8 col-12">
@@ -10,13 +10,27 @@
         <h2 class="text-center text-white mb-4">Edit Your Profile</h2>
 
         <!-- Profile Picture Preview -->
-        {% if user.userprofile.profile_picture %}
         <div class="text-center mb-4">
-          <img src="{{ user.userprofile.profile_picture.url }}" 
-               class="rounded-circle border border-danger shadow-sm"
-               style="width: 150px; height: 150px; object-fit: cover;">
+          {% if profile.profile_picture %}
+            <img src="{{ profile.profile_picture.url }}" 
+                 class="rounded-circle border border-danger shadow-sm mb-2"
+                 style="width: 150px; height: 150px; object-fit: cover;">
+          {% else %}
+            <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center mx-auto mb-2 shadow-sm"
+                 style="width: 150px; height: 150px; font-size: 2rem; font-weight: bold;">
+              {{ user.username|first|upper }}
+            </div>
+          {% endif %}
+
+          <!-- Profile Picture Upload -->
+          <div class="mt-2">
+            <label for="{{ form.profile_picture.id_for_label }}" class="form-label text-white">Change Profile Picture</label>
+            {{ form.profile_picture|add_class:"form-control bg-light text-dark rounded shadow-sm" }}
+            {% for error in form.profile_picture.errors %}
+              <div class="text-danger mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
         </div>
-        {% endif %}
 
         <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}

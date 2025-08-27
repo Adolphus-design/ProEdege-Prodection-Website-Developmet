@@ -1,4 +1,4 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 {% block content %}
 <div class="container my-5 text-white" style="background-color: #000; border-radius: 10px; padding: 20px;">
 
@@ -68,47 +68,53 @@
                 <td class="fw-semibold">{{ property.title }}</td>
                 <td>{{ property.location }}</td>
                 <td class="text-success">R{{ property.price|floatformat:2 }}</td>
+
+                {# --- Polished Status Badge --- #}
                 <td>
-                  <span class="badge 
-                    {% if property.status == 'approved' or property.status == 'available' %}bg-success
-                    {% elif property.status == 'sold' %}bg-danger
-                    {% else %}bg-secondary{% endif %}">
-                    {{ property.status|title }}
-                  </span>
+                  {% if property.status == 'available' or property.status == 'approved' %}
+                    <span class="badge bg-success">Available</span>
+                  {% elif property.status == 'sold' %}
+                    <span class="badge bg-danger">Sold</span>
+                  {% elif property.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ property.status|title }}</span>
+                  {% endif %}
                 </td>
+
+                {# --- Corrected 'Listed By' logic: prefer agent -> else agency (and assigned agents) --- #}
                 <td>
-                  {% comment %} Listing agent {% endcomment %}
                   {% if property.agent %}
                     <span class="badge bg-info">{{ property.agent.get_full_name|default:property.agent.username }}</span>
-                    <small class="text-muted">(Listed by agent)</small>
-                  {% endif %}
+                    <small class="text-muted ms-1">(Listed by agent)</small>
 
-                  {% comment %} Agency listing {% endcomment %}
-                  {% if property.agency %}
+                  {% elif property.agency %}
                     <span class="badge bg-primary">{{ property.agency.name }}</span>
-                    <small class="text-muted">(Listed by agency)</small>
-                  {% endif %}
+                    <small class="text-muted ms-1">(Listed by agency)</small>
 
-                  {% comment %} Assigned agents {% endcomment %}
-                  {% if property.agents.exists %}
-                    {% for agent in property.agents.all %}
-                      <span class="badge bg-danger">{{ agent.get_full_name|default:agent.username }}</span>
-                    {% endfor %}
-                    <small class="text-muted">(Assigned)</small>
-                  {% endif %}
+                    {% if property.agents.exists %}
+                      <div class="mt-1">
+                        {% for agent in property.agents.all %}
+                          <span class="badge bg-danger me-1">{{ agent.get_full_name|default:agent.username }}</span>
+                        {% endfor %}
+                        <small class="text-muted ms-1">(Assigned)</small>
+                      </div>
+                    {% endif %}
 
-                  {% comment %} No agent or agency assigned {% endcomment %}
-                  {% if not property.agent and not property.agency and not property.agents.exists %}
+                  {% else %}
                     <span class="text-muted">No agent assigned</span>
                   {% endif %}
                 </td>
+
+                {# --- Actions: keep existing urls, polish button styles to ProEdge theme --- #}
                 <td class="text-center">
                   <div class="d-flex flex-wrap gap-2 justify-content-center">
-                    <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-dark text-dark">View</a>
-                    <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-dark text-white">Edit</a>
+                    <a href="{% url 'property_detail' property.pk %}" class="btn btn-sm btn-outline-light text-dark">View</a>
+
+                    <a href="{% url 'edit_property' property.pk %}" class="btn btn-sm btn-danger text-white">Edit</a>
 
                     {% if property.status == 'approved' or property.status == 'available' %}
-                      <a href="{% url 'mark_property_sold' property.pk %}" class="btn btn-sm btn-danger text-white">Mark Sold</a>
+                      <a href="{% url 'mark_property_sold' property.pk %}" class="btn btn-sm btn-outline-danger text-danger">Mark Sold</a>
                     {% elif property.status == 'sold' %}
                       <a href="{% url 'mark_property_available' property.pk %}" class="btn btn-sm btn-dark text-white">Mark Available</a>
                     {% endif %}
@@ -128,7 +134,5 @@
     <p class="text-muted">No properties listed yet.</p>
   {% endif %}
 </div>
-
-
 
 {% endblock %}

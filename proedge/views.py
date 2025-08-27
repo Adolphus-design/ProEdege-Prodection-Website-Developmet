@@ -724,18 +724,44 @@ def login_register_view(request):
     
 @login_required
 def edit_profile(request):
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    user = request.user
+    profile, created = UserProfile.objects.get_or_create(user=user)
+
+    # Determine if the agent belongs to an agency
+    if hasattr(user, 'agentprofile') and user.agentprofile.agency:
+        FormClass = AgencyCreateAgentForm
+        instance = user
+        template_name = 'proedge/edit_agent_profile.html'
+    else:
+        FormClass = EditProfileForm
+        instance = profile
+        template_name = 'proedge/edit_profile.html'
 
     if request.method == 'POST':
-        form = EditProfileForm(request.POST, request.FILES, instance=profile)
+        form = FormClass(request.POST, request.FILES, instance=instance)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated successfully.')
-            return redirect('user_profile')
-    else:
-        form = EditProfileForm(instance=profile)
+            form.save()  # Save the profile
 
-    return render(request, 'proedge/edit_profile.html', {'form': form})
+            # ✅ Keep agent logged in if we updated the User model
+            if instance == user:
+                update_session_auth_hash(request, user)
+
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('agent_dashboard')
+    else:
+        form = FormClass(instance=instance)
+
+    context = {
+        'form': form,
+        'user': user,
+        'profile': profile,
+    }
+
+    # Pass 'agent' for agency-linked agents to fix template reverse URL
+    if hasattr(user, 'agentprofile') and user.agentprofile.agency:
+        context['agent'] = user
+
+    return render(request, template_name, context)
 
 #user profile view
 @login_required

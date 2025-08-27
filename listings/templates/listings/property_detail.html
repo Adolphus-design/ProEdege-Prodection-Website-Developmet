@@ -64,8 +64,6 @@
     {% if property.agents.all %}
         {% for agent in property.agents.all %}
             <div class="bg-black bg-opacity-80 text-white p-3 rounded shadow-sm d-flex align-items-center gap-3">
-                
-                {# Profile picture or agency logo fallback #}
                 <div class="d-flex align-items-center gap-2">
                     {% if agent.userprofile.profile_picture %}
                         <img src="{{ agent.userprofile.profile_picture.url }}" alt="Profile Picture"
@@ -94,14 +92,11 @@
                     {% endif %}
                     <div class="d-flex gap-2">
                         <a href="{% if user.is_authenticated %}tel:{{ agent.userprofile.phone_number }}{% else %}{% url 'login' %}{% endif %}"
-                           class="btn btn-outline-light btn-sm"
-                           title="{% if not user.is_authenticated %}Login to contact{% endif %}">
+                           class="btn btn-outline-light btn-sm">
                             <i class="fas fa-phone"></i> Call
                         </a>
-
                         <a href="{% if user.is_authenticated %}mailto:{{ agent.email }}{% else %}{% url 'login' %}{% endif %}"
-                           class="btn btn-danger btn-sm"
-                           title="{% if not user.is_authenticated %}Login to email{% endif %}">
+                           class="btn btn-danger btn-sm">
                             <i class="fas fa-envelope"></i> Email
                         </a>
                     </div>
@@ -110,10 +105,9 @@
         {% endfor %}
     {% endif %}
 
-    {# Individual agent (registered via standalone form) #}
-    {% if property.agent %}
+    {# Show standalone agent ONLY if not already in property.agents #}
+    {% if property.agent and property.agent not in property.agents.all %}
         <div class="bg-black bg-opacity-80 text-white p-3 rounded shadow-sm d-flex align-items-center gap-3">
-            
             {% if property.agent.userprofile.profile_picture %}
                 <img src="{{ property.agent.userprofile.profile_picture.url }}" alt="Profile Picture"
                      class="rounded-circle border" style="width: 80px; height: 80px; object-fit: cover;">
@@ -136,14 +130,11 @@
                 {% endif %}
                 <div class="d-flex gap-2">
                     <a href="{% if user.is_authenticated %}tel:{{ property.agent.userprofile.phone_number }}{% else %}{% url 'login' %}{% endif %}"
-                       class="btn btn-outline-light btn-sm"
-                       title="{% if not user.is_authenticated %}Login to contact{% endif %}">
+                       class="btn btn-outline-light btn-sm">
                         <i class="fas fa-phone"></i> Call
                     </a>
-
                     <a href="{% if user.is_authenticated %}mailto:{{ property.agent.email }}{% else %}{% url 'login' %}{% endif %}"
-                       class="btn btn-danger btn-sm"
-                       title="{% if not user.is_authenticated %}Login to email{% endif %}">
+                       class="btn btn-danger btn-sm">
                         <i class="fas fa-envelope"></i> Email
                     </a>
                 </div>
@@ -151,7 +142,7 @@
         </div>
     {% endif %}
 
-    {# Fallback for sellers, banks, landlords, etc. #}
+    {# Fallback seller (non-agent) #}
     {% if property.seller %}
         <div class="bg-black bg-opacity-80 text-white p-3 rounded shadow-sm d-flex align-items-center gap-3">
             {% if property.seller.userprofile.profile_picture %}
@@ -168,14 +159,11 @@
                 <p class="mb-1 fw-semibold">{{ property.seller.get_full_name|default:property.seller.username }}</p>
                 <div class="d-flex gap-2">
                     <a href="{% if user.is_authenticated %}tel:{{ property.seller.userprofile.phone_number }}{% else %}{% url 'login' %}{% endif %}"
-                       class="btn btn-outline-light btn-sm"
-                       title="{% if not user.is_authenticated %}Login to contact{% endif %}">
+                       class="btn btn-outline-light btn-sm">
                         <i class="fas fa-phone"></i> Call
                     </a>
-
                     <a href="{% if user.is_authenticated %}mailto:{{ property.seller.email }}{% else %}{% url 'login' %}{% endif %}"
-                       class="btn btn-danger btn-sm"
-                       title="{% if not user.is_authenticated %}Login to email{% endif %}">
+                       class="btn btn-danger btn-sm">
                         <i class="fas fa-envelope"></i> Email
                     </a>
                 </div>
@@ -184,6 +172,7 @@
     {% endif %}
 
 </div>
+
 
     </div>
   </div>
