@@ -17,8 +17,10 @@ DEBUG = True
 load_dotenv()
 
 ALLOWED_HOSTS = [
-    'proedegeproperty.onrender.com',
-    'www.proedegeproperty.onrender.com',
+    #'proedegeproperty.onrender.com',
+    'proedgepropertygroup.co.za',
+    'www.proedgepropertygroup.co.za',
+    #'www.proedegeproperty.onrender.com',
     'localhost',
     '127.0.0.1',
 ]
