@@ -15,6 +15,18 @@ class Property(models.Model):
         ('industrial', 'Industrial'),
     ]
 
+    PROVINCE_CHOICES = [
+        ('Eastern Cape', 'Eastern Cape'),
+        ('Free State', 'Free State'),
+        ('Gauteng', 'Gauteng'),
+        ('KwaZulu-Natal', 'KwaZulu-Natal'),
+        ('Limpopo', 'Limpopo'),
+        ('Mpumalanga', 'Mpumalanga'),
+        ('Northern Cape', 'Northern Cape'),
+        ('North West', 'North West'),
+        ('Western Cape', 'Western Cape'),
+    ]
+
     LISTING_TYPE_CHOICES = [
         ('private', 'Private Seller'),
         ('agent', 'Agent'),
@@ -32,7 +44,7 @@ class Property(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=12, decimal_places=2)
     location = models.CharField(max_length=255)
-    province = models.CharField(max_length=100)  # Now a free-text field
+    province = models.CharField(max_length=100, choices=PROVINCE_CHOICES)
     area = models.CharField(max_length=100, null=True, blank=True)
 
     
@@ -111,6 +123,7 @@ class Interest(models.Model):
     message = models.TextField(blank=True, null=True)
     offer_price = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    responded = models.BooleanField(default=False)
     contact_number = models.CharField(max_length=10, blank=True)
     status = models.CharField(
         max_length=20,

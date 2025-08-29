@@ -5,14 +5,33 @@
   {% if interests %}
     <div class="mb-4">
       {% for interest in interests %}
-        <div class="border rounded p-3 mb-3 shadow-sm">
-          <strong>{{ interest.user.get_full_name|default:interest.user.username }}</strong> is interested in
-          <a href="{% url 'property_detail' interest.property.pk %}">{{ interest.property.title }}</a><br>
-          <span class="text-muted small">
+        <div class="border rounded p-3 mb-3 shadow-sm {% if not interest.responded %}bg-light{% endif %}">
+          <div class="d-flex justify-content-between">
+            <strong>{{ interest.user.get_full_name|default:interest.user.username }}</strong>
+            
+            {% if not interest.responded %}
+              <span class="badge bg-danger">NEW</span>
+            {% else %}
+              <span class="badge bg-success">Responded</span>
+            {% endif %}
+          </div>
+
+          <p>
+            is interested in 
+            <a href="{% url 'property_detail' interest.property.pk %}">
+              {{ interest.property.title }}
+            </a>
+          </p>
+          
+          <small class="text-muted">
             Type: {{ interest.interest_type }} | Offer: R{{ interest.offer_price|floatformat:2 }}<br>
             Message: {{ interest.message }}<br>
-            Contact: {{ interest.user.userprofile.contact_number|default:"N/A" }}
-          </span>
+            Contact: {{ interest.user.userprofile.contact_number|default:"N/A" }}<br>
+            Email: <a href="mailto:{{ interest.user.email }}" 
+                      class="text-decoration-none text-primary">
+                      {{ interest.user.email }}
+                    </a>
+          </small>
         </div>
       {% endfor %}
     </div>

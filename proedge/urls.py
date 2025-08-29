@@ -19,6 +19,8 @@ urlpatterns = [
     path('edit-profile/', edit_profile, name='edit_profile'),
     path('profile/', user_profile_view, name='user_profile'),
     path('messages/', views.interest_messages_view, name='interest_messages'),
+    path('messages/<int:interest_id>/respond/', views.respond_interest, name='respond_interest'),
+    path('messages/<int:interest_id>/delete/', views.delete_interest, name='delete_interest'),
     path('auctioneer/dashboard/', views.auctioneer_dashboard, name='auctioneer_dashboard'),
     path('auctioneer/create-auction/', create_auction, name='create_auction'),
     path('auction/<int:auction_id>/', views.auction_detail, name='auction_detail'),
@@ -48,5 +50,6 @@ urlpatterns = [
     path('agency/agent/<int:pk>/', views.agency_agent_detail, name='agency_agent_detail'),
     path('agency/agent/<int:pk>/edit/', views.edit_agent_profile, name='edit_agent_profile'),
     path('profile/change-password/', views.change_password_view, name='change_password'),
+    path('messages/<int:interest_id>/respond/', views.respond_interest, name='respond_interest'),
 
 ]

@@ -20,5 +20,6 @@ urlpatterns = [
     #path('province/<int:province_id>/', views.province_properties, name='province_properties'),
     path('property/<int:property_id>/interest/', views.submit_interest, name='submit_interest'),
     path('property/image/delete/<int:image_id>/', views.delete_property_image, name='delete_property_image'),
+    path('properties/province/<str:province>/', views.province_properties, name='province_properties')
 
 ]

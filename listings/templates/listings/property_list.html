@@ -3,12 +3,16 @@
 
 {% block content %}
 <div class="container my-5">
-  <div class="container " style="margin-top:80px;">
-  <h2 class="mb-3 text-center">Available Properties in South Africa</h2>
- 
-</div>
+  <div class="container" style="margin-top:80px;">
+    <h2 class="mb-3 text-center">Available Properties in South Africa</h2>
+  </div>
 
   <hr>
+<!-- SVG Map -->
+ <!--
+<div class="sa-map-container">
+    <object id="sa-map" type="image/svg+xml" data="{% static 'maps/south_africa.svg' %}" style="width:100%; height:100%;"></object>
+</div>-->
 
   <!-- Province Filter Cards (Optional) -->
   {% if provinces %}
@@ -38,6 +42,14 @@
             <div class="position-absolute top-0 start-0 bg-danger text-white px-3 py-1 fw-bold rounded-end">
               SOLD
             </div>
+          {% endif %}
+
+          <!-- Agency Logo (if exists) -->
+          {% if property.agent.agentprofile and property.agent.agentprofile.agency and property.agent.agentprofile.agency.logo %}
+            <img src="{{ property.agent.agentprofile.agency.logo.url }}" 
+                 alt="{{ property.agent.agentprofile.agency.name }} Logo"
+                 class="position-absolute top-0 end-0 m-2" 
+                 style="width: 50px; height: 50px; object-fit: contain; border-radius:5px;">
           {% endif %}
 
           <!-- Image -->
@@ -85,6 +97,30 @@
 
 
 
+<script>
+document.querySelectorAll('.sa-map path, .sa-map polygon').forEach(region => {
+    const provinceName = region.getAttribute('id') || region.getAttribute('data-name');
+
+    region.addEventListener('click', () => {
+        // Redirect to the province-filtered view
+        window.location.href = "{% url 'province_properties' 'REPLACE_PROVINCE' %}".replace('REPLACE_PROVINCE', provinceName);
+    });
+});
+</script>
+
+<style>
+  .sa-map path, .sa-map polygon {
+    fill: #c0c0c0;       /* Default province color */
+    stroke: #000;         /* Border */
+    stroke-width: 0.5;
+    transition: fill 0.3s; /* Smooth hover effect */
+}
+
+.sa-map path:hover, .sa-map polygon:hover {
+    fill: #ff0000;        /* Highlight on hover */
+    cursor: pointer;
+}
+</style>
 
 
 {% endblock %}

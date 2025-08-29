@@ -60,6 +60,27 @@ from django.contrib.auth import update_session_auth_hash
 
 
 
+@login_required
+def respond_interest(request, interest_id):
+    interest = get_object_or_404(Interest, id=interest_id, property__agent=request.user)
+    interest.status = 'accepted'
+    interest.save()
+    messages.success(request, "Enquiry marked as responded.")
+    return redirect('interest_messages')
+
+#This view is for sorting interest messages but is labled agent
+def agent_messages(request):
+    # Sort: unresponded first, then responded
+    interests = Interest.objects.filter(agent=request.user.agentprofile).order_by('responded', '-id')
+    return render(request, 'proedge/messages.html', {'interests': interests})
+
+@login_required
+def delete_interest(request, interest_id):
+    interest = get_object_or_404(Interest, id=interest_id, property__agent=request.user)
+    interest.delete()
+    messages.success(request, "Enquiry deleted.")
+    return redirect('interest_messages')
+
 
 @login_required
 def change_password_view(request):
@@ -70,7 +91,7 @@ def change_password_view(request):
             # Keep user logged in after password change
             update_session_auth_hash(request, user)
             messages.success(request, "Your password was successfully updated!")
-            return redirect('dashboard_redi')  # redirect to profile or wherever you want
+            return redirect('dashboard_redirect')  # redirect to profile or wherever you want
         else:
             messages.error(request, "Please correct the errors below.")
     else:

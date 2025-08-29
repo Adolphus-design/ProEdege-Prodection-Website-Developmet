@@ -372,4 +372,10 @@ def delete_property_image(request, image_id):
 
 
 
-
+def province_properties(request, province):
+    properties = Property.objects.filter(province=province, status='approved')
+    provinces = Property.objects.values_list('province', flat=True).distinct()
+    return render(request, 'property_grid.html', {
+        'properties': properties,
+        'provinces': provinces
+    })
