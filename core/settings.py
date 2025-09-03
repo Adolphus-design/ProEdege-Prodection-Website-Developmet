@@ -89,12 +89,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 #sqlite3 default database
-DATABASES = {
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
+}"""
 
 
 #postgress database config
@@ -111,11 +111,11 @@ DATABASES = {
 
 
 #Neon Postgres database config
-"""DATABASES = {
+DATABASES = {
     'default': dj_database_url.config(
         default=config("DATABASE_URL")
     )
-}"""
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
