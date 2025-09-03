@@ -98,7 +98,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 #postgress database config
-"""DATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'proedge_db',
@@ -107,15 +107,15 @@ WSGI_APPLICATION = 'core.wsgi.application'
         'HOST': 'localhost',
         'PORT': '5432',
     }
-}"""
+}
 
 
 #Neon Postgres database config
-DATABASES = {
+"""DATABASES = {
     'default': dj_database_url.config(
         default=config("DATABASE_URL")
     )
-}
+}"""
 
 
 AUTH_PASSWORD_VALIDATORS = [

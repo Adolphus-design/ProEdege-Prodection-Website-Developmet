@@ -42,49 +42,47 @@
 <body>
 
 <!-- Navbar -->
-<header>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm">
-  <div class="container-fluid">  <!-- Changed from .container to .container-fluid -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm">
+  <div class="container">
+
     <!-- Logo -->
-    <a class="navbar-brand fw-bold" href="/">
+    <a class="navbar-brand fw-bold me-1" href="/">
       <img src="{% static 'images/logo.png' %}" alt="ProEdge Logo" style="height: 40px;">
     </a>
 
     <!-- Toggler -->
-    <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <!-- Nav links -->
     <div class="collapse navbar-collapse" id="navbarMain">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link btn btn-outline-danger text-white mx-1 {% if request.path == '/' or request.path == '/properties/' %}active{% endif %}" href="{% url 'property_list' %}">All Properties</a>
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-wrap justify-content-start">
+        <li class="nav-item flex-fill flex-lg-auto mb-1 mb-lg-0">
+          <a class="nav-link btn btn-outline-danger text-white w-100 text-center mx-1 px-1 {% if request.path == '/' or request.path == '/properties/' %}active{% endif %}" href="{% url 'property_list' %}">All Properties</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link btn btn-outline-danger text-white mx-1 {% if request.path == '/rent/' %}active{% endif %}" href="{% url 'property_list' %}">Rent Properties</a>
+        <li class="nav-item flex-fill flex-lg-auto mb-1 mb-lg-0">
+          <a class="nav-link btn btn-outline-danger text-white w-100 text-center mx-1 px-1 {% if request.path == '/rent/' %}active{% endif %}" href="{% url 'property_list' %}">Rent Properties</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link btn btn-outline-danger text-white mx-1 {% if request.path == '/bank/' %}active{% endif %}" href="{% url 'property_list' %}">Bank Properties</a>
+        <li class="nav-item flex-fill flex-lg-auto mb-1 mb-lg-0">
+          <a class="nav-link btn btn-outline-danger text-white w-100 text-center mx-1 px-1 {% if request.path == '/bank/' %}active{% endif %}" href="{% url 'property_list' %}">Bank Properties</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link btn btn-outline-danger text-white mx-1 {% if request.path == '/auctions/' %}active{% endif %}" href="{% url 'property_list' %}">Auction Properties</a>
+        <li class="nav-item flex-fill flex-lg-auto mb-1 mb-lg-0">
+          <a class="nav-link btn btn-outline-danger text-white w-100 text-center mx-1 px-1 {% if request.path == '/auctions/' %}active{% endif %}" href="{% url 'property_list' %}">Auction Properties</a>
         </li>
       </ul>
 
-      <!-- User initials dropdown -->
-      <div class="d-flex align-items-center">
+      <!-- User / Auth Section -->
+      <div class="d-flex flex-wrap align-items-center mt-2 mt-lg-0">
         {% if user.is_authenticated %}
           <div class="dropdown d-flex align-items-center">
-            <a class="d-flex align-items-center text-decoration-none text-white me-1" href="{% url 'dashboard_redirect' %}">
-              <div class="rounded-circle bg-danger text-white d-flex justify-content-center align-items-center fw-bold" 
-                   style="width: 40px; height: 40px;">
+            <a class="d-flex align-items-center text-decoration-none text-white me-2" href="{% url 'dashboard_redirect' %}">
+              <div class="rounded-circle bg-danger text-white d-flex justify-content-center align-items-center fw-bold" style="width: 40px; height: 40px;">
                 {{ user.get_full_name|default:user.username|slice:":1"|upper }}
               </div>
-              <span class="ms-2">{{ user.get_full_name|default:user.username }}</span>
+              <span class="ms-2 d-none d-lg-inline">{{ user.get_full_name|default:user.username }}</span>
             </a>
-            <a class="dropdown-toggle text-white fs-5" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="margin-left: 5px;"></a>
-
+            <a class="dropdown-toggle text-white fs-5" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false"></a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
               <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-1"></i> Settings</a></li>
               <li><hr class="dropdown-divider"></li>
@@ -92,13 +90,33 @@
             </ul>
           </div>
         {% else %}
-          <a class="btn btn-outline-danger text-white me-2 px-4 fw-semibold" href="{% url 'login' %}">Login</a>
-          <a class="btn btn-danger px-4 fw-semibold" href="{% url 'register' %}">Register</a>
+          <div class="d-flex flex-wrap gap-1">
+            <a class="btn btn-outline-danger text-white px-2 fw-semibold" href="{% url 'login' %}">Login</a>
+            <a class="btn btn-danger px-2 fw-semibold" href="{% url 'register' %}">Register</a>
+          </div>
         {% endif %}
       </div>
     </div>
   </div>
 </nav>
+
+<!-- Additional CSS for responsive shrinking -->
+<style>
+  @media (max-width: 575px) {
+    .navbar-nav .nav-link {
+      font-size: 0.85rem;
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+    }
+    .navbar-brand img {
+      height: 35px;
+    }
+    .dropdown span {
+      display: none; /* hide full name to save space */
+    }
+  }
+</style>
+
 
 </header>
 
@@ -118,12 +136,10 @@
 <hr>
 <!-- Footer -->
 <!-- Footer -->
-<footer class="bg-dark text-white mt-5 pt-5 pb-3 border-top">
-  <div class="container">
+<footer class="bg-dark text-white mt-5 pt-4 pb-3 border-top">
+  <div class="container-fluid px-2">
     <div class="row">
-
-      <!-- Quick Links -->
-      <div class="col-6 col-md-3 mb-3">
+      <div class="col-6 col-md-3 mb-3 text-center text-md-start">
         <h6 class="fw-bold mb-2">Quick Links</h6>
         <ul class="list-unstyled">
           <li><a href="#" class="text-white text-decoration-none">Terms & Conditions</a></li>
@@ -131,19 +147,15 @@
           <li><a href="#" class="text-white text-decoration-none">About Us</a></li>
         </ul>
       </div>
-
-      <!-- Contact -->
-      <div class="col-6 col-md-3 mb-3">
+      <div class="col-6 col-md-3 mb-3 text-center text-md-start">
         <h6 class="fw-bold mb-2">Contact Us</h6>
         <ul class="list-unstyled">
           <li>📞 068 205 78849</li>
-          <li>📧 <a href="mailto:info@youthportal.com" class="text-white text-decoration-none">admin@proedgeproperties.co.za</a></li>
+          <li>📧 <a href="mailto:admin@proedgeproperties.co.za" class="text-white text-decoration-none">admin@proedgeproperties.co.za</a></li>
           <li>📠 +27 987 654 321</li>
         </ul>
       </div>
-
-      <!-- Services -->
-      <div class="col-6 col-md-3 mb-3">
+      <div class="col-6 col-md-3 mb-3 text-center text-md-start">
         <h6 class="fw-bold mb-2">Services</h6>
         <ul class="list-unstyled">
           <li><a href="#" class="text-white text-decoration-none">Property Listings</a></li>
@@ -151,9 +163,7 @@
           <li><a href="#" class="text-white text-decoration-none">Valuations</a></li>
         </ul>
       </div>
-
-      <!-- Address -->
-      <div class="col-6 col-md-3 mb-3">
+      <div class="col-6 col-md-3 mb-3 text-center text-md-start">
         <h6 class="fw-bold mb-2">Address</h6>
         <ul class="list-unstyled">
           <li>Province: Gauteng</li>
@@ -163,21 +173,17 @@
           <li>Benoni, 1501</li>
         </ul>
       </div>
-
     </div>
 
     <!-- Social Media -->
-    <div class="d-flex justify-content-center gap-3 mb-3 flex-wrap">
-      <a href="mailto:info@youthportal.com" class="text-white text-decoration-none fw-bold">📧 Email</a>
-      <a href="https://facebook.com" target="_blank" class="text-white text-decoration-none fw-bold">📘 Facebook</a>
-      <a href="https://twitter.com" target="_blank" class="text-white text-decoration-none fw-bold">🐦 Twitter</a>
-      <a href="https://wa.me/1234567890" target="_blank" class="text-white text-decoration-none fw-bold">💬 WhatsApp</a>
+    <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+      <a href="mailto:info@youthportal.com" class="social-btn">📧 Email</a>
+      <a href="https://facebook.com" target="_blank" class="social-btn">📘 Facebook</a>
+      <a href="https://twitter.com" target="_blank" class="social-btn">🐦 Twitter</a>
+      <a href="https://wa.me/1234567890" target="_blank" class="social-btn">💬 WhatsApp</a>
     </div>
 
-    <!-- Copyright -->
-    <div class="text-center text-muted small">
-      &copy; {{ now|date:"Y" }} ProEdge Property Group | Version 0.1 | Developed by Gray-Tech Solutions
-    </div>
+    <div class="text-center text-muted small">&copy; {{ now|date:"Y" }} ProEdge Property Group | Version 0.1</div>
   </div>
 </footer>
 
@@ -210,6 +216,35 @@
             justify-content: center;
         }
     }
+
+    footer {
+    padding-left: 0.5rem; /* matches navbar container padding */
+    padding-right: 0.5rem;
+}
+
+
+/* Force navbar content to stay within viewport */
+body, html {
+  overflow-x: hidden;
+}
+
+/* Remove extra spacing from nav items on small screens */
+@media (max-width: 575px) {
+  .navbar-nav {
+    margin-right: 0 !important;
+  }
+  .navbar-nav .nav-item .nav-link {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
 </style>
 
 
@@ -232,15 +267,14 @@
         text-decoration: none;
     }
 
-    @media (max-width: 767px) {
-        footer .row > div {
-            text-align: center;
-        }
+    
 
-        footer .d-flex.justify-content-center {
-            justify-content: center;
-        }
-    }
+
+
+  .navbar-brand img { max-height: 40px; }
+  .navbar-toggler { margin-left: auto; }
+  .social-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid #b80707; color: #b80707; background-color: #000; text-decoration: none; transition: all 0.3s ease; }
+  .social-btn:hover { background-color: #b80707; color: #fff; transform: scale(1.05); }
 </style>
 
 <!-- Social Button Styling -->
