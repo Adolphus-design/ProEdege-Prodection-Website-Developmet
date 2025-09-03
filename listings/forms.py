@@ -33,6 +33,7 @@ class PropertyForm(forms.ModelForm):
             'number_of_garages', 'floor_area_m2', 'erf_size_m2',
             'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots',
             'unit_no', 'complex_name', 'erf_no', 'ownership_type',
+            'township', 'section_number', 'scheme_number', 'scheme_name',
 
             # Property Features
             'study', 'lounges', 'dining_rooms', 'laundry', 'patio', 'balcony',
@@ -47,6 +48,7 @@ class PropertyForm(forms.ModelForm):
             'commission_percentage', 'commission_value',
         ]
 
+    # Hidden latitude and longitude fields
     latitude = forms.FloatField(required=False, widget=forms.HiddenInput())
     longitude = forms.FloatField(required=False, widget=forms.HiddenInput())
 
@@ -60,6 +62,12 @@ class PropertyForm(forms.ModelForm):
     domestic_accommodation = forms.BooleanField(required=False)
     roof = forms.BooleanField(required=False)
     security = forms.BooleanField(required=False)
+    study = forms.BooleanField(required=False)
+    laundry = forms.BooleanField(required=False)
+    patio = forms.BooleanField(required=False)
+    balcony = forms.BooleanField(required=False)
+    store_room = forms.BooleanField(required=False)
+    views = forms.BooleanField(required=False)
 
     # Date fields
     occupation_date = forms.DateField(
@@ -75,7 +83,7 @@ class PropertyForm(forms.ModelForm):
         widget=forms.DateInput(attrs={'type': 'date'})
     )
 
-    # Grouped fields for template
+    # ---------------- Grouped fields for template ----------------
     basic_fields = [
         'title', 'description', 'province', 'location', 'listing_type',
         'property_type', 'price', 'area'
@@ -85,7 +93,8 @@ class PropertyForm(forms.ModelForm):
         'number_of_bedrooms', 'number_of_kitchens', 'number_of_bathrooms',
         'number_of_garages', 'floor_area_m2', 'erf_size_m2',
         'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots',
-        'unit_no', 'complex_name', 'erf_no', 'ownership_type'
+        'unit_no', 'complex_name', 'erf_no', 'ownership_type',
+        'township', 'section_number', 'scheme_number', 'scheme_name'
     ]
 
     property_features_fields = [

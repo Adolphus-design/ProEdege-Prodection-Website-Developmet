@@ -20,19 +20,29 @@
 
                 <!-- Overlay Card -->
                 <div class="position-absolute top-0 start-0 bg-dark bg-opacity-75 text-white p-3 rounded m-3" style="max-width: 340px;">
-                    <h4 class="mb-2">{{ property.title }}</h4>
-                    <p class="mb-2"><i class="fas fa-map-marker-alt me-1"></i> {{ property.location }}, {{ property.province }}</p>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h4 class="mb-0 text-danger fw-bold">R{{ property.price|floatformat:0 }}</h4>
-                        <a href="{% url 'submit_interest' property.id %}" class="btn btn-danger btn-sm">Make Offer</a>
-                    </div>
-                    <div class="d-flex gap-3 mt-3 small">
-                        {% if property.number_of_bedrooms %}<span><i class="fas fa-bed"></i> {{ property.number_of_bedrooms }}</span>{% endif %}
-                        {% if property.number_of_bathrooms %}<span><i class="fas fa-shower"></i> {{ property.number_of_bathrooms }}</span>{% endif %}
-                        {% if property.number_of_kitchens %}<span><i class="fas fa-utensils"></i> {{ property.number_of_kitchens }}</span>{% endif %}
-                        {% if property.number_of_garages %}<span><i class="fas fa-warehouse"></i> {{ property.number_of_garages }}</span>{% endif %}
-                    </div>
-                </div>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0">{{ property.title }}</h4>
+        {% if property.ownership_type %}
+            <span class="badge bg-danger text-light ms-4">{{ property.get_ownership_type_display }}</span>
+        {% endif %}
+    </div>
+
+    <p class="mb-2">
+        <i class="fas fa-map-marker-alt me-1"></i> {{ property.location }}, {{ property.province }}
+    </p>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0 text-danger fw-bold">R{{ property.price|floatformat:0 }}</h4>
+        <a href="{% url 'submit_interest' property.id %}" class="btn btn-danger btn-sm">Make Offer</a>
+    </div>
+
+    <div class="d-flex gap-3 mt-3 small">
+        {% if property.number_of_bedrooms %}<span><i class="fas fa-bed"></i> {{ property.number_of_bedrooms }}</span>{% endif %}
+        {% if property.number_of_bathrooms %}<span><i class="fas fa-shower"></i> {{ property.number_of_bathrooms }}</span>{% endif %}
+        {% if property.number_of_kitchens %}<span><i class="fas fa-utensils"></i> {{ property.number_of_kitchens }}</span>{% endif %}
+        {% if property.number_of_garages %}<span><i class="fas fa-warehouse"></i> {{ property.number_of_garages }}</span>{% endif %}
+    </div>
+</div>
             </div>
         {% else %}
             <img src="{% static 'images/default.jpg' %}" class="img-fluid rounded w-100" style="height: 400px; object-fit: cover;" alt="Default image">
@@ -60,61 +70,66 @@
 
         <h5 class="mb-3 border-bottom pb-2">Agent(s) Marketing This Property</h5>
 
-        <div class="d-flex flex-column gap-3">
+<div class="d-flex flex-column gap-3">
 
-            {# Multiple agents #}
-            {% if property.agents.all %}
-                {% for agent in property.agents.all %}
-                    <div class="bg-black bg-opacity-80 text-white p-3 rounded shadow-sm d-flex align-items-center gap-3">
-                        <!-- Agent card code same as your original -->
-                        <div class="d-flex align-items-center gap-2">
-                            {% if agent.userprofile.profile_picture %}
-                                <img src="{{ agent.userprofile.profile_picture.url }}" class="rounded-circle border" style="width: 80px; height: 80px; object-fit: cover;">
-                            {% elif agent.agency and agent.agency.logo %}
-                                <img src="{{ agent.agency.logo.url }}" class="border rounded" style="width: 80px; height: 80px; object-fit: cover;">
-                            {% else %}
-                                <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center text-white fw-bold"
-                                     style="width: 80px; height: 80px;">
-                                    {{ agent.username|first|upper }}
-                                </div>
-                            {% endif %}
+    {# Multiple agents #}
+    {% if property.agents.all %}
+        {% for agent in property.agents.all %}
+            <div class="bg-black bg-opacity-80 text-white p-3 rounded shadow-sm d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    {% if agent.userprofile.profile_picture %}
+                        <img src="{{ agent.userprofile.profile_picture.url }}" class="rounded-circle border" style="width: 80px; height: 80px; object-fit: cover;">
+                    {% elif agent.agency and agent.agency.logo %}
+                        <img src="{{ agent.agency.logo.url }}" class="border rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center text-white fw-bold"
+                             style="width: 80px; height: 80px;">
+                            {{ agent.username|first|upper }}
                         </div>
-                        <div>
-                            <p class="mb-1 fw-semibold">{{ agent.get_full_name|default:agent.username }}</p>
-                            {% if agent.agency %}
-                                <span class="text-gray-300 small">Agent at {{ agent.agency.name }}</span>
-                            {% endif %}
-                            <div class="d-flex gap-2 mt-2">
-                                {% if agent.userprofile.contact_number %}
-                                    <a href="tel:{{ agent.userprofile.contact_number }}" class="btn btn-outline-light btn-sm">
-                                        <i class="fas fa-phone"></i> Call
-                                    </a>
-                                    <a href="https://wa.me/{{ agent.userprofile.contact_number }}" class="btn btn-success btn-sm">
-                                        <i class="fab fa-whatsapp"></i> WhatsApp
-                                    </a>
-                                {% endif %}
-                                {% if agent.email %}
-                                    <a href="mailto:{{ agent.email }}" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-envelope"></i> Email
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="mb-1 fw-semibold">{{ agent.get_full_name|default:agent.username }}</p>
+                    {% if agent.agency %}
+                        <span class="text-gray-300 small">Agent at {{ agent.agency.name }}</span>
+                    {% endif %}
+                    <div class="d-flex gap-2 mt-2">
+                        {% if agent.userprofile.contact_number %}
+                            <a href="{% if user.is_authenticated %}tel:{{ agent.userprofile.contact_number }}{% else %}#{% endif %}" 
+                               class="btn btn-outline-light btn-sm contact-btn" 
+                               data-login-message="Please login to contact the agent.">
+                                <i class="fas fa-phone"></i> Call
+                            </a>
+                            <a href="{% if user.is_authenticated %}https://wa.me/{{ agent.userprofile.contact_number }}{% else %}#{% endif %}" 
+                               class="btn btn-success btn-sm contact-btn" 
+                               data-login-message="Please login to contact the agent.">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                        {% endif %}
+                        {% if agent.email %}
+                            <a href="{% if user.is_authenticated %}mailto:{{ agent.email }}{% else %}#{% endif %}" 
+                               class="btn btn-danger btn-sm contact-btn" 
+                               data-login-message="Please login to contact the agent.">
+                                <i class="fas fa-envelope"></i> Email
+                            </a>
+                        {% endif %}
                     </div>
-                {% endfor %}
-            {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
 
-            {# Standalone agent #}
-            {% if property.agent and property.agent not in property.agents.all %}
-                <!-- keep same block as your original -->
-            {% endif %}
+    {# Standalone agent #}
+    {% if property.agent and property.agent not in property.agents.all %}
+        <!-- keep same block as your original -->
+    {% endif %}
 
-            {# Seller fallback #}
-            {% if property.seller %}
-                <!-- keep same block as your original -->
-            {% endif %}
+    {# Seller fallback #}
+    {% if property.seller %}
+        <!-- keep same block as your original -->
+    {% endif %}
 
-        </div>
+</div>
       </div>
     </div>
 
@@ -318,4 +333,30 @@
   });
 </script>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+  });
+</script>
+
+<!-- JS for login check -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const contactButtons = document.querySelectorAll('.contact-btn');
+  contactButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      // If the href is #, user is not logged in
+      if (this.getAttribute('href') === '#') {
+        e.preventDefault();
+        alert(this.dataset.loginMessage);  // Show a simple alert
+        // OR redirect to login page if you prefer:
+        // window.location.href = "{% url 'login' %}";
+      }
+    });
+  });
+});
+</script>
 {% endblock %}

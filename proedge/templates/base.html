@@ -82,7 +82,8 @@
               </div>
               <span class="ms-2 d-none d-lg-inline">{{ user.get_full_name|default:user.username }}</span>
             </a>
-            <a class="dropdown-toggle text-white fs-5" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false"></a>
+            <!-- Properly aligned toggle using Bootstrap -->
+            <a class="dropdown-toggle text-white fs-5 ms-auto" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false"></a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
               <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-1"></i> Settings</a></li>
               <li><hr class="dropdown-divider"></li>
@@ -99,6 +100,7 @@
     </div>
   </div>
 </nav>
+
 
 <!-- Additional CSS for responsive shrinking -->
 <style>

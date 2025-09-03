@@ -59,29 +59,38 @@
               {% endif %}
             {% endwith %}
           </a>
+<!-- Body -->
+<div class="card-body">
+  <h5 class="card-title">{{ property.title }}</h5>
 
-          <!-- Body -->
-          <div class="card-body">
-            <h5 class="card-title">{{ property.title }}</h5>
-            <p class="card-text text-muted mb-1"><i class="fas fa-map-marker-alt me-1"></i> {{ property.location }} | {{ property.province }}</p>
-            <p class="text-danger fw-bold fs-5">R {{ property.price|floatformat:0 }}</p>
+  {% if property.ownership_type %}
+    <p class="px-2 py-1 bg-danger text-white d-inline-block rounded small mb-2">
+      {{ property.get_ownership_type_display }}
+    </p>
+  {% endif %}
 
-            <div class="d-flex justify-content-start gap-3 text-secondary small mt-2">
-              {% if property.number_of_bedrooms %}
-                <span><i class="fas fa-bed me-1"></i> {{ property.number_of_bedrooms }}</span>
-              {% endif %}
-              {% if property.number_of_bathrooms %}
-                <span><i class="fas fa-shower me-1"></i> {{ property.number_of_bathrooms }}</span>
-              {% endif %}
-              {% if property.number_of_garages %}
-                <span><i class="fas fa-warehouse me-1"></i> {{ property.number_of_garages }}</span>
-              {% endif %}
-            </div>
+  <p class="card-text text-muted mb-1">
+    <i class="fas fa-map-marker-alt me-1"></i> {{ property.location }} | {{ property.province }}
+  </p>
 
-            <a href="{% url 'property_detail' property.id %}" class="btn btn-dark btn-sm mt-3 w-100">
-              View Details
-            </a>
-          </div>
+  <p class="text-danger fw-bold fs-5">R {{ property.price|floatformat:0 }}</p>
+
+  <div class="d-flex justify-content-start gap-3 text-secondary small mt-2">
+    {% if property.number_of_bedrooms %}
+      <span><i class="fas fa-bed me-1"></i> {{ property.number_of_bedrooms }}</span>
+    {% endif %}
+    {% if property.number_of_bathrooms %}
+      <span><i class="fas fa-shower me-1"></i> {{ property.number_of_bathrooms }}</span>
+    {% endif %}
+    {% if property.number_of_garages %}
+      <span><i class="fas fa-warehouse me-1"></i> {{ property.number_of_garages }}</span>
+    {% endif %}
+  </div>
+
+  <a href="{% url 'property_detail' property.id %}" class="btn btn-dark btn-sm mt-3 w-100">
+    View Details
+  </a>
+</div>
         </div>
       </div>
     {% empty %}

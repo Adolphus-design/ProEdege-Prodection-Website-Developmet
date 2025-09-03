@@ -6,6 +6,9 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 
 
+from django.db import models
+from django.conf import settings
+
 class Property(models.Model):
     # Choices
     PROPERTY_TYPE_CHOICES = [
@@ -33,7 +36,7 @@ class Property(models.Model):
         ('private', 'Private Seller'),
         ('agent', 'Agent'),
         ('bank', 'Bank Property'),
-        ('auction', 'auction'),
+        ('auction', 'Auction'),
     ]
 
     STATUS_CHOICES = [
@@ -43,7 +46,7 @@ class Property(models.Model):
         ('sold', 'Sold'),
     ]
 
-    # Basic Details
+    # ---------------- Basic Details ----------------
     title = models.CharField(max_length=200)
     description = models.TextField()
     price = models.DecimalField(max_digits=12, decimal_places=2)
@@ -53,12 +56,11 @@ class Property(models.Model):
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES)
     listing_type = models.CharField(max_length=20, choices=LISTING_TYPE_CHOICES, default='')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-
     latitude = models.DecimalField(max_digits=100, decimal_places=50, null=True, blank=True)
     longitude = models.DecimalField(max_digits=100, decimal_places=50, null=True, blank=True)
     floor_plan = models.FileField(upload_to='floor_plans/', null=True, blank=True)
 
-    # Property Specs
+    # ---------------- Property Specs ----------------
     number_of_bedrooms = models.PositiveIntegerField(null=True, blank=True)
     number_of_kitchens = models.PositiveIntegerField(null=True, blank=True)
     number_of_bathrooms = models.PositiveIntegerField(null=True, blank=True)
@@ -73,8 +75,14 @@ class Property(models.Model):
     complex_name = models.CharField(max_length=255, null=True, blank=True)
     erf_no = models.CharField(max_length=50, null=True, blank=True)
     ownership_type = models.CharField(max_length=50, choices=[('freehold', 'Freehold'), ('sectional', 'Sectional Title')], null=True, blank=True)
+    
+    # Missing fields that caused previous errors
+    township = models.CharField(max_length=255, null=True, blank=True)
+    section_number = models.CharField(max_length=50, null=True, blank=True)
+    scheme_number = models.CharField(max_length=50, null=True, blank=True)
+    scheme_name = models.CharField(max_length=255, null=True, blank=True)
 
-    # Property Features
+    # ---------------- Property Features ----------------
     study = models.BooleanField(default=False)
     lounges = models.PositiveIntegerField(null=True, blank=True)
     dining_rooms = models.PositiveIntegerField(null=True, blank=True)
@@ -82,33 +90,44 @@ class Property(models.Model):
     patio = models.BooleanField(default=False)
     balcony = models.BooleanField(default=False)
     domestic_accommodation = models.BooleanField(default=False)
-    carports = models.PositiveIntegerField(null=True, blank=True)
+    carports = models.BooleanField(default=False)
     flatlet = models.BooleanField(default=False)
     store_room = models.BooleanField(default=False)
     furnished = models.BooleanField(default=False)
     pool = models.BooleanField(default=False)
-    security = models.CharField(max_length=255, null=True, blank=True)
-    roof = models.CharField(max_length=255, null=True, blank=True)
+    security = models.BooleanField(default=False)
+    roof = models.BooleanField(default=False)
     garden = models.BooleanField(default=False)
     views = models.BooleanField(default=False)
     walling = models.CharField(max_length=255, null=True, blank=True)
     flooring = models.CharField(max_length=255, null=True, blank=True)
 
-    # Lease / Rental Details
+    # ---------------- Lease / Rental Details ----------------
     lease_period = models.CharField(max_length=50, null=True, blank=True)
     occupation_date = models.DateField(null=True, blank=True)
     deposit = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     lease_excludes = models.TextField(null=True, blank=True)
     annual_escalation = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
-    # Mandate / Commission Details
+    # Sectional-specific
+    levy_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    floor_level = models.CharField(max_length=50, null=True, blank=True)
+
+    # Freehold-specific
+    zoning = models.CharField(max_length=100, null=True, blank=True)
+
+    # Common to both (optional)
+    rates_and_taxes = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    municipality = models.CharField(max_length=255, null=True, blank=True)
+
+    # ---------------- Mandate / Commission Details ----------------
     mandate_type = models.CharField(max_length=50, null=True, blank=True)
     mandate_start_date = models.DateField(null=True, blank=True)
     mandate_end_date = models.DateField(null=True, blank=True)
     commission_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     commission_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
-    # User associations
+    # ---------------- User associations ----------------
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='properties', null=True, blank=True)
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='purchased_properties')
     landlord = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='rented_properties')

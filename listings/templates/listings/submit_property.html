@@ -54,78 +54,88 @@
         <input type="hidden" id="id_longitude" name="longitude" value="{{ form.longitude.value|default_if_none:'' }}">
 
         <!-- Advanced Fields Toggle -->
-        <button type="button" id="toggle-advanced-btn" class="btn btn-danger mt-4 mb-3 w-100">Add Additional Property Info</button>
+<button type="button" id="toggle-advanced-btn" class="btn btn-danger mt-4 mb-3 w-100">
+    Show Advanced Fields
+</button>
 
-        <div id="advanced-fields" style="display: none;">
+<div id="advanced-fields" style="display: none;">
 
-            <!-- Property Specs -->
-            <h5 class="advanced-section-heading btn-danger">Property Specs</h5>
-            <div class="row g-3">
-                {% for field in form %}
-                    {% if field.name in form.property_specs_fields %}
-                        <div class="col-md-6 col-12">
+    <!-- Property Specs Section -->
+    <button type="button" class="btn btn-danger mb-2 w-100 toggle-section-btn" data-target="#property-specs">
+        Property Specs
+    </button>
+    <div id="property-specs" class="section-fields" style="display: none;">
+        <div class="row g-3">
+            {% for field in form %}
+                {% if field.name in form.property_specs_fields %}
+                    <div class="col-md-6 col-12">
+                        <label for="{{ field.id_for_label }}" class="form-label text-white fw-semibold">{{ field.label }}</label>
+                        {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Property Features Section -->
+    <button type="button" class="btn btn-danger mb-2 w-100 toggle-section-btn" data-target="#property-features">
+        Property Features
+    </button>
+    <div id="property-features" class="section-fields" style="display: none;">
+        <div class="row g-3">
+            {% for field in form %}
+                {% if field.name in form.property_features_fields %}
+                    <div class="col-md-6 col-12">
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                            <div class="form-check text-white">
+                                {{ field|add_class:"form-check-input" }}
+                                <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            </div>
+                        {% else %}
                             <label for="{{ field.id_for_label }}" class="form-label text-white fw-semibold">{{ field.label }}</label>
                             {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <!-- Property Features -->
-            <h5 class="advanced-section-heading">Property Features</h5>
-            <div class="row g-3">
-                {% for field in form %}
-                    {% if field.name in form.property_features_fields %}
-                        <div class="col-md-6 col-12">
-                            {% if field.field.widget.input_type == 'checkbox' %}
-                                <div class="form-check text-white">
-                                    {{ field|add_class:"form-check-input" }}
-                                    <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                </div>
-                            {% else %}
-                                <label for="{{ field.id_for_label }}" class="form-label text-white fw-semibold">{{ field.label }}</label>
-                                {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <!-- Lease / Rental Details -->
-            <h5 class="advanced-section-heading">Lease / Rental Details</h5>
-            <div class="row g-3">
-                {% for field in form %}
-                    {% if field.name in form.lease_fields %}
-                        <div class="col-md-6 col-12">
-                            <label for="{{ field.id_for_label }}" class="form-label text-white fw-semibold">{{ field.label }}</label>
-                            {% if field.field.widget.input_type == 'date' %}
-                                {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
-                            {% else %}
-                                {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <!-- Mandate / Commission Details -->
-            <h5 class="advanced-section-heading">Mandate / Commission Details</h5>
-            <div class="row g-3">
-                {% for field in form %}
-                    {% if field.name in form.mandate_fields %}
-                        <div class="col-md-6 col-12">
-                            <label for="{{ field.id_for_label }}" class="form-label text-white fw-semibold">{{ field.label }}</label>
-                            {% if field.field.widget.input_type == 'date' %}
-                                {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
-                            {% else %}
-                                {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
         </div>
+    </div>
+
+    <!-- Lease / Rental Details Section -->
+    <button type="button" class="btn btn-danger mb-2 w-100 toggle-section-btn" data-target="#lease-details">
+        Lease / Rental Details
+    </button>
+    <div id="lease-details" class="section-fields" style="display: none;">
+        <div class="row g-3">
+            {% for field in form %}
+                {% if field.name in form.lease_fields %}
+                    <div class="col-md-6 col-12">
+                        <label for="{{ field.id_for_label }}" class="form-label text-white fw-semibold">{{ field.label }}</label>
+                        {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Mandate / Commission Details Section -->
+    <button type="button" class="btn btn-danger mb-2 w-100 toggle-section-btn" data-target="#mandate-details">
+        Mandate / Commission Details
+    </button>
+    <div id="mandate-details" class="section-fields" style="display: none;">
+        <div class="row g-3">
+            {% for field in form %}
+                {% if field.name in form.mandate_fields %}
+                    <div class="col-md-6 col-12">
+                        <label for="{{ field.id_for_label }}" class="form-label text-white fw-semibold">{{ field.label }}</label>
+                        {{ field|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
 
         <!-- Map Preview -->
         <div id="map" style="height: 400px; margin-top: 20px;"></div>
@@ -189,10 +199,18 @@ button.btn-secondary:hover {
 <script>
     // Toggle advanced fields
     const toggleBtn = document.getElementById('toggle-advanced-btn');
-    const advancedFields = document.getElementById('advanced-fields');
-    toggleBtn.addEventListener('click', () => {
-        advancedFields.style.display = advancedFields.style.display === 'none' ? 'block' : 'none';
-        toggleBtn.textContent = advancedFields.style.display === 'none' ? 'Add Additional Property Info' : 'Hide Additional Info';
+    // Toggle entire advanced fields
+    document.getElementById('toggle-advanced-btn').addEventListener('click', function() {
+        const adv = document.getElementById('advanced-fields');
+        adv.style.display = adv.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Toggle individual sections
+    document.querySelectorAll('.toggle-section-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = document.querySelector(btn.getAttribute('data-target'));
+            target.style.display = target.style.display === 'none' ? 'block' : 'none';
+        });
     });
 
     // Google Maps & Places Autocomplete
