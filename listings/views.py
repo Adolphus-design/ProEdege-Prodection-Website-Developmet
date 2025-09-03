@@ -128,10 +128,9 @@ def submit_property(request):
             elif user_role == 'agent':
                 property.agent = request.user
                 agency = getattr(request.user.agentprofile, 'agency', None) if hasattr(request.user, 'agentprofile') else None
-                property.agency = agency  # Will be None if agent has no agency
-
-                property.save()  # Save first for ManyToManyField
-                property.agents.add(request.user)  # Assign to self for consistency
+                property.agency = agency
+                property.save()
+                property.agents.add(request.user)
 
             elif user_role:
                 setattr(property, user_role, request.user)
@@ -152,22 +151,14 @@ def submit_property(request):
     else:
         form = PropertyForm()
 
-    # Field lists for template
-    basic_fields = [
-        'title', 'description', 'province', 'location', 'area',
-        'property_type', 'listing_type', 'price', 'number_of_rooms'
-    ]
-
-    advanced_fields = [
-        'number_of_bedrooms', 'number_of_kitchens', 'number_of_bathrooms',
-        'number_of_garages', 'floor_area_m2', 'erf_size_m2',
-        'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots'
-    ]
-
+    # Pass the grouped fields from the form itself
     return render(request, 'listings/submit_property.html', {
         'form': form,
-        'basic_fields': basic_fields,
-        'advanced_fields': advanced_fields
+        'basic_fields': form.basic_fields,
+        'property_specs_fields': form.property_specs_fields,
+        'property_features_fields': form.property_features_fields,
+        'lease_fields': form.lease_fields,
+        'mandate_fields': form.mandate_fields
     })
 
 

@@ -24,14 +24,84 @@ class PropertyForm(forms.ModelForm):
     class Meta:
         model = Property
         fields = [
-            'title', 'description', 'province', 'location', 'latitude', 'longitude', 'listing_type', 'property_type', 'price',
+            # Basic Details
+            'title', 'description', 'province', 'location', 'latitude', 'longitude',
+            'listing_type', 'property_type', 'price', 'area',
+
+            # Property Specs
             'number_of_bedrooms', 'number_of_kitchens', 'number_of_bathrooms',
             'number_of_garages', 'floor_area_m2', 'erf_size_m2',
-            'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots'
+            'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots',
+            'unit_no', 'complex_name', 'erf_no', 'ownership_type',
+
+            # Property Features
+            'study', 'lounges', 'dining_rooms', 'laundry', 'patio', 'balcony',
+            'domestic_accommodation', 'carports', 'flatlet', 'store_room', 'furnished',
+            'pool', 'security', 'roof', 'garden', 'views', 'walling', 'flooring',
+
+            # Lease / Rental Details
+            'lease_period', 'occupation_date', 'deposit', 'lease_excludes', 'annual_escalation',
+
+            # Mandate / Commission Details
+            'mandate_type', 'mandate_start_date', 'mandate_end_date',
+            'commission_percentage', 'commission_value',
         ]
 
     latitude = forms.FloatField(required=False, widget=forms.HiddenInput())
     longitude = forms.FloatField(required=False, widget=forms.HiddenInput())
+
+    # Checkbox fields
+    has_parking = forms.BooleanField(required=False)
+    furnished = forms.BooleanField(required=False)
+    pool = forms.BooleanField(required=False)
+    garden = forms.BooleanField(required=False)
+    carports = forms.BooleanField(required=False)
+    flatlet = forms.BooleanField(required=False)
+    domestic_accommodation = forms.BooleanField(required=False)
+    roof = forms.BooleanField(required=False)
+    security = forms.BooleanField(required=False)
+
+    # Date fields
+    occupation_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    mandate_start_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    mandate_end_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+
+    # Grouped fields for template
+    basic_fields = [
+        'title', 'description', 'province', 'location', 'listing_type',
+        'property_type', 'price', 'area'
+    ]
+
+    property_specs_fields = [
+        'number_of_bedrooms', 'number_of_kitchens', 'number_of_bathrooms',
+        'number_of_garages', 'floor_area_m2', 'erf_size_m2',
+        'price_per_m2', 'price_per_erf_m2', 'has_parking', 'number_of_parking_slots',
+        'unit_no', 'complex_name', 'erf_no', 'ownership_type'
+    ]
+
+    property_features_fields = [
+        'study', 'lounges', 'dining_rooms', 'laundry', 'patio', 'balcony',
+        'domestic_accommodation', 'carports', 'flatlet', 'store_room', 'furnished',
+        'pool', 'security', 'roof', 'garden', 'views', 'walling', 'flooring'
+    ]
+
+    lease_fields = [
+        'lease_period', 'occupation_date', 'deposit', 'lease_excludes', 'annual_escalation'
+    ]
+
+    mandate_fields = [
+        'mandate_type', 'mandate_start_date', 'mandate_end_date',
+        'commission_percentage', 'commission_value'
+    ]
 
 
         
