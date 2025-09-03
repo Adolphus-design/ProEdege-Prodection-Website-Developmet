@@ -31,9 +31,17 @@
         <i class="fas fa-map-marker-alt me-1"></i> {{ property.location }}, {{ property.province }}
     </p>
 
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h4 class="mb-0 text-danger fw-bold">R{{ property.price|floatformat:0 }}</h4>
-        <a href="{% url 'submit_interest' property.id %}" class="btn btn-danger btn-sm">Make Offer</a>
+    <div class="d-flex flex-column mb-2">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h4 class="mb-0 text-danger fw-bold">R{{ property.price|floatformat:0 }}</h4>
+            <a href="{% url 'submit_interest' property.id %}" class="btn btn-danger btn-sm">Make Offer</a>
+        </div>
+
+        {# Display property_type badge if ownership_type is neither Sectional nor Freehold #}
+        {% if property.ownership_type != "Sectional Title" and property.ownership_type != "Freehold" and property.property_type %}
+            <span class="badge bg-danger text-white mt-2">{{ property.property_type }}</span>
+
+        {% endif %}
     </div>
 
     <div class="d-flex gap-3 mt-3 small">
@@ -133,28 +141,33 @@
       </div>
     </div>
 
-    <!-- Key Features -->
-    <div id="features" class="mb-5">
-        <h5 class="mb-3 border-bottom pb-2">Key Features</h5>
-        <div class="row g-3">
-            {% if property.number_of_bedrooms %}<div class="col-6 col-md-3"><strong>Bedrooms:</strong> {{ property.number_of_bedrooms }}</div>{% endif %}
-            {% if property.number_of_bathrooms %}<div class="col-6 col-md-3"><strong>Bathrooms:</strong> {{ property.number_of_bathrooms }}</div>{% endif %}
-            {% if property.number_of_kitchens %}<div class="col-6 col-md-3"><strong>Kitchens:</strong> {{ property.number_of_kitchens }}</div>{% endif %}
-            {% if property.number_of_garages %}<div class="col-6 col-md-3"><strong>Garages:</strong> {{ property.number_of_garages }}</div>{% endif %}
-            {% if property.floor_area_m2 %}<div class="col-6 col-md-3"><strong>Floor Area:</strong> {{ property.floor_area_m2 }} m²</div>{% endif %}
-            {% if property.erf_size_m2 %}<div class="col-6 col-md-3"><strong>Erf Size:</strong> {{ property.erf_size_m2 }} m²</div>{% endif %}
-            {% if property.property_type %}<div class="col-6 col-md-3"><strong>Property Type:</strong> {{ property.property_type }}</div>{% endif %}
-            {% if property.price_per_m2 %}<div class="col-6 col-md-3"><strong>Price per m²:</strong> R {{ property.price_per_m2|floatformat:0 }}</div>{% endif %}
-            {% if property.price_per_erf_m2 %}<div class="col-6 col-md-3"><strong>Price per Erf m²:</strong> R {{ property.price_per_erf_m2|floatformat:0 }}</div>{% endif %}
-            {% if property.has_parking %}<div class="col-6 col-md-3"><strong>Parking:</strong> Yes {% if property.number_of_parking_slots %}({{ property.number_of_parking_slots }} slots){% endif %}</div>{% endif %}
-        </div>
+   <!-- Key Features -->
+{% if property.number_of_bedrooms or property.number_of_bathrooms or property.number_of_kitchens or property.number_of_garages or property.floor_area_m2 or property.erf_size_m2 or property.property_type or property.price_per_m2 or property.price_per_erf_m2 or property.has_parking %}
+<div id="features" class="mb-5">
+    <h5 class="mb-3 fw-bold text-danger">Key Features</h5>
+    <hr>
+    <div class="row g-3 bg-white text-dark p-3 rounded">
+        {% if property.number_of_bedrooms %}<div class="col-6 col-md-3"><strong>Bedrooms:</strong> {{ property.number_of_bedrooms }}</div>{% endif %}
+        {% if property.number_of_bathrooms %}<div class="col-6 col-md-3"><strong>Bathrooms:</strong> {{ property.number_of_bathrooms }}</div>{% endif %}
+        {% if property.number_of_kitchens %}<div class="col-6 col-md-3"><strong>Kitchens:</strong> {{ property.number_of_kitchens }}</div>{% endif %}
+        {% if property.number_of_garages %}<div class="col-6 col-md-3"><strong>Garages:</strong> {{ property.number_of_garages }}</div>{% endif %}
+        {% if property.floor_area_m2 %}<div class="col-6 col-md-3"><strong>Floor Area:</strong> {{ property.floor_area_m2 }} m²</div>{% endif %}
+        {% if property.erf_size_m2 %}<div class="col-6 col-md-3"><strong>Erf Size:</strong> {{ property.erf_size_m2 }} m²</div>{% endif %}
+        {% if property.property_type %}<div class="col-6 col-md-3"><strong>Property Type:</strong> {{ property.property_type }}</div>{% endif %}
+        {% if property.price_per_m2 %}<div class="col-6 col-md-3"><strong>Price per m²:</strong> R {{ property.price_per_m2|floatformat:0 }}</div>{% endif %}
+        {% if property.price_per_erf_m2 %}<div class="col-6 col-md-3"><strong>Price per Erf m²:</strong> R {{ property.price_per_erf_m2|floatformat:0 }}</div>{% endif %}
+        {% if property.has_parking %}<div class="col-6 col-md-3"><strong>Parking:</strong> Yes {% if property.number_of_parking_slots %}({{ property.number_of_parking_slots }} slots){% endif %}</div>{% endif %}
     </div>
+</div>
+{% endif %}
 
-    <!-- Rental / Lease Info -->
-    {% if property.listing_type == "Rental" %}
+<!-- Lease / Rental Info -->
+{% if property.listing_type == "Rental" %}
+    {% if property.lease_period or property.occupation_date or property.deposit or property.lease_excludes or property.annual_escalation %}
     <div id="rental" class="mb-5">
-        <h5 class="mb-3 border-bottom pb-2 text-center fw-bold">Lease / Rental Information</h5>
-        <div class="row g-3">
+        <h5 class="mb-3 fw-bold text-danger">Lease / Rental Information</h5>
+        <hr>
+        <div class="row g-3 bg-white text-dark p-3 rounded">
             {% if property.lease_period %}<div class="col-md-4"><strong>Lease Period:</strong> {{ property.lease_period }}</div>{% endif %}
             {% if property.occupation_date %}<div class="col-md-4"><strong>Occupation Date:</strong> {{ property.occupation_date }}</div>{% endif %}
             {% if property.deposit %}<div class="col-md-4"><strong>Deposit:</strong> R {{ property.deposit }}</div>{% endif %}
@@ -163,18 +176,22 @@
         </div>
     </div>
     {% endif %}
+{% endif %}
 
-    <!-- Mandate / Commission Info -->
-    <div id="mandate" class="mb-5">
-        
-        <div class="row g-3">
-            {% if property.mandate_type %}<div class="col-md-4"><strong>Mandate Type:</strong> {{ property.mandate_type }}</div>{% endif %}
-            {% if property.mandate_start_date %}<div class="col-md-4"><strong>Start Date:</strong> {{ property.mandate_start_date }}</div>{% endif %}
-            {% if property.mandate_end_date %}<div class="col-md-4"><strong>End Date:</strong> {{ property.mandate_end_date }}</div>{% endif %}
-            {% if property.commission_percentage %}<div class="col-md-4"><strong>Commission %:</strong> {{ property.commission_percentage }}%</div>{% endif %}
-            {% if property.commission_value %}<div class="col-md-4"><strong>Commission Value:</strong> R {{ property.commission_value }}</div>{% endif %}
-        </div>
+<!-- Mandate / Commission Info -->
+{% if property.mandate_type or property.mandate_start_date or property.mandate_end_date or property.commission_percentage or property.commission_value %}
+<div id="mandate" class="mb-5">
+    <h5 class="mb-3 fw-bold text-danger">Mandate / Commission Information</h5>
+    <hr>
+    <div class="row g-3 bg-light text-dark p-3 rounded">
+        {% if property.mandate_type %}<div class="col-md-4"><strong>Mandate Type:</strong> {{ property.mandate_type }}</div>{% endif %}
+        {% if property.mandate_start_date %}<div class="col-md-4"><strong>Start Date:</strong> {{ property.mandate_start_date }}</div>{% endif %}
+        {% if property.mandate_end_date %}<div class="col-md-4"><strong>End Date:</strong> {{ property.mandate_end_date }}</div>{% endif %}
+        {% if property.commission_percentage %}<div class="col-md-4"><strong>Commission %:</strong> {{ property.commission_percentage }}%</div>{% endif %}
+        {% if property.commission_value %}<div class="col-md-4"><strong>Commission Value:</strong> R {{ property.commission_value }}</div>{% endif %}
     </div>
+</div>
+{% endif %}
 
     <!-- Gallery -->
     <h5>Image Gallery</h5>
