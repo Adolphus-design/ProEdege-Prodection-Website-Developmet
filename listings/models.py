@@ -18,6 +18,8 @@ class Property(models.Model):
         ('commercial', 'Commercial'),
         ('industrial', 'Industrial'),
         ('rental', 'Rental'),
+        ('plot', 'Plot'),
+        
     ]
 
     PROVINCE_CHOICES = [

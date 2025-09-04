@@ -162,7 +162,7 @@
 {% endif %}
 
 <!-- Lease / Rental Info -->
-{% if property.listing_type == "Rental" %}
+
     {% if property.lease_period or property.occupation_date or property.deposit or property.lease_excludes or property.annual_escalation %}
     <div id="rental" class="mb-5">
         <h5 class="mb-3 fw-bold text-danger">Lease / Rental Information</h5>
@@ -176,7 +176,7 @@
         </div>
     </div>
     {% endif %}
-{% endif %}
+
 
 <!-- Mandate / Commission Info -->
 {% if property.mandate_type or property.mandate_start_date or property.mandate_end_date or property.commission_percentage or property.commission_value %}
