@@ -155,6 +155,39 @@ def create_agent(request):
     
     return render(request, 'proedge/create_agent.html', {'form': form})
 
+# This view handles agent registration linked to ProEdge agency
+# The agency is identified by username "Admin"
+def agent_register(request):
+    # Get the ProEdge agency (case-sensitive username)
+    proedge_agency = get_object_or_404(Agency, owner__username="Admin")
+
+    if request.method == 'POST':
+        form = AgencyCreateAgentForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Save the user first
+            agent_user = form.save()  # saves the User instance
+
+            # Create the AgentProfile and link to ProEdge
+            AgentProfile.objects.create(
+                user=agent_user,
+                agency=proedge_agency
+            )
+
+            # Optional: Send welcome email
+            send_mail(
+                subject="Welcome to ProEdge Property Group",
+                message=f"Hi {agent_user.username},\n\nYour agent account has been created and is linked to ProEdge. You can now log in using your credentials.\n\n- ProEdge Team",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[agent_user.email],
+                fail_silently=True,
+            )
+
+            messages.success(request, "Your account has been created successfully! Please log in.")
+            return redirect('login')
+    else:
+        form = AgencyCreateAgentForm()
+
+    return render(request, 'proedge/agent_register.html', {'form': form})
 
 @login_required
 def create_agent(request):
@@ -355,6 +388,15 @@ def dashboard_redirect_view(request):
 def agent_dashboard(request):
     user = request.user
 
+    profile = getattr(request.user, 'userprofile', None)
+
+    # Or using try/except
+    try:
+        profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        profile = None
+    # Or using filter().first()
+    profile = AgentProfile.objects.filter(user=request.user).first()
     # ✅ Properties listed by the agent themselves
     self_listed_properties = Property.objects.filter(agent=user)
 
@@ -411,6 +453,8 @@ def agent_dashboard(request):
 
         'query': query,
         'selected_status': selected_status,
+
+        'profile': profile,
     }
 
     return render(request, 'proedge/agent_dashboard.html', context)

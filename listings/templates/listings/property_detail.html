@@ -142,7 +142,7 @@
     </div>
 
    <!-- Key Features -->
-{% if property.number_of_bedrooms or property.number_of_bathrooms or property.number_of_kitchens or property.number_of_garages or property.floor_area_m2 or property.erf_size_m2 or property.property_type or property.price_per_m2 or property.price_per_erf_m2 or property.has_parking %}
+{% if property.number_of_bedrooms or property.number_of_bathrooms or property.number_of_kitchens or property.number_of_garages or property.floor_area_m2 or property.erf_size_m2 or property.property_type or property.price_per_m2 or property.price_per_erf_m2 or property.has_parking or property.unit_no or property.complex_name or property.erf_no or property.ownership_type or property.township or property.section_number or property.scheme_number or property.scheme_name %}
 <div id="features" class="mb-5">
     <h5 class="mb-3 fw-bold text-danger">Key Features</h5>
     <hr>
@@ -157,25 +157,91 @@
         {% if property.price_per_m2 %}<div class="col-6 col-md-3"><strong>Price per m²:</strong> R {{ property.price_per_m2|floatformat:0 }}</div>{% endif %}
         {% if property.price_per_erf_m2 %}<div class="col-6 col-md-3"><strong>Price per Erf m²:</strong> R {{ property.price_per_erf_m2|floatformat:0 }}</div>{% endif %}
         {% if property.has_parking %}<div class="col-6 col-md-3"><strong>Parking:</strong> Yes {% if property.number_of_parking_slots %}({{ property.number_of_parking_slots }} slots){% endif %}</div>{% endif %}
+        {% if property.unit_no %}<div class="col-6 col-md-3"><strong>Unit No:</strong> {{ property.unit_no }}</div>{% endif %}
+        {% if property.complex_name %}<div class="col-6 col-md-3"><strong>Complex Name:</strong> {{ property.complex_name }}</div>{% endif %}
+        {% if property.erf_no %}<div class="col-6 col-md-3"><strong>Erf No:</strong> {{ property.erf_no }}</div>{% endif %}
+        {% if property.ownership_type %}<div class="col-6 col-md-3"><strong>Ownership:</strong> {{ property.ownership_type }}</div>{% endif %}
+        {% if property.township %}<div class="col-6 col-md-3"><strong>Township:</strong> {{ property.township }}</div>{% endif %}
+        {% if property.section_number %}<div class="col-6 col-md-3"><strong>Section No:</strong> {{ property.section_number }}</div>{% endif %}
+        {% if property.scheme_number %}<div class="col-6 col-md-3"><strong>Scheme No:</strong> {{ property.scheme_number }}</div>{% endif %}
+        {% if property.scheme_name %}<div class="col-6 col-md-3"><strong>Scheme Name:</strong> {{ property.scheme_name }}</div>{% endif %}
     </div>
 </div>
 {% endif %}
 
+
+<!-- Property Features -->
+{% if property.study or property.lounges or property.dining_rooms or property.laundry or property.patio or property.balcony or property.domestic_accommodation or property.carports or property.flatlet or property.store_room or property.furnished or property.pool or property.security or property.roof or property.garden or property.views or property.walling or property.flooring %}
+<div id="property-features" class="mb-5">
+    <h5 class="mb-3 fw-bold text-danger">Property Features</h5>
+    <hr>
+    <div class="row g-3 bg-white text-dark p-3 rounded">
+        {% if property.study %}<div class="col-6 col-md-3"><strong>Study:</strong> Yes</div>{% endif %}
+        {% if property.lounges %}<div class="col-6 col-md-3"><strong>Lounges:</strong> {{ property.lounges }}</div>{% endif %}
+        {% if property.dining_rooms %}<div class="col-6 col-md-3"><strong>Dining Rooms:</strong> {{ property.dining_rooms }}</div>{% endif %}
+        {% if property.laundry %}<div class="col-6 col-md-3"><strong>Laundry:</strong> Yes</div>{% endif %}
+        {% if property.patio %}<div class="col-6 col-md-3"><strong>Patio:</strong> Yes</div>{% endif %}
+        {% if property.balcony %}<div class="col-6 col-md-3"><strong>Balcony:</strong> Yes</div>{% endif %}
+        {% if property.domestic_accommodation %}<div class="col-6 col-md-3"><strong>Domestic Accommodation:</strong> Yes</div>{% endif %}
+        {% if property.carports %}<div class="col-6 col-md-3"><strong>Carports:</strong> Yes</div>{% endif %}
+        {% if property.flatlet %}<div class="col-6 col-md-3"><strong>Flatlet:</strong> Yes</div>{% endif %}
+        {% if property.store_room %}<div class="col-6 col-md-3"><strong>Store Room:</strong> Yes</div>{% endif %}
+        {% if property.furnished %}<div class="col-6 col-md-3"><strong>Furnished:</strong> Yes</div>{% endif %}
+        {% if property.pool %}<div class="col-6 col-md-3"><strong>Pool:</strong> Yes</div>{% endif %}
+        {% if property.security %}<div class="col-6 col-md-3"><strong>Security:</strong> Yes</div>{% endif %}
+        {% if property.roof %}<div class="col-6 col-md-3"><strong>Roof:</strong> Yes</div>{% endif %}
+        {% if property.garden %}<div class="col-6 col-md-3"><strong>Garden:</strong> Yes</div>{% endif %}
+        {% if property.views %}<div class="col-6 col-md-3"><strong>Views:</strong> Yes</div>{% endif %}
+        {% if property.walling %}<div class="col-6 col-md-3"><strong>Walling:</strong> {{ property.walling }}</div>{% endif %}
+        {% if property.flooring %}<div class="col-6 col-md-3"><strong>Flooring:</strong> {{ property.flooring }}</div>{% endif %}
+    </div>
+</div>
+{% endif %}
+
+
+<!-- Sectional / Freehold Details -->
+{% if property.levy_amount or property.floor_level or property.zoning or property.rates_and_taxes or property.municipality %}
+<div id="property-specifics" class="mb-5">
+    <h5 class="mb-3 fw-bold text-danger">Property Specifics</h5>
+    <hr>
+    <div class="row g-3 bg-white text-dark p-3 rounded">
+        {% if property.levy_amount %}<div class="col-md-4"><strong>Levy Amount:</strong> R {{ property.levy_amount }}</div>{% endif %}
+        {% if property.floor_level %}<div class="col-md-4"><strong>Floor Level:</strong> {{ property.floor_level }}</div>{% endif %}
+        {% if property.zoning %}<div class="col-md-4"><strong>Zoning:</strong> {{ property.zoning }}</div>{% endif %}
+        {% if property.rates_and_taxes %}<div class="col-md-4"><strong>Rates & Taxes:</strong> R {{ property.rates_and_taxes }}</div>{% endif %}
+        {% if property.municipality %}<div class="col-md-4"><strong>Municipality:</strong> {{ property.municipality }}</div>{% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Floor Plan -->
+{% if property.floor_plan %}
+<div id="floor-plan" class="mb-5">
+    <h5 class="mb-3 fw-bold text-danger">Floor Plan</h5>
+    <hr>
+    <div class="bg-white text-dark p-3 rounded">
+        <a href="{{ property.floor_plan.url }}" target="_blank">Download/View Floor Plan</a>
+    </div>
+</div>
+{% endif %}
+
+
 <!-- Lease / Rental Info -->
 
     {% if property.lease_period or property.occupation_date or property.deposit or property.lease_excludes or property.annual_escalation %}
-    <div id="rental" class="mb-5">
-        <h5 class="mb-3 fw-bold text-danger">Lease / Rental Information</h5>
-        <hr>
-        <div class="row g-3 bg-white text-dark p-3 rounded">
-            {% if property.lease_period %}<div class="col-md-4"><strong>Lease Period:</strong> {{ property.lease_period }}</div>{% endif %}
-            {% if property.occupation_date %}<div class="col-md-4"><strong>Occupation Date:</strong> {{ property.occupation_date }}</div>{% endif %}
-            {% if property.deposit %}<div class="col-md-4"><strong>Deposit:</strong> R {{ property.deposit }}</div>{% endif %}
-            {% if property.lease_excludes %}<div class="col-md-6"><strong>Lease Excludes:</strong> {{ property.lease_excludes }}</div>{% endif %}
-            {% if property.annual_escalation %}<div class="col-md-6"><strong>Annual Escalation:</strong> {{ property.annual_escalation }}%</div>{% endif %}
-        </div>
+<div id="rental" class="mb-5">
+    <h5 class="mb-3 fw-bold text-danger">Lease / Rental Information</h5>
+    <hr>
+    <div class="row g-3 bg-white text-dark p-3 rounded">
+        {% if property.lease_period %}<div class="col-md-4"><strong>Lease Period:</strong> {{ property.lease_period }}</div>{% endif %}
+        {% if property.occupation_date %}<div class="col-md-4"><strong>Occupation Date:</strong> {{ property.occupation_date }}</div>{% endif %}
+        {% if property.deposit %}<div class="col-md-4"><strong>Deposit:</strong> R {{ property.deposit }}</div>{% endif %}
+        {% if property.lease_excludes %}<div class="col-md-6"><strong>Lease Excludes:</strong> {{ property.lease_excludes }}</div>{% endif %}
+        {% if property.annual_escalation %}<div class="col-md-6"><strong>Annual Escalation:</strong> {{ property.annual_escalation }}%</div>{% endif %}
     </div>
+</div>
     {% endif %}
+
 
 
 <!-- Mandate / Commission Info -->

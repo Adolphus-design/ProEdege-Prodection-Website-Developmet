@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import  assign_agent_to_property, buyer_dashboard, create_auction, edit_profile, register_view, CustomLoginView, CustomLogoutView, dashboard_redirect_view, seller_dashboard, tenant_dashboard, agent_dashboard, landlord_dashboard, bank_dashboard, auctioneer_dashboard, user_profile_view
+from .views import  agent_register, assign_agent_to_property, buyer_dashboard, create_auction, edit_profile, register_view, CustomLoginView, CustomLogoutView, dashboard_redirect_view, seller_dashboard, tenant_dashboard, agent_dashboard, landlord_dashboard, bank_dashboard, auctioneer_dashboard, user_profile_view
 from . import views 
 
 from .views import activate_account
@@ -51,5 +51,6 @@ urlpatterns = [
     path('agency/agent/<int:pk>/edit/', views.edit_agent_profile, name='edit_agent_profile'),
     path('profile/change-password/', views.change_password_view, name='change_password'),
     path('messages/<int:interest_id>/respond/', views.respond_interest, name='respond_interest'),
+    path('agents/register/', agent_register, name='agent_register'),
 
 ]
