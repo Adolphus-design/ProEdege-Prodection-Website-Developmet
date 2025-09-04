@@ -94,8 +94,8 @@ WSGI_APPLICATION = 'core.wsgi.application'
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
-"""
+}"""
+
 
 #postgress database config
 """DATABASES = {

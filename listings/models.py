@@ -17,7 +17,7 @@ class Property(models.Model):
         ('land', 'Vacant Land'),
         ('commercial', 'Commercial'),
         ('industrial', 'Industrial'),
-        ('rental', 'Rental'),
+        ('to let', 'To Let'),
         ('plot', 'Plot'),
         
     ]
