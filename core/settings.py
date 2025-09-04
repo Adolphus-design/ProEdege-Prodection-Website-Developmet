@@ -89,33 +89,33 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 #sqlite3 default database
-DATABASES = {
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
+}"""
 
 
 #postgress database config
 """DATABASES = {
     'default': {
-    'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'proedge_db',
-    'USER': 'proedge_user',
-    'PASSWORD': 'Adolphus@0917',
-    'HOST': 'localhost',
-    'PORT': '5432',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'proedge_db',
+        'USER': 'proedge_user',
+        'PASSWORD': 'Adolphus@0917',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }"""
 
 
 #Neon Postgres database config
-"""DATABASES = {
+DATABASES = {
     'default': dj_database_url.config(
         default=config("DATABASE_URL")
     )
-}"""
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
