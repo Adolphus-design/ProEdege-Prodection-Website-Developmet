@@ -10,12 +10,19 @@ from django.contrib.auth import get_user_model
 # It allows multiple file uploads and uses a ClearableFileInput widget for better user experience.
 from django import forms
 
-class PropertyImageForm(forms.Form):
+"""class PropertyImageForm(forms.Form):
     images = forms.FileField(
         required=False,
         label="Upload Property Images",
         
-    )
+    )"""
+
+class MultiFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+class PropertyImageForm(forms.Form):
+    #images = forms.FileField(required=False, widget=MultiFileInput(attrs={'multiple': True}))
+    main_image = forms.FileField(required=False)
 
 
 # This form is used for submitting a new property listing
