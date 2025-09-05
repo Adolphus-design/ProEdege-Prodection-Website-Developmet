@@ -158,31 +158,20 @@ def create_agent(request):
 # This view handles agent registration linked to ProEdge agency
 # The agency is identified by username "Admin"
 def agent_register(request):
-    # Get the ProEdge agency (case-sensitive username)
-    proedge_agency = get_object_or_404(Agency, owner__username="Admin")
+    # Get ProEdge agency (or any default agency for self-registered agents)
+    proedge_agency = get_object_or_404(Agency, owner__username="Gray-Agency")
 
     if request.method == 'POST':
         form = AgencyCreateAgentForm(request.POST, request.FILES)
         if form.is_valid():
-            # Save the User instance
-            agent_user = form.save()
-
-            # ✅ Link the UserProfile to the ProEdge agency
-            profile, created = UserProfile.objects.get_or_create(user=agent_user)
-            profile.agency = proedge_agency
-            profile.save()
-
-            # ✅ Create AgentProfile linked to the agency
-            AgentProfile.objects.get_or_create(user=agent_user, defaults={'agency': proedge_agency})
+            agent = form.save(agency=proedge_agency)  # link to ProEdge agency
 
             # Optional: send welcome email
             send_mail(
                 subject="Welcome to ProEdge Property Group",
-                message=f"Hi {agent_user.username},\n\n"
-                        "Your agent account has been created and is linked to ProEdge. "
-                        "You can now log in using your credentials.\n\n- ProEdge Team",
+                message=f"Hi {agent.username},\n\nYour agent account has been created and is linked to ProEdge. You can now log in using your credentials.\n\n- ProEdge Team",
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[agent_user.email],
+                recipient_list=[agent.email],
                 fail_silently=True,
             )
 
@@ -944,45 +933,33 @@ def agency_dashboard(request):
     except Agency.DoesNotExist:
         return redirect("create_agency_profile")
 
-    # Get all agents under this agency
-    agents = AgentProfile.objects.filter(agency=agency)
-    agent_users = [agent.user for agent in agents]
-    
+    # Get all agents linked to this agency (both self-registered and agency-created)
+    agent_profiles = AgentProfile.objects.filter(agency=agency)
+    agent_users = [agent.user for agent in agent_profiles]
 
-    # 1️⃣ Properties listed by the agency itself
+    # 1️⃣ Properties listed directly by the agency
     agency_properties = Property.objects.filter(agency=agency)
 
-    # 2️⃣ Properties listed by agents of this agency
+    # 2️⃣ Properties listed by any agent of this agency
     agent_listed_properties = Property.objects.filter(agent__in=agent_users)
 
     # 3️⃣ Properties assigned to agents of this agency
     assigned_properties = Property.objects.filter(agents__in=agent_users)
 
-    # Combine all three querysets
+    # Combine all three querysets, remove duplicates, and order
     all_properties = (agency_properties | agent_listed_properties | assigned_properties).distinct().order_by('-created_at')
 
-    # Group by status
+    # Group properties by status
     grouped_properties = defaultdict(list)
     for prop in all_properties:
         grouped_properties[prop.status].append(prop)
 
-    
-
-    # Join requests
+    # Join requests for the agency
     join_requests = AgentJoinRequest.objects.filter(agency=agency).order_by("-created_at")
-
-    print("Agents in this agency:", agent_users)
-    print("Properties listed by agents:", Property.objects.filter(agent__in=agent_users))
-
-
-    print("Agency:", agency)
-    print("Agents under agency:", agents)
-    print("Agent users:", agent_users)
-    print("Agent-listed properties:", agent_listed_properties)
 
     context = {
         "agency": agency,
-        "agents": agents,
+        "agents": agent_profiles,
         "properties": all_properties,
         "grouped_properties": dict(grouped_properties),
         "join_requests": join_requests,
@@ -992,6 +969,7 @@ def agency_dashboard(request):
     }
 
     return render(request, "proedge/agency_dashboard.html", context)
+
 
 
 

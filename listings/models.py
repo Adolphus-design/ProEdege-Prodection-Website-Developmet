@@ -56,7 +56,7 @@ class Property(models.Model):
     province = models.CharField(max_length=100, choices=PROVINCE_CHOICES)
     area = models.CharField(max_length=100, null=True, blank=True)
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES)
-    listing_type = models.CharField(max_length=20, choices=LISTING_TYPE_CHOICES, default='')
+    listing_type = models.CharField(max_length=20, choices=LISTING_TYPE_CHOICES, default='agent')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     latitude = models.DecimalField(max_digits=100, decimal_places=50, null=True, blank=True)
     longitude = models.DecimalField(max_digits=100, decimal_places=50, null=True, blank=True)

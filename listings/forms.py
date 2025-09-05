@@ -17,12 +17,31 @@ from django import forms
         
     )"""
 
-class MultiFileInput(forms.ClearableFileInput):
+"""class MultiFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
 class PropertyImageForm(forms.Form):
     #images = forms.FileField(required=False, widget=MultiFileInput(attrs={'multiple': True}))
-    main_image = forms.FileField(required=False)
+    main_image = forms.FileField(required=False)"""
+
+class MultiFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class PropertyImageForm(forms.Form):
+    main_image = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={'multiple': False})
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        main_image = cleaned_data.get("main_image")
+
+        if not main_image:
+            raise forms.ValidationError("Please upload at least one main property image.")
+
+        return cleaned_data
 
 
 # This form is used for submitting a new property listing

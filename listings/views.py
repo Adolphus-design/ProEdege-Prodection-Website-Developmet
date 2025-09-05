@@ -125,10 +125,13 @@ def submit_property(request):
                 except Agency.DoesNotExist:
                     return redirect('create_agency_profile')
 
+            
             elif user_role == 'agent':
                 property.agent = request.user
-                agency = getattr(request.user.agentprofile, 'agency', None) if hasattr(request.user, 'agentprofile') else None
-                property.agency = agency
+                # Always fetch agency from AgentProfile (self-registered or agency-created)
+                agency = getattr(request.user.agentprofile, 'agency', None)
+                if agency:
+                    property.agency = agency
                 property.save()
                 property.agents.add(request.user)
 
