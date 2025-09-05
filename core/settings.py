@@ -43,8 +43,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
     'widget_tweaks',
-    'agent',
-    'django.contrib.humanize',
+    'agent'
 ]
 
 # Cloudinary configuration (replace with your real credentials)
