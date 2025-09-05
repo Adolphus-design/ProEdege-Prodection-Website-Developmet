@@ -118,6 +118,32 @@
         </div>
     </div>
 
+    <!-- Commercial Details Section -->
+    <button type="button" class="btn btn-danger mb-2 w-100 toggle-section-btn" data-target="#commercial-details">
+        Commercial Details
+    </button>
+    <div id="commercial-details" class="section-fields" style="display: none;">
+        <div class="col-md-6 col-12">
+    <label for="{{ form.gross_rental.id_for_label }}" class="form-label text-white fw-semibold">Gross Rental (R/m²)</label>
+    {{ form.gross_rental|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
+</div>
+
+<div class="col-md-6 col-12">
+    <label for="{{ form.net_rental.id_for_label }}" class="form-label text-white fw-semibold">Net Rental (R/m²)</label>
+    {{ form.net_rental|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
+</div>
+
+<div class="col-md-6 col-12">
+    <label for="{{ form.operating_costs.id_for_label }}" class="form-label text-white fw-semibold">Operating Costs (R/m²)</label>
+    {{ form.operating_costs|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
+</div>
+
+<div class="col-md-6 col-12">
+    <label for="{{ form.rates.id_for_label }}" class="form-label text-white fw-semibold">Rates (R/m²)</label>
+    {{ form.rates|add_class:"form-control form-control-dark text-white bg-black bg-opacity-50 border border-secondary rounded" }}
+</div>
+    </div>
+
     <!-- Mandate / Commission Details Section -->
     <button type="button" class="btn btn-danger mb-2 w-100 toggle-section-btn" data-target="#mandate-details">
         Mandate / Commission Details

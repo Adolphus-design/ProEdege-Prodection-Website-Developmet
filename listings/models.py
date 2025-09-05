@@ -110,6 +110,12 @@ class Property(models.Model):
     deposit = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     lease_excludes = models.TextField(null=True, blank=True)
     annual_escalation = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    
+    # Commercial-specific
+    gross_rental = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="R/m²")
+    net_rental = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="R/m²")
+    operating_costs = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="R/m²")
+    rates = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="R/m²")
 
     # Sectional-specific
     levy_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

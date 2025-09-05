@@ -47,6 +47,9 @@ class PropertyForm(forms.ModelForm):
             'domestic_accommodation', 'carports', 'flatlet', 'store_room', 'furnished',
             'pool', 'security', 'roof', 'garden', 'views', 'walling', 'flooring',
 
+            # Commercial-specific
+            'gross_rental', 'net_rental', 'operating_costs', 'rates',
+            
             # Lease / Rental Details
             'lease_period', 'occupation_date', 'deposit', 'lease_excludes', 'annual_escalation',
 
