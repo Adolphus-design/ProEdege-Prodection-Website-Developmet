@@ -164,7 +164,8 @@ CustomUser = get_user_model()
 class AgencyCreateAgentForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30, required=True)
     last_name = forms.CharField(max_length=30, required=True)
-    password = forms.CharField(widget=forms.PasswordInput, required=False)  # optional on edit
+    password = forms.CharField(widget=forms.PasswordInput, required=True, label="Password")
+    confirm_password = forms.CharField(widget=forms.PasswordInput, required=True, label="Confirm Password")
     ffc_certificate = forms.FileField(required=False)
     id_copy = forms.FileField(required=False)
     proof_of_address = forms.FileField(required=False)
@@ -172,12 +173,30 @@ class AgencyCreateAgentForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'first_name', 'last_name', 'password', 'role']
+        fields = ['username', 'email', 'first_name', 'last_name', 'password', 'confirm_password', 'role']
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if len(password) < 8:
+            raise forms.ValidationError("Password must be at least 8 characters long.")
+        if not any(char.isdigit() for char in password):
+            raise forms.ValidationError("Password must contain at least one number.")
+        if not any(char.isalpha() for char in password):
+            raise forms.ValidationError("Password must contain at least one letter.")
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password and confirm_password and password != confirm_password:
+            self.add_error('confirm_password', "Passwords do not match.")
 
     def save(self, commit=True, agency=None):
         user = super().save(commit=False)
 
-        # Set password if provided
+        # Set password
         password = self.cleaned_data.get('password')
         if password:
             user.set_password(password)
@@ -208,7 +227,7 @@ class AgencyCreateAgentForm(forms.ModelForm):
                 profile.agency = agency
             profile.save()
 
-            # ✅ Create or get AgentProfile for this user
+            # Create AgentProfile
             AgentProfile.objects.get_or_create(user=user, defaults={'agency': agency})
 
         return user

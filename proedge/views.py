@@ -164,16 +164,13 @@ def agent_register(request):
     if request.method == 'POST':
         form = AgencyCreateAgentForm(request.POST, request.FILES)
         if form.is_valid():
-            # Save the user first
-            agent_user = form.save()  # saves the User instance
+            agent_user = form.save()  # Only save the user; form handles AgentProfile
 
-            # Create the AgentProfile and link to ProEdge
-            AgentProfile.objects.create(
-                user=agent_user,
-                agency=proedge_agency
-            )
+            # Optionally link to ProEdge
+            agent_user.agentprofile.agency = proedge_agency
+            agent_user.agentprofile.save()
 
-            # Optional: Send welcome email
+            # Send welcome email
             send_mail(
                 subject="Welcome to ProEdge Property Group",
                 message=f"Hi {agent_user.username},\n\nYour agent account has been created and is linked to ProEdge. You can now log in using your credentials.\n\n- ProEdge Team",

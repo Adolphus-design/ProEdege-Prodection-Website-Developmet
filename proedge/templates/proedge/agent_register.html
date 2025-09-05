@@ -20,7 +20,23 @@
                             {% for field in form %}
                                 <div class="col-md-6 mb-3">
                                     <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                    {{ field|add_class:"form-control" }}
+                                    {{ field|add_class:"form-control bg-black text-white border border-secondary" }}
+
+                                    {% if field.name == "password" %}
+                                        <div id="password-hints" class="form-text text-white mt-1">
+                                            Password must:
+                                            <ul class="mb-0">
+                                                <li id="length" class="text-danger">Be at least 8 characters</li>
+                                                <li id="letter" class="text-danger">Contain at least one letter</li>
+                                                <li id="number" class="text-danger">Contain at least one number</li>
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if field.name == "confirm_password" %}
+                                        <div id="match-hint" class="form-text text-white mt-1"></div>
+                                    {% endif %}
+
                                     {% if field.help_text %}
                                         <small class="text-muted">{{ field.help_text }}</small>
                                     {% endif %}
@@ -39,4 +55,62 @@
         </div>
     </div>
 </div>
+
+<script>
+const passwordInput = document.getElementById('id_password');
+const confirmInput = document.getElementById('id_confirm_password');
+
+const lengthHint = document.getElementById('length');
+const letterHint = document.getElementById('letter');
+const numberHint = document.getElementById('number');
+const matchHint = document.getElementById('match-hint');
+
+function validatePassword() {
+    const value = passwordInput.value;
+
+    // Check length
+    if (value.length >= 8) {
+        lengthHint.classList.remove('text-danger');
+        lengthHint.classList.add('text-success');
+    } else {
+        lengthHint.classList.remove('text-success');
+        lengthHint.classList.add('text-danger');
+    }
+
+    // Check letter
+    if (/[A-Za-z]/.test(value)) {
+        letterHint.classList.remove('text-danger');
+        letterHint.classList.add('text-success');
+    } else {
+        letterHint.classList.remove('text-success');
+        letterHint.classList.add('text-danger');
+    }
+
+    // Check number
+    if (/\d/.test(value)) {
+        numberHint.classList.remove('text-danger');
+        numberHint.classList.add('text-success');
+    } else {
+        numberHint.classList.remove('text-success');
+        numberHint.classList.add('text-danger');
+    }
+
+    // Check match with confirm password
+    if (confirmInput.value) {
+        if (value === confirmInput.value) {
+            matchHint.textContent = "Passwords match ✅";
+            matchHint.classList.remove('text-danger');
+            matchHint.classList.add('text-success');
+        } else {
+            matchHint.textContent = "Passwords do not match ❌";
+            matchHint.classList.remove('text-success');
+            matchHint.classList.add('text-danger');
+        }
+    }
+}
+
+passwordInput.addEventListener('input', validatePassword);
+confirmInput.addEventListener('input', validatePassword);
+</script>
+
 {% endblock %}
