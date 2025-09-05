@@ -240,6 +240,13 @@
         {% if property.deposit %}<div class="col-md-4"><strong>Deposit:</strong> R {{ property.deposit }}</div>{% endif %}
         {% if property.lease_excludes %}<div class="col-md-6"><strong>Lease Excludes:</strong> {{ property.lease_excludes }}</div>{% endif %}
         {% if property.annual_escalation %}<div class="col-md-6"><strong>Annual Escalation:</strong> {{ property.annual_escalation }}%</div>{% endif %}
+        {% if property.gross_rental %}<div class="col-md-6"><strong>Gross Rental:</strong> R {{ property.gross_rental }}</div>{% endif %}
+
+        {% if property.net_rental %}<div class="col-md-6"><strong>Net Rental:</strong> R {{ property.net_rental }}</div>{% endif %}
+        {% if property.gross_rental %}<div class="col-md-6"><strong>Gross Rental:</strong> R {{ property.gross_rental }}</div>{% endif %}
+        {% if property.rate %}<div class="col-md-6"><strong>Rate Costs:</strong>{{ property.rate }}</div>{% endif %}
+
+
     </div>
 </div>
     {% endif %}
