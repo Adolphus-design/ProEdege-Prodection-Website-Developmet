@@ -159,7 +159,7 @@ def create_agent(request):
 # The agency is identified by username "Admin"
 def agent_register(request):
     # Get ProEdge agency (or any default agency for self-registered agents)
-    proedge_agency = get_object_or_404(Agency, owner__username="Gray-Agency")
+    proedge_agency = get_object_or_404(Agency, owner__username="Admin")
 
     if request.method == 'POST':
         form = AgencyCreateAgentForm(request.POST, request.FILES)
