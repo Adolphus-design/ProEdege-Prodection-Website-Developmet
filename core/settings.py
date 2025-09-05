@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
     'widget_tweaks',
-    'agent'
+    'agent',
+    'django.contrib.humanize',
 ]
 
 # Cloudinary configuration (replace with your real credentials)
@@ -94,8 +95,8 @@ WSGI_APPLICATION = 'core.wsgi.application'
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}"""
-
+}
+"""
 
 #postgress database config
 """DATABASES = {
