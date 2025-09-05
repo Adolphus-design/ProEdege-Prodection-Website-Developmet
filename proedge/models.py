@@ -80,18 +80,18 @@ class UserProfile(models.Model):
     
 class CustomUser(AbstractUser):
     ROLE_CHOICES = [
-        ('buyer', 'Buyer'),
-        ('seller', 'Seller'),
-        ('tenant', 'Tenant'),
-        ('agency', 'Agency'),
-        ('landlord', 'Landlord'),
+        #('buyer', 'Buyer'),
+        #('seller', 'Seller'),
+        #('tenant', 'Tenant'),
+        #('agency', 'Agency'),
+        #('landlord', 'Landlord'),
         ('agent', 'Agent'),
-        ('bank', 'Bank'),
-        ('auctioneer', 'Auctioneer'),
+        #('bank', 'Bank'),
+        #('auctioneer', 'Auctioneer'),
         
     ]
 
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='')
     email = models.EmailField(unique=True)
     is_email_verified = models.BooleanField(default=False)
     
