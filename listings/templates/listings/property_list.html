@@ -41,24 +41,8 @@
             </div>
           {% endif %}
 
-          <!-- Agency Logo (if exists) -->
-          {% if property.agent.agentprofile and property.agent.agentprofile.agency and property.agent.agentprofile.agency.logo %}
-            <img src="{{ property.agent.agentprofile.agency.logo.url }}" 
-                 alt="{{ property.agent.agentprofile.agency.name }} Logo"
-                 class="position-absolute top-0 end-0 m-2" 
-                 style="width: 50px; height: 50px; object-fit: contain; border-radius:5px;">
-          {% endif %}
 
-          <!-- Image -->
-          <a href="{% url 'property_detail' property.id %}">
-            {% with main_image_url=property.get_main_image_url %}
-              {% if main_image_url %}
-                <img src="{{ main_image_url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Property image">
-              {% else %}
-                <img src="{% static 'images/default.jpg' %}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Default image">
-              {% endif %}
-            {% endwith %}
-          </a>
+          
 <!-- Body -->
 <div class="card-body">
   <h5 class="card-title">{{ property.title }}</h5>

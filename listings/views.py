@@ -255,24 +255,24 @@ def redirect_user_dashboard(request):
     
 # This view allows sellers or agents to upload images for a property listing
 # It checks the user's role and ensures they are the owner of the property before allowing image uploads    
+from cloudinary_storage.storage import MediaCloudinaryStorage
+
 @login_required
 def upload_property_images(request, pk):
     property_obj = get_object_or_404(Property, pk=pk)
 
-    # 🚨 Restrict access: only the owner/authorized roles
+    # Restrict access
     user_role = getattr(request.user, 'role', None)
     allowed = False
-
     if user_role == 'agency' and property_obj.agency == getattr(request.user, 'agency_profile', None):
         allowed = True
     elif user_role == 'agent' and property_obj.agent == request.user:
         allowed = True
     elif user_role == 'seller' and property_obj.seller == request.user:
         allowed = True
-    # add bank, landlord, etc. here if needed
 
     if not allowed:
-        return redirect('dashboard_redirect')  # or raise PermissionDenied
+        return redirect('dashboard_redirect')
 
     if request.method == 'POST':
         form = PropertyImageForm(request.POST, request.FILES)
@@ -280,13 +280,15 @@ def upload_property_images(request, pk):
         main_image_file = request.FILES.get('main_image')
 
         if form.is_valid():
-            # Save main image
+            # Save main image to Cloudinary
             if main_image_file:
-                PropertyImage.objects.create(property=property_obj, main_image=main_image_file)
+                main_img_obj = PropertyImage(property=property_obj)
+                main_img_obj.main_image.save(main_image_file.name, main_image_file, save=True)
 
-            # Save gallery images
+            # Save gallery images to Cloudinary
             for f in files:
-                PropertyImage.objects.create(property=property_obj, image=f)
+                img_obj = PropertyImage(property=property_obj)
+                img_obj.image.save(f.name, f, save=True)
 
             return redirect('property_detail', pk=property_obj.pk)
 
@@ -297,6 +299,7 @@ def upload_property_images(request, pk):
         'form': form,
         'property': property_obj,
     })
+
 
 @login_required
 def contact_seller(request, property_id):
