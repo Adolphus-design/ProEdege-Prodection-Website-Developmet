@@ -112,19 +112,19 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 #Neon Postgres database config
-"""DATABASES = {
+DATABASES = {
     'default': dj_database_url.config(
         default=config("DATABASE_URL")
     )
 }
-"""
-DATABASES = {
+
+"""DATABASES = {
     'default': dj_database_url.config(
         default=config("DATABASE_URL"),
         #conn_max_age=600,      # Keep connections open for 10 minutes
         #ssl_require=True       # Ensure SSL connection to Neon
     )
-}
+}"""
 
 
 AUTH_PASSWORD_VALIDATORS = [
