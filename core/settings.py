@@ -5,7 +5,7 @@ import dj_database_url
 from decouple import config
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 SECRET_KEY = 'django-insecure-q)3@9gh_m@lff88ry*v!ih#1%3!h!h5$!@*b(n(rw)i^h@sy#m'
 
