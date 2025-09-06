@@ -96,7 +96,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }"""
-
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 #postgress database config
 """DATABASES = {
