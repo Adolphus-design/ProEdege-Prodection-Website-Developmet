@@ -49,9 +49,9 @@ INSTALLED_APPS = [
 
 # Cloudinary configuration (replace with your real credentials)
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dhhmoioij',
-    'API_KEY': '547473313418333',
-    'API_SECRET': 'XNdrSAugmeHTxE-bDUoPj10PJIs',
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
 }
 
 # Use Cloudinary for media file storage
@@ -121,8 +121,8 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         default=config("DATABASE_URL"),
-        conn_max_age=600,      # Keep connections open for 10 minutes
-        ssl_require=True       # Ensure SSL connection to Neon
+        #conn_max_age=600,      # Keep connections open for 10 minutes
+        #ssl_require=True       # Ensure SSL connection to Neon
     )
 }
 
